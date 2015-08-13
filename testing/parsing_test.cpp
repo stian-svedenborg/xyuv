@@ -22,3 +22,29 @@
  * THE SOFTWARE.
  */
 
+#include <gtest/gtest.h>
+
+#include "../src/config-parser/minicalc/minicalc.h"
+#include <vector>
+
+const static std::vector<std::pair<std::string, uint64_t>> expressions {
+        {"7", 7},
+        {"1+2", 3},
+        {"3-5", -2},
+        {"2*3", 6},
+        {"12/3", 4},
+        {"3**3", 27 },
+        {"(8)", 8},
+        {"-56", -56},
+        {"2 + -43", -41},
+        {"abs(-54)", 54 },
+};
+
+TEST(MiniCalc, Expressions) {
+
+    for (auto expr : expressions) {
+        SCOPED_TRACE(expr.first);
+        MiniCalc expression(expr.first);
+        ASSERT_EQ(expr.second, expression.evaluate(nullptr));
+    }
+}

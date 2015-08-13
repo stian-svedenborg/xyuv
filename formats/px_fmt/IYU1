@@ -1,0 +1,97 @@
+##########################################
+#                 IYU1                   #
+##########################################
+# The IYU1 format is a 12 bit format used 
+# in mode 2 of the IEEE 1394 Digital Camera 1.04 spec 
+# ("1394-based Digital Camera Specification, 
+# Version 1.04, August 9, 1996", page 14.)
+# The format, a duplicate of Y411, is YUV (4:1:1).
+##########################################
+
+{
+    "fourcc" : "IYU1",
+
+    "licence" : {
+        "type" : "no_licence"
+	},
+
+    "origin" : "upper_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 4,
+        "macro_px_h" : 1
+    },
+
+    "planes" : [
+		{
+			"base_offset"  : "0",
+			"line_stride"  : "next_multiple(image_w, macro_px_w)*(48/8)",
+			"plane_size"   : "next_multiple(image_w, macro_px_w)*next_multiple(image_h, macro_px_h)*(48/8)",
+			"block_stride" : 48,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		}
+	],
+
+	"y_block" : {
+		"block_w" : 4,
+		"block_h" : 1,
+		"samples" : [
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 8
+            },
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 16
+            },
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 32
+            },
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 40
+            }
+		]
+	},
+
+	"u_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+           		"plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 0
+            }
+		]
+	},
+
+	"v_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+           		"plane" : 0,
+                "int_bits" : 6,
+                "frac_bits" : 0,
+                "offset" : 24
+            }
+		]
+	},
+
+	"a_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	}
+}

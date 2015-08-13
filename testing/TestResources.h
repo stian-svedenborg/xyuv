@@ -22,3 +22,27 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <gtest/gtest.h>
+#include <xyuv/config_manager.h>
+#include <Magick++/Image.h>
+
+// Useful global constants
+class Resources {
+public:
+    static const xyuv::config_manager & config();
+    static const Magick::Image & get_lena512();
+    static const Magick::Image & get_tiny();
+    static const Magick::Image & get_default();
+
+    static std::vector<std::string> get_all_formats();
+
+private:
+    static const Resources & get();
+    xyuv::config_manager config_;
+    Magick::Image Lena512, Tiny;
+
+    Resources();
+};
+
+

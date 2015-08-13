@@ -1,0 +1,64 @@
+##########################################
+#                 Y16                   #
+##########################################
+# This format contains only a single, 
+# 16 bit Y plane for monochrome images. 
+# Each pixel is represented by a 16 bit, 
+# little endian luminance sample.
+##########################################
+
+{
+    "fourcc" : "Y16",
+
+    "licence" : {
+        "type" : "no_licence"
+	},
+
+    "origin" : "upper_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 1,
+        "macro_px_h" : 1
+    },
+
+	"planes" : [
+		{
+			"base_offset"  : "0",
+			"line_stride"  : "next_multiple(image_w, macro_px_w)*2",
+			"plane_size"   : "next_multiple(image_w, macro_px_w)*next_multiple(image_h, macro_px_h)*2",
+			"block_stride" : 16,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		}
+	],
+
+	"y_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 16,
+                    "frac_bits" : 0,
+                    "offset" : 0
+            }
+		]
+	},
+
+	"u_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	},
+
+	"v_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	},
+
+	"a_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	}
+}

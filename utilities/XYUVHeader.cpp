@@ -1,0 +1,84 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Stian Valentin Svedenborg
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+#include <xyuv/structures/format.h>
+#include <xyuv/frame.h>
+#include <xyuv/large_buffer.h>
+#include <Magick++/Geometry.h>
+#include <Magick++/Image.h>
+#include <iostream>
+#include <xyuv/imagemagick/magick_wrapper.h>
+#include "XYUVHeader.h"
+
+
+XYUVHeader::XYUVHeader() {
+    #ifdef DEFAULT_FORMATS_PATH
+        config_manager_.load_configurations(DEFAULT_FORMATS_PATH);
+    #endif
+}
+
+
+xyuv::frame XYUVHeader::AddHeader(const xyuv::format_template & fmt_template,
+                      const xyuv::chroma_siting & siting,
+                      const xyuv::conversion_matrix & matrix,
+                      uint32_t image_w,
+                      uint32_t image_h,
+                      std::istream & input_stream
+)
+{
+    auto format = xyuv::create_format(image_w, image_h, fmt_template, matrix, siting);
+    auto frame = xyuv::create_frame(format, nullptr, 0);
+
+    uint64_t bytes_read = xyuv::read_large_buffer(input_stream, reinterpret_cast<char*>(frame.data.get()), format.size);
+
+    if (bytes_read != format.size) {
+        throw std::runtime_error("Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " + std::to_string(format.size));
+    }
+
+    return frame;
+}
+
+void XYUVHeader::Display(const xyuv::frame & frame) {
+    Magick::Image image(Magick::Geometry(1,1,0,0), Magick::ColorRGB(0.0,0.0,0.0));
+
+    xyuv::magick_wrapper wrapper(image);
+    xyuv::write_frame_to_rgb_image(&wrapper, frame);
+
+    image.display();
+}
+
+
+int main(int argc, char **argv) {
+    try {
+        XYUVHeader prog;
+        auto options = prog.ParseArgs(argc, argv);
+        prog.Run(options);
+    } catch (std::exception & e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Use --help for help." << std::endl;
+        return -1;
+    }
+    return 0;
+}
+

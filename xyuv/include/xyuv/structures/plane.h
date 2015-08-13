@@ -22,3 +22,28 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include "constants.h"
+#include <string>
+
+namespace xyuv {
+
+struct plane_template {
+    std::string base_offset_expression;
+    std::string line_stride_expression;
+    std::string plane_size_expression;
+    uint32_t block_stride; // The stride of a block in this plane.
+    interleave_pattern interleave_mode;
+};
+
+struct plane {
+    uint64_t base_offset;
+    uint64_t size;
+    uint32_t line_stride;
+    uint32_t block_stride; // The stride of a block in this plane.
+    interleave_pattern interleave_mode;
+};
+
+bool operator==(const plane &lhs, const plane &rhs);
+
+} // namespace xyuv

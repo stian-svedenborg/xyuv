@@ -22,3 +22,32 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#include <functional>
+#include <string>
+
+class MiniCalc;
+
+//! \file File contains abstract syntax tree definitions and helper functions.
+
+//! \brief Base class of an abstract syntax tree node.
+struct node {
+    //! \brief Evaluate the abstract syntax subtree.
+    virtual int evaluate() const = 0;
+    virtual ~node() = default;
+};
+
+//! \brief Allocate a new node which applies func(arg) on the sub-tree.
+node* create_node(node* arg, std::function<int(int)> func);
+
+//! \brief Allocate a new node which applies func(arg0, arg1) on the sub-trees.
+node* create_node(node* arg0, node* arg1, std::function<int(int, int)> func);
+
+//! \brief Allocate a new node representing a single constant \a value, this is a leaf node.
+node* create_node(int value);
+
+//! \brief Allocate a new node representing a single named \a variable, this is a leaf node.
+//! \param owner Reference to xyuv::MiniCalc object in which to lookup the value of variable during evaluation.
+node* create_node(const std::string & variable, const MiniCalc & owner);
+

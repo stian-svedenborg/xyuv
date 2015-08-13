@@ -1,0 +1,18 @@
+############################################
+#             Chroma siting 444            #
+#                                          #
+# All channels are sampled in every pixel. #
+############################################
+{
+    "block_width" : 1,
+    "block_height" : 1,
+    
+    "u_sample_point" : {
+        "sample_x" : 0.0,
+        "sample_y" : 0.0
+    },
+    "v_sample_point" : {
+        "sample_x" : 0.0,
+        "sample_y" : 0.0
+    }            
+} 

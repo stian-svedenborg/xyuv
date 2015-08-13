@@ -22,3 +22,31 @@
  * THE SOFTWARE.
  */
 
+#include <xyuv.h>
+#include <xyuv/frame.h>
+#include <xyuv/yuv_image.h>
+
+namespace xyuv {
+
+xyuv::frame convert_frame(const xyuv::frame &frame_in, const format &new_format) {
+    // First, check if this is a no-op.
+/*    if (frame_in.format == new_format) {
+        return frame_in;
+    }
+*/
+    xyuv::yuv_image temporary_image = decode_frame(frame_in);
+    return encode_frame(temporary_image, new_format);
+}
+
+
+xyuv::frame read_frame_from_rgb_image(const rgb_image &rgbImage_in, const format &new_format) {
+    yuv_image temporary_image = rgb_to_yuv_image(rgbImage_in, new_format.conversion_matrix);
+    return encode_frame(temporary_image, new_format);
+}
+
+void write_frame_to_rgb_image(rgb_image *rgbImage_out, const xyuv::frame &frame_in) {
+    yuv_image temporary_image = decode_frame(frame_in);
+    yuv_image_to_rgb(rgbImage_out, temporary_image, frame_in.format.conversion_matrix);
+}
+
+} // namespace xyuv

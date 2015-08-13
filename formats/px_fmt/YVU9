@@ -1,0 +1,114 @@
+##########################################
+#                 YVU9                   #
+##########################################
+# This format dates back to the days of the 
+# ActionMedia II adapter and comprises an NxN 
+# plane of Y samples, 8 bits each, followed by 
+# (N/4)x(N/4) V and U planes.
+##########################################
+
+{
+
+    "fourcc" : "YVU9",
+
+    "licence" : {
+        "type" : "no_licence"
+	},
+
+    "origin" : "upper_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 4,
+        "macro_px_h" : 4
+    },
+
+    "planes" : [
+		{
+			"base_offset"  : "0",
+			"line_stride"  : "next_multiple(image_w, macro_px_w)",
+			"plane_size"   : "next_multiple(image_w, macro_px_w)*next_multiple(image_h, macro_px_h)",
+			"block_stride" : 8,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		},
+		{
+			"base_offset"  : "plane[0].base_offset + plane[0].size",
+			"line_stride"  : "image_w/macro_px_w",
+			"plane_size"   : "(next_multiple(image_w, macro_px_w)/macro_px_w)*(next_multiple(image_h, macro_px_h)/macro_px_h)",
+			"block_stride" : 8,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		},
+		{
+			"base_offset"  : "plane[1].base_offset + plane[1].size",
+			"line_stride"  : "image_w/macro_px_w",
+			"plane_size"   : "(next_multiple(image_w, macro_px_w)/macro_px_w)*(next_multiple(image_h, macro_px_h)/macro_px_h)",
+			"block_stride" : 8,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		}
+	],
+ 
+	"y_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+					# From which plane is this sample read from.
+           			"plane" : 0,
+                        
+                    # Bits used in the integer part of the format. 
+                    "int_bits" : 8,
+
+                    # Bits used in the fractional part of the format.
+                    "frac_bits" : 0,
+                        
+                    # Offset from the least significant bit to this sample.
+                    "offset" : 0
+                }
+		]
+	},
+
+	"u_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+					# From which plane is this sample read from.
+           			"plane" : 2,
+                        
+                    # Bits used in the integer part of the format. 
+                    "int_bits" : 8,
+
+                    # Bits used in the fractional part of the format.
+                    "frac_bits" : 0,
+                        
+                    # Offset from the least significant bit to this sample.
+                    "offset" : 0
+                }
+		]
+	},
+
+	"v_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+					# From which plane is this sample read from.
+           			"plane" : 1,
+                        
+                    # Bits used in the integer part of the format. 
+                    "int_bits" : 8,
+
+                    # Bits used in the fractional part of the format.
+                    "frac_bits" : 0,
+                        
+                    # Offset from the least significant bit to this sample.
+                    "offset" : 0
+                }
+		]
+	},
+
+	"a_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	}
+}

@@ -22,3 +22,36 @@
  * THE SOFTWARE.
  */
 
+#include "xyuv/rgb_image.h"
+#include "xyuv.h"
+#include "xyuv/yuv_image.h"
+
+namespace xyuv {
+
+void rgb_image::from_yuv_image(const xyuv::yuv_image & image_in, const xyuv::conversion_matrix & conversion_matrix ) {
+
+    const yuv_image * img = &image_in;
+
+    try {
+        if (!is_444(image_in.siting.subsampling)) {
+            img = new yuv_image(up_sample(image_in));
+        }
+
+        xyuv_from_yuv_image_444(*img, conversion_matrix);
+
+        if (img != &image_in) {
+            delete img;
+        }
+    } catch (...) {
+        if (img != &image_in) {
+            delete img;
+        }
+        throw;
+    }
+}
+
+yuv_image rgb_image::to_yuv_image(const xyuv::conversion_matrix & conversion_matrix) const {
+    return std::move(xyuv_to_yuv_image_444(conversion_matrix));
+}
+
+} // namespace xyuv

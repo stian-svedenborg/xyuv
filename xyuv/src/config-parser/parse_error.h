@@ -22,3 +22,19 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#include <stdexcept>
+
+namespace xyuv {
+
+//! \brief Exception class for reporting parsing errors.
+class parse_error : public std::runtime_error {
+public:
+    parse_error(const std::string &msg) : runtime_error(msg) { }
+
+protected:
+
+};
+
+} // namespace xyuv

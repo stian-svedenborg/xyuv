@@ -1,0 +1,20 @@
+############################################
+#             Chroma siting 420            #
+#                                          #
+# Each block is sampled separately and the #
+# U and V samples are averaged across the  #
+# block.                                   #
+############################################
+{
+    "block_width" : 2,
+    "block_height" : 2,
+    
+    "u_sample_point" : {
+        "sample_x" : 0.5,
+        "sample_y" : 0.5
+    },
+    "v_sample_point" : {
+        "sample_x" : 0.5,
+        "sample_y" : 0.5
+    }   
+} 

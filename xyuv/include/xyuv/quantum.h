@@ -22,3 +22,10 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+namespace xyuv {
+
+using pixel_quantum = float;
+
+} // namespace xyuv

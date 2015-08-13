@@ -22,3 +22,29 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <string>
+
+namespace xyuv {
+
+struct chroma_siting;
+struct format_template;
+struct conversion_matrix;
+
+/** \brief Read a configuration file stripping it of all comments.
+ * \details JSON does not support comments, I thought this was a shame,
+ *  so the configuration files in xyuv do support comments (lines starting with #)
+ *  the comments are then stripped away bu this function before being passed on to
+ *  the parser functions. */
+extern std::string read_json(const std::string &filename);
+
+/** Parse a chroma siting configuration json string.*/
+extern chroma_siting parse_chroma_siting(const std::string &json);
+
+/** Parse a pixel format template from a json string. */
+extern format_template parse_format_template(const std::string &json);
+
+/** Parse an rgb conversion matrix from a json string. */
+extern conversion_matrix parse_conversion_matrix(const std::string &json);
+
+} // namespace xyuv

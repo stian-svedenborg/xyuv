@@ -22,3 +22,14 @@
  * THE SOFTWARE.
  */
 
+#include "minicalc/minicalc.h"
+
+namespace xyuv {
+
+uint64_t minicalc_evaluate(const std::string &expression, const std::unordered_map<std::string, uint64_t> *variables) {
+    MiniCalc expr{expression};
+    uint64_t result = expr.evaluate(variables);
+    return result;
+};
+
+} // namespace xyuv

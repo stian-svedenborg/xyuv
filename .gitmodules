@@ -1,0 +1,6 @@
+[submodule "thirdparty/gtest"]
+	path = thirdparty/gtest
+	url = https://chromium.googlesource.com/external/googletest
+[submodule "thirdparty/rapidjson"]
+	path = thirdparty/rapidjson
+	url = https://github.com/miloyip/rapidjson.git

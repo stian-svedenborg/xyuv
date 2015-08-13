@@ -1,0 +1,68 @@
+##########################################
+#                  R8G8                  #
+##########################################
+#
+##########################################
+
+{
+    "fourcc" : "",
+
+    "licence" : {
+        "type" : "no_licence"
+    },
+
+    "origin" : "upper_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 1,
+        "macro_px_h" : 1
+    },
+
+    "planes" : [
+        {
+            "base_offset"  : "0",
+            "line_stride"  : "image_w*2",
+            "plane_size"   : "image_w*image_h*2",
+            "block_stride" : 16,
+            "interleave_pattern" : "NO_INTERLEAVING"
+        }
+    ],
+
+    "y_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 0
+            }
+        ]
+    },
+
+    "u_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 8
+            }
+        ]
+    },
+
+    "v_block" : {
+        "block_w" : 0,
+        "block_h" : 0,
+        "samples" : []
+    },
+
+    "a_block" : {
+        "block_w" : 0,
+        "block_h" : 0,
+        "samples" : []
+    }
+}

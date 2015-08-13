@@ -22,3 +22,16 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+namespace xyuv {
+
+struct rgb_color;
+struct yuv_color;
+struct conversion_matrix;
+
+void to_rgb(rgb_color *rgb, const yuv_color &yuv, const conversion_matrix &matrix);
+
+void to_yuv(yuv_color *yuv, const rgb_color &rgb, const conversion_matrix &matrix);
+
+} // namespace xyuv

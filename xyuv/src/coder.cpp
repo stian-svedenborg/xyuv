@@ -22,3 +22,14 @@
  * THE SOFTWARE.
  */
 
+#include "xyuv/yuv_image.h"
+#include "xyuv/frame.h"
+
+
+namespace xyuv {
+
+xyuv::frame encode_frame(const yuv_image &sub_sampled_yuva, const xyuv::format &format) {
+    throw 0;
+}
+
+} // namespace xyuv

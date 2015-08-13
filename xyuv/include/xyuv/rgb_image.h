@@ -22,3 +22,26 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+namespace  xyuv {
+
+struct conversion_matrix;
+struct yuv_image;
+
+
+/** @brief Interface to integrate third party rgb image libraries with xYUV.*/
+class rgb_image {
+public:
+    void from_yuv_image(const xyuv::yuv_image &image_in, const xyuv::conversion_matrix &conversion_matrix);
+
+    yuv_image to_yuv_image(const xyuv::conversion_matrix &conversion_matrix) const;
+
+protected:
+    virtual void xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_444,
+                                         const xyuv::conversion_matrix &conversion_matrix) = 0;
+
+    virtual yuv_image xyuv_to_yuv_image_444(const xyuv::conversion_matrix &conversion_matrix) const = 0;
+};
+
+} // namespace xyuv

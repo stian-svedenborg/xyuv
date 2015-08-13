@@ -22,3 +22,41 @@
  * THE SOFTWARE.
  */
 
+#include "../config_parser.h"
+#include <fstream>
+#include <sys/errno.h>
+#include <stdexcept>
+
+namespace xyuv {
+
+std::string read_json(const std::string &filename) {
+    std::ifstream fin(filename);
+
+    if (!fin) {
+        throw std::runtime_error("Could not open file '" + filename + "'");
+    }
+
+    std::string result;
+    std::string line;
+
+    while (std::getline(fin, line)) {
+        // Strip leading whitespace.
+        const char *start = line.c_str();
+        while (iswspace(*start)) {
+            ++start;
+        }
+        // if line starts with a # it is a comment, ignore.
+        if (*start == '#') {
+            result += '\n'; // Add the newline to keep line numbers coherent.
+            continue;
+        }
+
+        result += start;
+        result += " \n";
+
+    }
+
+    return std::move(result);
+}
+
+} // namespace xyuv

@@ -22,3 +22,42 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include "channel_block.h"
+#include "plane.h"
+#include "subsampling.h"
+#include "sample.h"
+
+#include <array>
+#include <vector>
+
+namespace xyuv {
+
+/** \brief A struct describing a class of pixel formats.
+  *
+  * \details
+  * Together with a xyuv::chroma_siting  and a xyuv::conversion_matrix  it is used to instansiate a xyuv::format .
+  *
+  * If you have created a new pixel format you would integrate it into xyuv by defining a format_template.
+  *
+  * See documentation on LINK for information on how to integrate your own pixel formats with xyuv.
+  * \todo Add link to format documentation
+  */
+struct format_template {
+    //! \copydoc format::fourcc
+    std::string fourcc;
+
+    //! \copydoc format::subsampling
+    xyuv::subsampling subsampling;
+
+    //! \copydoc format::origin
+    image_origin origin;
+
+    //! \copydoc format::channel_blocks
+    std::array<channel_block, 4> channel_blocks;
+
+    //! \copydoc fromat::planes
+    std::vector<plane_template> planes;
+};
+
+} // namespace xyuv

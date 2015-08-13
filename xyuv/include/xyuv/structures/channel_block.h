@@ -22,3 +22,25 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include "sample.h"
+#include <vector>
+
+namespace xyuv {
+
+//! \brief struct defining how to read samples for one channel.
+//! \details This defines the smallest cluster of pixels that must be present in "one go", i.e. some formats have "blocks"
+//!     that tightly pack together multiple pixels. The geometry of such a cluster is defined in this struct.
+//!     \paragraph This struct has no knowledge of which channel it is, as that is determined by it's position in the
+//!     parent array.
+//! TODO: Add link to explanation.
+struct channel_block {
+    //! Width and height of a block of pixels measure in this channel.
+    uint16_t w, h;
+    //! Sample descriptors for this block
+    std::vector<sample> samples;
+};
+
+bool operator==(const channel_block &lhs, const channel_block &rhs);
+
+} // namespace xyuv

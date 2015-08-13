@@ -1,0 +1,8 @@
+This folder includes the Lemon parser generator which is part of
+the SQLite source https://www.sqlite.org/src/doc/trunk/doc/lemon.html
+
+The version of Lemon reproduced here is copied from release 3080900 of
+the SQLite source.
+
+Another copy of the lempar.c file is also included in the minicalc subdirectory
+of the source tree.

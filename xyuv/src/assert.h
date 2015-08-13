@@ -22,3 +22,9 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <cassert>
+
+#define XYUV_ASSERT_PTR(p) assert((p) != NULL )
+#define XYUV_ASSERT(p) assert(p)
+#define XYUV_ASSERT_RANGE(min, max, val) assert( min <= val && val <= max )

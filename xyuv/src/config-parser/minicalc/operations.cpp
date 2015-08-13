@@ -22,3 +22,55 @@
  * THE SOFTWARE.
  */
 
+#include <stdexcept>
+#include "operations.h"
+
+// Evaluator functions:
+
+int minicalc_add(int lhs, int rhs) {
+    return lhs + rhs;
+}
+
+int minicalc_sub(int lhs, int rhs) {
+    return lhs - rhs;
+}
+
+int minicalc_mul(int lhs, int rhs) {
+    return lhs * rhs;
+}
+
+int minicalc_div(int lhs, int rhs) {
+    if (rhs == 0) {
+        throw std::runtime_error("Divide by 0");
+    }
+    return lhs / rhs;
+}
+
+int minicalc_mod(int lhs, int rhs) {
+    if (rhs == 0) {
+        throw std::runtime_error("Divide by 0");
+    }
+    return lhs % rhs;
+}
+
+int minicalc_pow(int base, int exponent) {
+    int result = 1;
+    while (exponent > 0) {
+        result *= base;
+        --exponent;
+    }
+    return result;
+}
+
+int minicalc_negate(int v) {
+    return -v;
+}
+
+int minicalc_next_multiple(int base, int multiplier) {
+    int quotient_ceil = (base + (multiplier-1)) / multiplier;
+    return quotient_ceil*multiplier;
+}
+
+int minicalc_abs(int v) {
+    return v < 0 ? -v : v;
+}

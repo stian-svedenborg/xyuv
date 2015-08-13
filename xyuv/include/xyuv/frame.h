@@ -22,3 +22,18 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <memory>
+#include "structures/format.h"
+
+namespace xyuv {
+
+// Class representing a xyuv frame. Including all information needed to en-/decode a frame.
+struct frame {
+public:
+    // The format descriptor
+    xyuv::format format;
+    std::unique_ptr<uint8_t[]> data;
+};
+
+} // namespace xyuv

@@ -22,3 +22,34 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#include <string>
+
+
+
+// Due to a bug in cygwin, we need to wrap std::to_string().
+#ifndef __CYGWIN__
+namespace xyuv {
+template <typename T>
+static inline std::string to_string(const T & v) {
+    return std::to_string(v);
+}
+} // namespace xyuv
+#else
+
+
+
+#include <sstream>
+namespace xyuv {
+template<typename T>
+static std::string to_string(const T &v) {
+    std::ostringstream ostr;
+    ostr << v;
+    return ostr.str();
+}
+} // namespace xyuv
+
+#endif
+
+

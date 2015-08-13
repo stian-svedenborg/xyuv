@@ -22,3 +22,28 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#include <xyuv/rgb_image.h>
+
+// Forward Declarations
+namespace Magick {
+class Image;
+};
+
+namespace xyuv {
+
+class magick_wrapper : public rgb_image {
+public:
+    magick_wrapper(Magick::Image &image);
+
+    virtual void xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_444,
+                                         const xyuv::conversion_matrix &conversion_matrix) override;
+
+    virtual yuv_image xyuv_to_yuv_image_444(const xyuv::conversion_matrix &conversion_matrix) const override;
+
+private:
+    Magick::Image &image;
+};
+
+} // namespace xyuv

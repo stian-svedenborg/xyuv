@@ -1,0 +1,44 @@
+####################################
+#   BT601 SDTV conversion standard #
+####################################
+{
+
+    # The internal representation of YUV (aka. YCrCb) is
+    # given by the normalized channels i.e.
+    # Y,A in [0.0, 1.0]
+    # U,V in [-0.5, 0.5]
+
+    "to_yuv" : [
+        [0.299,     0.587,      0.114   ],
+        [-0.14713, -0.28886,    0.436   ],
+        [0.615,    -0.51499,   -0.10001 ]
+    ],
+
+    "to_rgb"  : [
+        [1.0,   0.0,        1.13983 ],
+        [1.0,  -0.39465,   -0.58060 ],
+        [1.0,   2.03211,    0.0     ]
+    ],
+
+
+    # The following section contains two kinds of ranges, the first contains the range of
+    # the resulting YUV color space values as output by the conversion matrix above.
+    # These ranges will be used to normalize the components in the YUV colorspace to the range [0, 1].
+    # The reason we have chosen to [0.0, 1.0] as opposed to the convential [-0.5, 0.5] is to be independent of
+    # the actual color space used.
+    "y_range" : [0.0, 1.0],
+    "u_range" : [-0.436, 0.436],
+    "v_range" : [-0.615, 0.615],
+
+    # The next range parameters control the range of the encoded values. This feature is here to allow for studio
+    # range vs. full range values.
+    # The calculation is straight forward, say we want to encode 8 bit studio range.
+    # This gives Y in [16, 235] and U/V in [16, 240] the will affect the minimum and maximum INTEGER size,
+    # i.e. fractional bits will not be affected. (This allows us to use the same constants to encode for instance
+    # 10-bit studio range, where the last two bits are fractional).
+
+    "y_packed_range" : [ 0.062745098, 0.921568627],
+    "u_packed_range" : [ 0.062745098, 0.941176471],
+    "v_packed_range" : [ 0.062745098, 0.941176471]
+
+}

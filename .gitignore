@@ -1,0 +1,19 @@
+# VC stuff
+*.vcxproj.user
+Debug/
+Release/
+Win32/
+*.sdf
+*.opensdf
+*.suo
+
+.idea/
+
+# Doxygen stuff
+doc/*/
+
+# Cmake stuff
+CMakeCache.txt
+CMakeFiles/
+*.dir
+*.cmake

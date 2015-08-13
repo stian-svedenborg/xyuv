@@ -22,3 +22,22 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <xyuv/structures/color.h>
+
+namespace xyuv {
+
+std::vector<std::string> list_files_in_folder(const std::string &dir_path);
+
+static inline pixel_quantum clamp( pixel_quantum min_, pixel_quantum max_, pixel_quantum val)
+{
+    using std::min;
+    using std::max;
+    return min(max_, max(min_, val));
+}
+
+} // namespace xyuv

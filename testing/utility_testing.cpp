@@ -22,3 +22,9 @@
  * THE SOFTWARE.
  */
 
+#include <gtest/gtest.h>
+#include "../xyuv/src/utility.h"
+
+TEST(Utility, ListFilesInFolder) {
+	ASSERT_GT(xyuv::list_files_in_folder("formats/px_fmt/").size(), 0u);
+}

@@ -22,3 +22,21 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#ifndef  FORMATS_SEARCH_PATH
+#    define FORMATS_SEARCH_PATH  "formats/"
+#endif
+
+#ifndef PX_FMT_DIR
+#    define PX_FMT_DIR "px_fmt/"
+#endif
+
+#ifndef CHROMA_SITING_DIR
+#   define CHROMA_SITING_DIR "chroma_siting/"
+#endif
+
+#ifndef CONVERSION_MATRICES_DIR
+#   define CONVERSION_MATRICES_DIR "rgb_conversion/"
+#endif
+

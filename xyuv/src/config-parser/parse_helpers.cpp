@@ -22,3 +22,18 @@
  * THE SOFTWARE.
  */
 
+#include "../assert.h"
+#include "parsing_helpers.h"
+
+namespace xyuv {
+
+uint32_t line_number_from_offset(const std::string &json, std::size_t offset) {
+    XYUV_ASSERT(offset < json.size());
+    uint32_t line = 0;
+    for (uint32_t i = 0; i < offset; i++) {
+        if (json[i] == '\n') line++;
+    }
+    return line;
+}
+
+} // namespace xyuv

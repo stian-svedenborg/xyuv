@@ -22,3 +22,20 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+
+#include "subsampling.h"
+#include <utility>
+
+namespace xyuv {
+
+//! \brief Struct defining a subsampling method.
+//! TODO: Add more details.
+struct chroma_siting {
+    xyuv::subsampling subsampling;
+    std::pair<float, float> u_sample_point, v_sample_point;
+};
+
+bool operator==(const chroma_siting &lhs, const chroma_siting &rhs);
+
+} // namespace xyuv

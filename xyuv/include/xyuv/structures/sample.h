@@ -22,3 +22,29 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <cstdint>
+
+namespace xyuv {
+
+//! struct defining a single sample of a channel.
+struct sample {
+    //! Which plane is this sample sampled from.
+    uint8_t plane;
+    //! Number of UNORM integer bits.
+    uint8_t integer_bits;
+
+    //! Number of UNORM fractional bits.
+    uint8_t fractional_bits;
+
+    //! Offset (in bits) to the "first" bit of this sample. "First" is the first bit of the sample when counting one
+    //! bit at a time from the byte in the block with the lowest address.
+    uint16_t offset;
+
+    //! [Currently reserved], future releases will support a single sample being split across more than one plane.
+    bool has_continuation = false;
+};
+
+bool operator==(const sample &lhs, const sample &rhs);
+
+} // namespace xyuv

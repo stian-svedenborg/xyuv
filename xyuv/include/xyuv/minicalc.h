@@ -22,3 +22,18 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <string>
+#include <cstdint>
+#include <unordered_map>
+
+namespace xyuv {
+
+//! Evaluate a single \a expression using the minicalc parser.
+//! \TODO: Throw exceptions
+extern uint64_t minicalc_evaluate(
+        const std::string &expression,
+        const std::unordered_map <std::string, uint64_t> *variables
+);
+
+} // namespace xyuv

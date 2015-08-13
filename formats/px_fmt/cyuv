@@ -1,0 +1,87 @@
+##########################################
+#                 cyuv                   #
+##########################################
+# This FOURCC, allegedly registered by 
+# Creative Labs, is essentially a duplicate of UYVY. 
+# The only difference is that the image is flipped vertically, 
+# the first u_int16 in the buffer representing the 
+# bottom line of the viewed image. 
+# Note that the FOURCC is comprised of lower 
+# case characters (so much for the upper case convention !)
+##########################################
+
+{
+    "fourcc" : "cyuv",
+
+    "licence" : {
+        "type" : "no_licence"
+	},
+
+    "origin" : "lower_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 2,
+        "macro_px_h" : 1
+    },
+
+	"planes" : [
+		{
+			"base_offset"  : "0",
+			"line_stride"  : "next_multiple(image_w, macro_px_w)*4",
+			"plane_size"   : "next_multiple(image_w, macro_px_w)*next_multiple(image_h, macro_px_h)*4",
+			"block_stride" : 32,
+			"interleave_pattern" : "NO_INTERLEAVING"
+		}
+	],
+
+	"y_block" : {
+		"block_w" : 2,
+		"block_h" : 1,
+		"samples" : [
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 8
+            },
+			{
+           			"plane" : 0,                    
+                    "int_bits" : 8,
+                    "frac_bits" : 0,
+                    "offset" : 24
+            }
+		]
+	},
+
+	"u_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+           		"plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 0
+            }
+		]
+	},
+
+	"v_block" : {
+		"block_w" : 1,
+		"block_h" : 1,
+		"samples" : [
+			{
+           		"plane" : 0,
+                "int_bits" : 6,
+                "frac_bits" : 0,
+                "offset" : 16
+            }
+		]
+	},
+
+	"a_block" : {
+		"block_w" : 0,
+		"block_h" : 0,
+		"samples" : []
+	}
+}

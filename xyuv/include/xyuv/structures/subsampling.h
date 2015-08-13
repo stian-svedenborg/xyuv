@@ -22,3 +22,24 @@
  * THE SOFTWARE.
  */
 
+#pragma once
+#include <cstdint>
+
+namespace xyuv {
+
+//! \brief struct defining a subsampling mode.
+//! \details i.e. How many luma samples occur per chroma sample.
+struct subsampling {
+    //! Defines many luma samples (and in what geometry) is used per chroma sample.
+    //! \details Internally this is used to validate a xyuv::format_template  against a xyuv::chroma_siting .
+    uint8_t macro_px_w, macro_px_h;
+};
+
+//! \brief Returns true if the subsampling mode is 444, i.e. One luma sample per chroma sample.
+static inline bool is_444(const xyuv::subsampling &subsampling) {
+    return subsampling.macro_px_w == 1 && subsampling.macro_px_h == 1;
+}
+
+bool operator==(const subsampling & lhs, const subsampling & rhs);
+
+} // namespace xyuv
