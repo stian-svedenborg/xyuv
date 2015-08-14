@@ -6,12 +6,8 @@
 #include <iostream>
 #include "XYUVHeader.h"
 
-static std::string get_suffix(const std::string & path) {
+std::string get_suffix(const std::string & path) {
     return path.substr(path.rfind('.', std::string::npos), std::string::npos);
-}
-
-static std::string strip_suffix(const std::string & path) {
-    return path.substr(0, path.rfind('.', std::string::npos));
 }
 
 static void write_frame_using_image_magick(const xyuv::frame &frame, const std::string & out_filename) {

@@ -53,16 +53,6 @@ void XYUVHeader::Run(const ::options & options) {
         return;
     }
 
-    // Try to aquire each input stream and output stream.
-    std::vector<std::unique_ptr<std::istream>> istreams;
-    for ( const auto & path : options.input_files ) {
-        std::unique_ptr<std::istream> istream{new std::ifstream(path, std::ios::binary)};
-        if (!(*istream)) {
-            throw std::runtime_error("Could not open input file: '" + path + "'");
-        }
-        istreams.emplace_back(std::move(istream));
-    }
-
     // Try to aquire each output stream.
     bool detect_concatinate = options.concatinate;
     std::vector<std::string> output_names;
@@ -171,7 +161,7 @@ void XYUVHeader::Run(const ::options & options) {
         }
     }
 
-    if (options.display && istreams.size() != 1 ) {
+    if (options.display && options.input_files.size() != 1 ) {
         throw std::invalid_argument("--display only supported for a single input.");
     }
 
@@ -192,16 +182,16 @@ void XYUVHeader::Run(const ::options & options) {
     }
 
     // At this point everything looks good :) Lets load some formats.
-    for ( std::size_t i = 0; i < istreams.size(); i++) {
-        xyuv::frame frame = AddHeader(
-                format_templates.size() == 1 ? format_templates[0] : format_templates[i],
-                sitings.size() == 1 ? sitings[0] : sitings[i],
-                matrices.size() == 1 ? matrices[0] : matrices[i],
+    for ( std::size_t i = 0; i < options.input_files.size(); i++) {
+        xyuv::format target_format = xyuv::create_format(
                 options.image_w,
                 options.image_h,
-                *(istreams[i])
+                format_templates.size() == 1 ? format_templates[0] : format_templates[i],
+                matrices.size() == 1 ? matrices[0] : matrices[i],
+                sitings.size() == 1 ? sitings[0] : sitings[i]
         );
 
+        xyuv::frame frame = LoadConvertFrame(target_format, options.input_files[i]);
 
         if (options.writeout) {
             if (options.concatinate) {

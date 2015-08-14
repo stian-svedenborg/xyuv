@@ -111,6 +111,8 @@ protected:
     // Write a frame to file, infering the mode from the file suffix.
     void WriteFrame(const xyuv::frame& frame, const std::string & out_filename);
 
+    xyuv::frame LoadConvertFrame( const xyuv::format &, const std::string & infile_name );
+
     void Display(const xyuv::frame & frm);
 
     void PrintHelp();
