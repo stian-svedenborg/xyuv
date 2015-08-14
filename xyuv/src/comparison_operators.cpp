@@ -27,28 +27,41 @@
 
 namespace xyuv {
 
-// These structures are pods.
 bool operator==(const subsampling &lhs, const subsampling &rhs) {
-    return memcmp(&lhs, &rhs, sizeof(subsampling)) == 0;
+    return lhs.macro_px_w == rhs.macro_px_w && lhs.macro_px_h == rhs.macro_px_h;
 }
 
 bool operator==(const chroma_siting &lhs, const chroma_siting &rhs) {
-    return memcmp(&lhs, &rhs, sizeof(chroma_siting)) == 0;
+    return lhs.subsampling == rhs.subsampling && lhs.u_sample_point == rhs.u_sample_point && lhs.v_sample_point == rhs.v_sample_point;
 }
 
 bool operator==(const conversion_matrix &lhs, const conversion_matrix &rhs) {
-    return memcmp(&lhs, &rhs, sizeof(conversion_matrix)) == 0;
+    static_assert(sizeof(lhs.rgb_to_yuv) > sizeof(void*), "Sizeof assumptions violated.");
+    return ( memcmp(lhs.rgb_to_yuv, rhs.rgb_to_yuv, sizeof(lhs.rgb_to_yuv)) == 0)
+           &&  ( memcmp(lhs.yuv_to_rgb, rhs.yuv_to_rgb, sizeof(lhs.yuv_to_rgb)) == 0)
+           &&  ( lhs.y_packed_range == rhs.y_packed_range )
+           &&  ( lhs.u_packed_range == rhs.u_packed_range )
+           &&  ( lhs.v_packed_range == rhs.v_packed_range )
+           &&  ( lhs.y_range == rhs.y_range )
+           &&  ( lhs.u_range == rhs.u_range )
+           &&  ( lhs.v_range == rhs.v_range );
 }
 
 bool operator==(const plane &lhs, const plane &rhs) {
-    return memcmp(&lhs, &rhs, sizeof(plane)) == 0;
+    return (lhs.base_offset == rhs.base_offset) &&
+            (lhs.interleave_mode == rhs.interleave_mode) &&
+            (lhs.block_stride == rhs.block_stride) &&
+            (lhs.line_stride == rhs.line_stride) &&
+            (lhs.size == rhs.size );
 }
 
 bool operator==(const sample &lhs, const sample &rhs) {
-    return memcmp(&lhs, &rhs, sizeof(sample)) == 0;
+    return (lhs.plane == rhs.plane) &&
+            (lhs.offset == rhs.offset) &&
+            (lhs.has_continuation == rhs.has_continuation) &&
+            (lhs.integer_bits == rhs.integer_bits ) &&
+            (lhs.fractional_bits == rhs.fractional_bits);
 }
-
-// Structs containing class types.
 
 bool operator==(const channel_block &lhs, const channel_block &rhs) {
     if (lhs.samples.size() != rhs.samples.size()
