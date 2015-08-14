@@ -36,7 +36,6 @@ namespace xyuv {
 // Helper functions
 void config_manager::load_format_templates(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {
@@ -52,7 +51,6 @@ bool operator<(const subsampling &lhs, const subsampling &rhs);
 
 void config_manager::load_chroma_sitings(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {
@@ -66,7 +64,6 @@ void config_manager::load_chroma_sitings(const std::string &dir_path) {
 
 void config_manager::load_conversion_matrices(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {

@@ -26,12 +26,32 @@
 #include <getopt.h>
 #include <iostream>
 #include <iomanip>
+#include <unordered_map>
 
 void XYUVHeader::PrintHelp() {
     std::cout <<
     "xyuv-header, version 0.1_beta\n"
 
     << std::endl;
+}
+
+static ::options::output_modes interpret_output_mode(const std::string &optarg) {
+    std::unordered_map<std::string, ::options::output_modes> map {
+            {"xyuv", ::options::output_modes::XYUV},
+            {"magick", ::options::output_modes::IMAGEMAGICK},
+    };
+
+    auto it = map.find(optarg);
+    if (it == map.end()) {
+        it = map.begin();
+        std::string error_message = "Invalid output mode: '" + optarg + "' must be one of { " + it->first;
+        while (++it != map.end()) {
+            error_message += ", " + it->first;
+        }
+        error_message += " }";
+        throw std::invalid_argument(error_message);
+    }
+    return it->second;
 }
 
 ::options XYUVHeader::ParseArgs(int argc, char ** argv) {
@@ -43,16 +63,17 @@ void XYUVHeader::PrintHelp() {
             { "conversion-matrix", required_argument, 0, 'm'},
             { "width", required_argument, 0, 'w'},
             { "height", required_argument, 0, 'h'},
-            { "cat", required_argument, 0, 'c'},
-            { "display", required_argument, 0, 'd'},
-            { "no-writeout", required_argument, 0, 'n'},
-            { "list", required_argument, 0, 'l'},
-            { "help", required_argument, 0, '?'},
+            { "output-mode", required_argument, 0, 'p'},
+            { "cat", no_argument, 0, 'c'},
+            { "display", no_argument, 0, 'd'},
+            { "no-writeout", no_argument, 0, 'n'},
+            { "list", no_argument, 0, 'l'},
+            { "help", no_argument, 0, '?'},
             {}
     };
     int index = 0;
     int c = -1;
-    const char * const shortopts = "hlndcF:o:f:h:w:m:s:";
+    const char * const shortopts = "?lndcF:o:f:h:w:m:s:";
 
     ::options options;
     while ( (c = getopt_long(argc, argv, shortopts, long_opts, &index )) != -1 ) {
@@ -92,6 +113,9 @@ void XYUVHeader::PrintHelp() {
                 break;
             case '?':
                 options.print_help = true;
+                break;
+            case 'p':
+                options.output_mode = interpret_output_mode(optarg);
                 break;
             default:
                 throw std::invalid_argument("Unknown argument :'" + std::string(optarg) + "'");

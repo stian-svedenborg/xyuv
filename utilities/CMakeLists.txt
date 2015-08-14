@@ -4,6 +4,7 @@ add_executable(xyuv-header
     XYUVHeader.cpp
     xyuv_header_parse_args.cpp
     xyuv_header_run.cpp
+    xyuv_header_write_frame.cpp
 )
 
 target_include_directories(xyuv-header
