@@ -158,19 +158,41 @@ private:
 };
 
 static void encode_channel(uint8_t *base_addr, const channel_block &block, const surface<float> &surf,
-                           const std::vector<plane> &planes, const std::pair<float, float> range) {
+                           const std::vector<plane> &planes, const std::pair<float, float> range, bool negative_line_stride) {
     block_iterator it(block.w, block.h, &surf);
 
     uint32_t n_blocks_in_line = (surf.width() / block.w);
     uint32_t n_block_lines = (surf.height() / block.h);
+
+    // We need to support negative line stride.
+    std::vector<std::pair<std::ptrdiff_t , std::ptrdiff_t >> line_offsets;
+    for (const auto & plane : planes ) {
+        if (negative_line_stride) {
+            std::ptrdiff_t line_stride = -static_cast<std::ptrdiff_t>(plane.line_stride);
+            // Each line  is still left to right.
+            line_offsets.emplace_back(line_stride, plane.size + line_stride);
+        } else {
+            line_offsets.emplace_back(plane.line_stride, 0);
+        }
+    }
 
     for (uint32_t line = 0; line < n_block_lines; line++) {
         for (uint32_t b = 0; b < n_blocks_in_line; b++) {
             for (auto &sample : block.samples) {
                 float value = *it.advance();
 
+                uint8_t * ptr_to_line =
+                        // Start with offset to frame
+                        base_addr +
+                        // Add offset to lowest byte in plane.
+                        planes[sample.plane].base_offset +
+                        // Add the size of the plane if applicable.
+                        line_offsets[sample.plane].second +
+                        // Add offset to current line.
+                        line * line_offsets[sample.plane].first;
+
                 unorm_t unorm = to_unorm(value, sample.integer_bits, sample.fractional_bits, range);
-                write_unorm(base_addr + planes[sample.plane].base_offset + line * planes[sample.plane].line_stride,
+                write_unorm(ptr_to_line,
                             b * planes[sample.plane].block_stride + sample.offset,
                             sample.integer_bits + sample.fractional_bits, unorm);
             }
@@ -188,13 +210,16 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
 
     std::unique_ptr<uint8_t[]> buffer = std::unique_ptr<uint8_t[]>(new uint8_t[format.size]);
 
+    bool has_negative_line_stride = (format.origin == image_origin::LOWER_LEFT);
+
     if (has_y)
         encode_channel(
                 buffer.get(),
                 format.channel_blocks[channel::Y],
                 yuva_in.y_plane,
                 format.planes,
-                format.conversion_matrix.y_packed_range
+                format.conversion_matrix.y_packed_range,
+                has_negative_line_stride
         );
 
     if (has_u)
@@ -203,7 +228,8 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 format.channel_blocks[channel::U],
                 yuva_in.u_plane,
                 format.planes,
-                format.conversion_matrix.u_packed_range
+                format.conversion_matrix.u_packed_range,
+                has_negative_line_stride
         );
     if (has_v)
         encode_channel(
@@ -211,7 +237,8 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 format.channel_blocks[channel::V],
                 yuva_in.v_plane,
                 format.planes,
-                format.conversion_matrix.v_packed_range
+                format.conversion_matrix.v_packed_range,
+                has_negative_line_stride
         );
 
     if (has_a)
@@ -220,7 +247,8 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 format.channel_blocks[channel::A],
                 yuva_in.a_plane,
                 format.planes,
-                std::make_pair<float, float>(0.0f, 1.0f)
+                std::make_pair<float, float>(0.0f, 1.0f),
+                has_negative_line_stride
         );
 
 
@@ -233,19 +261,41 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
 }
 
 static void decode_channel(const uint8_t *base_addr, const channel_block &block, surface<float> *surf,
-                           const std::vector<plane> &planes, const std::pair<float, float> range) {
+                           const std::vector<plane> &planes, const std::pair<float, float> range, bool negative_line_stride) {
     block_iterator it(block.w, block.h, surf);
 
     uint32_t n_blocks_in_line = (surf->width() / block.w);
     uint32_t n_block_lines = (surf->height() / block.h);
+
+    // We need to support negative line stride.
+    std::vector<std::pair<std::ptrdiff_t , std::ptrdiff_t >> line_offsets;
+    for (const auto & plane : planes ) {
+        if (negative_line_stride) {
+            std::ptrdiff_t line_stride = -static_cast<std::ptrdiff_t>(plane.line_stride);
+            // Each line  is still left to right.
+            line_offsets.emplace_back(line_stride, plane.size + line_stride);
+        } else {
+            line_offsets.emplace_back(plane.line_stride, 0);
+        }
+    }
 
     for (uint32_t line = 0; line < n_block_lines; line++) {
         for (uint32_t b = 0; b < n_blocks_in_line; b++) {
             for (auto &sample : block.samples) {
                 float *value = it.advance();
 
+                const uint8_t * ptr_to_line =
+                        // Start with offset to frame
+                        base_addr +
+                        // Add offset to lowest byte in plane.
+                        planes[sample.plane].base_offset +
+                        // Add the size of the plane if applicable.
+                        line_offsets[sample.plane].second +
+                        // Add offset to current line.
+                        line * line_offsets[sample.plane].first;
+
                 unorm_t unorm = read_unorm(
-                        base_addr + planes[sample.plane].base_offset + line * planes[sample.plane].line_stride,
+                        ptr_to_line,
                         b * planes[sample.plane].block_stride + sample.offset,
                         sample.integer_bits + sample.fractional_bits);
 
@@ -274,13 +324,16 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
             has_a
     );
 
+    bool has_negative_line_stride = (frame_in.format.origin == image_origin::LOWER_LEFT);
+
     if (has_y)
         decode_channel(
                 frame_in.data.get(),
                 frame_in.format.channel_blocks[channel::Y],
                 &(yuva_out.y_plane),
                 frame_in.format.planes,
-                frame_in.format.conversion_matrix.y_packed_range
+                frame_in.format.conversion_matrix.y_packed_range,
+                has_negative_line_stride
         );
     if (has_u)
         decode_channel(
@@ -288,7 +341,8 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
                 frame_in.format.channel_blocks[channel::U],
                 &(yuva_out.u_plane),
                 frame_in.format.planes,
-                frame_in.format.conversion_matrix.u_packed_range
+                frame_in.format.conversion_matrix.u_packed_range,
+                has_negative_line_stride
         );
     if (has_v)
         decode_channel(
@@ -296,7 +350,8 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
                 frame_in.format.channel_blocks[channel::V],
                 &(yuva_out.v_plane),
                 frame_in.format.planes,
-                frame_in.format.conversion_matrix.v_packed_range
+                frame_in.format.conversion_matrix.v_packed_range,
+                has_negative_line_stride
         );
     if (has_a)
         decode_channel(
@@ -304,7 +359,8 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
                 frame_in.format.channel_blocks[channel::A],
                 &(yuva_out.a_plane),
                 frame_in.format.planes,
-                std::make_pair<float, float>(0.0f, 1.0f)
+                std::make_pair<float, float>(0.0f, 1.0f),
+                has_negative_line_stride
         );
 
     return yuva_out;

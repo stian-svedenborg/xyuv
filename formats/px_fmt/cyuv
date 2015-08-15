@@ -28,7 +28,7 @@
 		{
 			"base_offset"  : "0",
 			"line_stride"  : "next_multiple(image_w, macro_px_w)*4",
-			"plane_size"   : "next_multiple(image_w, macro_px_w)*next_multiple(image_h, macro_px_h)*4",
+			"plane_size"   : "line_stride*next_multiple(image_h, macro_px_h)",
 			"block_stride" : 32,
 			"interleave_pattern" : "NO_INTERLEAVING"
 		}
