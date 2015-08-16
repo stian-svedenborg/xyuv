@@ -1,4 +1,3 @@
-#cmake_minimum_required(VERSION 2.4)
 cmake_minimum_required(VERSION 3.1)
 project(crossyuv)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -8,7 +7,7 @@ add_compile_options(
     "-Wall"
     "-mcmodel=large"
     "-m64"
- #   "-Werror"
+    "-Werror"
 )
 
 # Configurable Options
@@ -107,12 +106,3 @@ endif (USE_IMAGEMAGICK_INTEGRATION)
 add_subdirectory(thirdparty)
 add_subdirectory(testing)
 add_subdirectory(utilities)
-
-
-# Copy formats to installation directory
-#add_custom_target(install_formats ALL
-#    COMMAND cp -vruf ${CMAKE_CURRENT_SOURCE_DIR}/formats ${CMAKE_CURRENT_BINARY_DIR}/formats
-#)
-
-
-

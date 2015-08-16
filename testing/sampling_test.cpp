@@ -57,8 +57,8 @@ static void randomize_plane( surface<pixel_quantum> & surf ) {
 }
 
 yuv_image create_test_image(const ::chroma_siting & chroma_siting) {
-    yuv_image image = create_yuv_image(chroma_siting.subsampling.macro_px_w * 3,
-                                       chroma_siting.subsampling.macro_px_h * 3,
+    yuv_image image = create_yuv_image(chroma_siting.subsampling.macro_px_w * 3u,
+                                       chroma_siting.subsampling.macro_px_h * 3u,
                                        chroma_siting,
                                        true, true, true, true
     );
