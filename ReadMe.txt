@@ -30,6 +30,8 @@ $ cd xyuv_build
 $ cmake ../xyuv
 $ make
 
+"make install" support is still in the works, but should be
+coming soon(tm).
 
 ===================================================
 ||                Dependencies                   ||
