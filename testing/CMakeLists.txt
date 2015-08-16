@@ -10,7 +10,13 @@ add_executable(unit_tests
     parsing_test.cpp
     utility_testing.cpp
     yuv_image_testing.cpp
-rgb_test.cpp unorm_test.cpp sampling_test.cpp TestResources.cpp TestResources.h)
+    rgb_test.cpp
+    unorm_test.cpp
+    sampling_test.cpp
+    TestResources.cpp
+    TestResources.h
+    continuation_blocks.cpp
+)
 
 
 

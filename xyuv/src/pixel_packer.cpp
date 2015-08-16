@@ -94,27 +94,23 @@ static inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
 }
 
 // Offset in bits form MSB to start of region.
-static void write_unorm(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t value) {
-    // TODO: This is highly inefficient. Make it better.
-    unorm_t bit_mask = static_cast<unorm_t>(0x1) << (bits - 1);
-    for (uint8_t i = 0; i < bits; i++) {
-        set_bit(buffer, offset + i, (bit_mask & value) != 0);
-        bit_mask >>= 1;
+static void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &value) {
+
+    for (uint8_t i = bits-1; i < bits; i--) {
+        set_bit(buffer, offset + i, (value & 0x1) != 0);
+        value >>= 1;
     }
 }
 
 
 // Offset in bits form MSB to start of region.
-static unorm_t read_unorm(const uint8_t *buffer, uint64_t offset, uint8_t bits) {
+static unorm_t read_bits(unorm_t & unorm, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
 
-    // TODO: This is highly inefficient. Make it better.
-    unorm_t unorm = 0;
-    unorm_t bit_mask = static_cast<unorm_t>(0x1) << (bits - 1);
     for (uint8_t i = 0; i < bits; i++) {
+        unorm <<= 1;
         if (get_bit(buffer, offset + i)) {
-            unorm |= bit_mask;
+            unorm |= 0x1;
         }
-        bit_mask >>= 1;
     }
 
     return unorm;
@@ -176,25 +172,77 @@ static void encode_channel(uint8_t *base_addr, const channel_block &block, const
         }
     }
 
+    // We need to preprocess the sample array to support continuation samples.
+    std::vector<sample> samples;
+    for (std::size_t i = 0; i < block.samples.size(); i++) {
+        const xyuv::sample &sample = block.samples[i];
+        if (!sample.has_continuation) {
+            samples.push_back(sample);
+        }
+        else {
+            // Create a descriptor block containing all the bits of the samples.
+            xyuv::sample sample_descriptor;
+            sample_descriptor.integer_bits = 0;
+            sample_descriptor.fractional_bits = 0;
+            sample_descriptor.has_continuation = true;
+            samples.push_back(sample_descriptor);
+            size_t descriptor_pos = samples.size() -1;
+
+            // Create a stack of all the bits in the sample.
+            // We need to reverse the order of the samples to encode them correctly.
+            std::vector<const xyuv::sample*> bit_stack;
+            do {
+                // Update descriptor
+                samples[descriptor_pos].integer_bits += block.samples[i].integer_bits;
+                samples[descriptor_pos].fractional_bits += block.samples[i].fractional_bits;
+                bit_stack.push_back(&(block.samples[i]));
+            } while(block.samples[i++].has_continuation);
+
+            for (auto rit = bit_stack.rbegin(); rit != bit_stack.rend(); ++rit) {
+                samples.push_back(*(*rit));
+                samples.back().has_continuation = true;
+            }
+
+            samples.back().has_continuation = false;
+        }
+    }
+
     for (uint32_t line = 0; line < n_block_lines; line++) {
         for (uint32_t b = 0; b < n_blocks_in_line; b++) {
-            for (auto &sample : block.samples) {
+            for (std::size_t s = 0; s < samples.size(); ) {
+
+
+                uint8_t integer_bits = samples[s].integer_bits;
+                uint8_t fractional_bits = samples[s].fractional_bits;
+
                 float value = *it.advance();
+                unorm_t unorm = to_unorm(value, integer_bits, fractional_bits, range);
 
-                uint8_t * ptr_to_line =
-                        // Start with offset to frame
-                        base_addr +
-                        // Add offset to lowest byte in plane.
-                        planes[sample.plane].base_offset +
-                        // Add the size of the plane if applicable.
-                        line_offsets[sample.plane].second +
-                        // Add offset to current line.
-                        line * line_offsets[sample.plane].first;
+                // If we hit a continuation block here, it means that we have the
+                // Total bits descriptor and should skip it for the purpose of actual storing.
+                if (samples[s].has_continuation) {
+                    s++;
+                }
 
-                unorm_t unorm = to_unorm(value, sample.integer_bits, sample.fractional_bits, range);
-                write_unorm(ptr_to_line,
-                            b * planes[sample.plane].block_stride + sample.offset,
-                            sample.integer_bits + sample.fractional_bits, unorm);
+                do {
+                    const xyuv::sample &sample = samples[s];
+
+                    uint8_t * ptr_to_line =
+                            // Start with offset to frame
+                            base_addr +
+                            // Add offset to lowest byte in plane.
+                            planes[sample.plane].base_offset +
+                            // Add the size of the plane if applicable.
+                            line_offsets[sample.plane].second +
+                            // Add offset to current line.
+                            line * line_offsets[sample.plane].first;
+
+                    // Read bits written bits from LSb fractional to MSb integer bit.
+                    write_bits( ptr_to_line,
+                               b * planes[sample.plane].block_stride + sample.offset,
+                               sample.integer_bits + sample.fractional_bits, unorm);
+
+                } while (samples[s++].has_continuation);
             }
         }
     }
@@ -279,27 +327,70 @@ static void decode_channel(const uint8_t *base_addr, const channel_block &block,
         }
     }
 
+    // We need to preprocess the sample array to support continuation samples.
+    std::vector<sample> samples;
+    for (std::size_t i = 0; i < block.samples.size(); ) {
+        const xyuv::sample &sample = block.samples[i];
+        if (!sample.has_continuation) {
+            samples.push_back(sample);
+            i++;
+        }
+        else {
+            // Create a descriptor block containing all the bits of the samples.
+            xyuv::sample sample_descriptor;
+            sample_descriptor.integer_bits = 0;
+            sample_descriptor.fractional_bits = 0;
+            sample_descriptor.has_continuation = true;
+            samples.push_back(sample_descriptor);
+            size_t descriptor_pos = samples.size() -1;
+            do {
+                // Update descriptor
+                samples[descriptor_pos].integer_bits += block.samples[i].integer_bits;
+                samples[descriptor_pos].fractional_bits += block.samples[i].fractional_bits;
+                samples.push_back(block.samples[i]);
+            } while(block.samples[i++].has_continuation);
+        }
+    }
+
     for (uint32_t line = 0; line < n_block_lines; line++) {
         for (uint32_t b = 0; b < n_blocks_in_line; b++) {
-            for (auto &sample : block.samples) {
+            for (std::size_t s = 0; s < samples.size(); ) {
+
+
+                uint8_t integer_bits = samples[s].integer_bits;
+                uint8_t fractional_bits = samples[s].fractional_bits;
+
+
+                // If we hit a continuation block here, it means that we have the
+                // Total bits descriptor and should skip it for the purpose of actual loading.
+                if (samples[s].has_continuation) {
+                    s++;
+                }
+
+                unorm_t unorm = 0;
+                do {
+                    const xyuv::sample &sample = samples[s];
+
+                    const uint8_t * ptr_to_line =
+                            // Start with offset to frame
+                            base_addr +
+                            // Add offset to lowest byte in plane.
+                            planes[sample.plane].base_offset +
+                            // Add the size of the plane if applicable.
+                            line_offsets[sample.plane].second +
+                            // Add offset to current line.
+                            line * line_offsets[sample.plane].first;
+
+                    // Read bits reads bits from MSb integer to LSb fractional bit.
+                    read_bits( unorm,
+                               ptr_to_line,
+                               b * planes[sample.plane].block_stride + sample.offset,
+                               sample.integer_bits + sample.fractional_bits);
+
+                } while (samples[s++].has_continuation);
+
                 float *value = it.advance();
-
-                const uint8_t * ptr_to_line =
-                        // Start with offset to frame
-                        base_addr +
-                        // Add offset to lowest byte in plane.
-                        planes[sample.plane].base_offset +
-                        // Add the size of the plane if applicable.
-                        line_offsets[sample.plane].second +
-                        // Add offset to current line.
-                        line * line_offsets[sample.plane].first;
-
-                unorm_t unorm = read_unorm(
-                        ptr_to_line,
-                        b * planes[sample.plane].block_stride + sample.offset,
-                        sample.integer_bits + sample.fractional_bits);
-
-                *value = from_unorm(unorm, sample.integer_bits, sample.fractional_bits, range);
+                *value = from_unorm(unorm, integer_bits, fractional_bits, range);
             }
         }
     }
