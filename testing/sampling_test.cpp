@@ -26,6 +26,7 @@
 #include <xyuv.h>
 #include "../xyuv/src/to_string.h"
 #include "TestResources.h"
+#include <random>
 
 #include <gtest/gtest.h>
 
