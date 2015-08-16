@@ -25,6 +25,7 @@
 #include <xyuv.h>
 #include <xyuv/yuv_image.h>
 #include <xyuv/frame.h>
+#include <xyuv/structures/constants.h>
 
 #include "config-parser/minicalc/minicalc.h"
 #include "utility.h"
@@ -35,6 +36,31 @@
 namespace xyuv {
 
 using unorm_t = uint64_t;
+
+    static uint32_t get_line(uint32_t block_line, xyuv::interleave_pattern interleave_pattern, uint32_t height_in_blocks) {
+        switch (interleave_pattern) {
+        case xyuv::interleave_pattern::NO_INTERLEAVING:
+            return block_line;
+        case xyuv::interleave_pattern::INTERLEAVE_0_2_4__1_3_5:
+            if (block_line & 1) {
+                uint32_t split_at = (height_in_blocks + 1) / 2;
+                return split_at + (block_line/2);
+            }
+            else {
+                return (block_line/2);
+            }
+        case xyuv::interleave_pattern::INTERLEAVE_1_3_5__0_2_4:
+            if (block_line & 1) {
+                return (block_line/2);
+            }
+            else {
+                uint32_t split_at = (height_in_blocks) / 2;
+                return split_at + (block_line/2);
+            }
+        }
+        XYUV_ASSERT(false && "Unreachable");
+    }
+
 
 static inline unorm_t round_to_unorm(double val) {
     using std::floor;
@@ -235,7 +261,7 @@ static void encode_channel(uint8_t *base_addr, const channel_block &block, const
                             // Add the size of the plane if applicable.
                             line_offsets[sample.plane].second +
                             // Add offset to current line.
-                            line * line_offsets[sample.plane].first;
+                            get_line(line, planes[sample.plane].interleave_mode, n_block_lines) * line_offsets[sample.plane].first;
 
                     // Read bits written bits from LSb fractional to MSb integer bit.
                     write_bits( ptr_to_line,
@@ -379,7 +405,7 @@ static void decode_channel(const uint8_t *base_addr, const channel_block &block,
                             // Add the size of the plane if applicable.
                             line_offsets[sample.plane].second +
                             // Add offset to current line.
-                            line * line_offsets[sample.plane].first;
+                            get_line(line, planes[sample.plane].interleave_mode, n_block_lines) * line_offsets[sample.plane].first;
 
                     // Read bits reads bits from MSb integer to LSb fractional bit.
                     read_bits( unorm,
