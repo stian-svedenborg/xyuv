@@ -37,17 +37,23 @@ namespace xyuv {
 #   define be64toh(x) ntohll(x)
 #   define be32toh(x) ntohl(x)
 #   define be16toh(x) ntohs(x)
-#else
-#if defined(__linux__)
-#       include <endian.h>
+#elif defined(__linux__)
+#   include <endian.h>
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
-#       include <sys/endian.h>
+#   include <sys/endian.h>
 #elif defined(__OpenBSD__)
-#       include <sys/types.h>
-#       define be16toh(x) betoh16(x)
-#       define be32toh(x) betoh32(x)
-#       define be64toh(x) betoh64(x)
-#   endif
+#   include <sys/types.h>
+#   define be16toh(x) betoh16(x)
+#   define be32toh(x) betoh32(x)
+#   define be64toh(x) betoh64(x)
+#elif defined(__APPLE__)
+#	include <libkern/OSByteOrder.h>
+#	define htobe16(x) OSSwapHostToBigInt16(x)
+#	define htobe32(x) OSSwapHostToBigInt32(x)
+#	define htobe64(x) OSSwapHostToBigInt64(x)
+#	define be16toh(x) OSSwapBigToHostInt16(x)
+#	define be32toh(x) OSSwapBigToHostInt32(x)
+#	define be64toh(x) OSSwapBigToHostInt64(x)
 #endif
 
 inline uint64_t host_to_be(uint64_t val) {
