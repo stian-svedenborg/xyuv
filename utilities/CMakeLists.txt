@@ -38,3 +38,6 @@ if (USE_IMAGEMAGICK_INTEGRATION)
     )
 
 endif (USE_IMAGEMAGICK_INTEGRATION)
+
+#Installation section
+install (TARGETS xyuv-header DESTINATION bin)

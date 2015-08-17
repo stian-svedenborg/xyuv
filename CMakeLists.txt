@@ -27,12 +27,13 @@ set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
     "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
 
 # Primary library.
-add_library(xyuv STATIC
+add_library(xyuv SHARED
     xyuv/src/xyuv.cpp
 )
 
 target_include_directories(xyuv
-    PUBLIC xyuv/include/
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
+    PUBLIC $<INSTALL_INTERFACE:xyuv/include>
 )
 
 # Primary library
@@ -64,7 +65,8 @@ add_library(xyuv_core STATIC
 xyuv/include/xyuv/large_buffer.h)
 
 target_include_directories(xyuv_core
-    PUBLIC xyuv/include/
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
+    PUBLIC $<INSTALL_INTERFACE:xyuv/include>
     PRIVATE thirdparty/rapidjson/include
 )
 
@@ -83,7 +85,8 @@ if (USE_IMAGEMAGICK_INTEGRATION)
     )
 
     target_include_directories(xyuv_magick
-        PUBLIC xyuv/include/xyuv/imagemagick
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include/xyuv/imagemagick>
+        PUBLIC $<INSTALL_INTERFACE:xyuv/include/xyuv/imagemagick>
         PRIVATE xyuv/include
         PUBLIC ${ImageMagick_INCLUDE_DIRS}
     )
@@ -106,3 +109,33 @@ endif (USE_IMAGEMAGICK_INTEGRATION)
 add_subdirectory(thirdparty)
 add_subdirectory(testing)
 add_subdirectory(utilities)
+
+# Installation section.
+install (
+    TARGETS xyuv_core xyuv_magick
+    DESTINATION lib/static
+    EXPORT lib
+)
+install (
+    TARGETS xyuv
+    DESTINATION lib
+    EXPORT lib
+)
+install (
+    DIRECTORY xyuv/include/
+    DESTINATION include
+    FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+)
+install (
+    DIRECTORY formats/
+    DESTINATION share/xyuv
+    FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+)
+install (
+    EXPORT lib
+    NAMESPACE xyuv_
+    DESTINATION lib/xyuv
+)
+
+
+

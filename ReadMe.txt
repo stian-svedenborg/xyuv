@@ -22,27 +22,29 @@ in this bundle.
 ||                Installation                   ||
 ===================================================
 Start by cloning the repository (recursively to bring
-in the dependencies as well:
+in the dependencies as well):
 
-$ git clone https://github.com/stian-svedenborg/xyuv.git
+$ git clone --recursive https://github.com/stian-svedenborg/xyuv.git
 $ mkdir xyuv_build
 $ cd xyuv_build
 $ cmake ../xyuv
 $ make
+# make install
 
-"make install" support is still in the works, but should be
-coming soon(tm).
+The default installation directory can be overridden
+by passing -DCMAKE_INSTALL_PREFIX:PATH=/path/to/somewhere
+to cmake.
 
 ===================================================
 ||                Dependencies                   ||
 ===================================================
 Requirements:
  - CMake 3.2
- - Rapidjson (version xx included in the source).
- - (Optional) gtest testing framework.
+ - Rapidjson (submodule in source)
+ - googletest (submodeule in source)
 
 For changing the minicalc internal expression parser
-library you may also require the following tools:
+you may also require the following tools:
  - re2c lexer generator.
  - The Lemon parser generator (svn version 3080900 in tree).
 
