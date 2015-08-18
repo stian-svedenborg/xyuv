@@ -27,7 +27,7 @@ set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
     "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
 
 # Primary library.
-add_library(xyuv SHARED
+add_library(xyuv 
     xyuv/src/xyuv.cpp
 )
 
