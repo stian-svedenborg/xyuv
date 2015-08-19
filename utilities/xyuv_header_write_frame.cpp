@@ -35,7 +35,7 @@ std::string get_suffix(const std::string & path) {
 }
 
 static void write_frame_using_image_magick(const xyuv::frame &frame, const std::string & out_filename) {
-    Magick::Image image(Magick::Geometry(1,1,0,0), Magick::ColorRGB(0.0,0.0,0.0));
+    Magick::Image image(Magick::Geometry(frame.format.image_w,frame.format.image_h,0,0), Magick::ColorRGB(0.0,0.0,0.0));
 
     xyuv::magick_wrapper wrapper(image);
     xyuv::write_frame_to_rgb_image(&wrapper, frame);

@@ -27,7 +27,9 @@
 #include "xyuv/structures/conversion_matrix.h"
 #include "xyuv/structures/color.h"
 #include "../rgb_conversion.h"
+#include "../assert.h"
 #include <Magick++.h>
+#include <xyuv/structures/constants.h>
 
 namespace xyuv {
 
@@ -44,7 +46,11 @@ static inline void get_yuv_color(yuv_color &color, const yuv_image &img_444, uin
 void magick_wrapper::xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_444,
                                              const xyuv::conversion_matrix &conversion_matrix) {
     // Resize underlying image to the input image.
-    image.resize(Magick::Geometry(yuv_image_444.image_w, yuv_image_444.image_h));
+    // Warning, this call has been slightly buggy for some resolutions.
+    // It's better construct the image correctly in the first place.
+    if (image.rows() != yuv_image_444.image_h || image.columns() != yuv_image_444.image_w ) {
+        image.resize(Magick::Geometry(yuv_image_444.image_w, yuv_image_444.image_h));
+    }
 
     bool has_a = !yuv_image_444.a_plane.empty();
     image.matte(has_a);
@@ -55,6 +61,7 @@ void magick_wrapper::xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_44
     yuv_color yuv;
 
     Magick::PixelPacket *pixels = image.setPixels(0, 0, yuv_image_444.image_w, yuv_image_444.image_h);
+    XYUV_ASSERT(pixels != nullptr);
 
     for (uint32_t y = 0; y < yuv_image_444.image_h; y++) {
         for (uint32_t x = 0; x < yuv_image_444.image_w; x++) {
@@ -94,7 +101,14 @@ yuv_image magick_wrapper::xyuv_to_yuv_image_444(const xyuv::conversion_matrix &c
     bool has_a = image.matte();
 
 
-    yuv_image image_out = create_yuv_image_444(image.columns(), image.rows(), has[0], has[1], has[2], has_a);
+    yuv_image image_out = create_yuv_image_444(
+            static_cast<uint32_t>(image.columns()),
+            static_cast<uint32_t>(image.rows()),
+            has[channel::Y],
+            has[channel::U],
+            has[channel::V],
+            has_a);
+
 
     // Create pixels with default values.
     // Note that this hides the lack of planes.
