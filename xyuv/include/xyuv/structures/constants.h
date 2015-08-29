@@ -29,8 +29,8 @@ namespace xyuv {
 //! \brief Enum describing the origin [posision of pixel (0, 0)] of the image.
 //! This is used when mapping from in memory data to xyuv::yuv_image which is always UPPER_LEFT.
 enum class image_origin {
-    UPPER_LEFT,
-    LOWER_LEFT,
+    UPPER_LEFT = 0,
+    LOWER_LEFT = 1,
 };
 
 //! \brief Enum mapping an channel to an integer.

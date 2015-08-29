@@ -4,6 +4,10 @@ add_executable(xyuv-header
     XYUVHeader.cpp
     xyuv_header_parse_args.cpp
     xyuv_header_run.cpp
+    xyuv_header_write_frame.cpp
+    xyuv_header_read_frame.cpp
+    console_width.h
+    console_width.cpp
 )
 
 target_include_directories(xyuv-header
@@ -34,3 +38,6 @@ if (USE_IMAGEMAGICK_INTEGRATION)
     )
 
 endif (USE_IMAGEMAGICK_INTEGRATION)
+
+#Installation section
+install (TARGETS xyuv-header DESTINATION bin)

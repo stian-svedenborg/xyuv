@@ -29,6 +29,7 @@
 #include "../utility.h"
 #include "../paths.h"
 #include "parse_error.h"
+#include "format_validator.h"
 #include <iostream>
 
 namespace xyuv {
@@ -36,14 +37,17 @@ namespace xyuv {
 // Helper functions
 void config_manager::load_format_templates(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {
             xyuv::format_template format_template = parse_format_template(read_json(dir_path + "/" + file));
-            add(file, format_template);
+            if (validate_format_template(format_template)) {
+                add(file, format_template);
+            }
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;
+        } catch (std::logic_error & e) {
+            std::cerr << "Invalid format template '" << dir_path << file << "': " << e.what() << std::endl;
         }
     }
 }
@@ -52,7 +56,6 @@ bool operator<(const subsampling &lhs, const subsampling &rhs);
 
 void config_manager::load_chroma_sitings(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {
@@ -66,7 +69,6 @@ void config_manager::load_chroma_sitings(const std::string &dir_path) {
 
 void config_manager::load_conversion_matrices(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
-    XYUV_ASSERT(!files.empty());
 
     for (auto &file : files) {
         try {

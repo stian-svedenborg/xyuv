@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 namespace xyuv {
 

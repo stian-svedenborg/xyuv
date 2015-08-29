@@ -27,6 +27,12 @@
 #include <fstream>
 #include <memory>
 #include <unordered_set>
+#include <iostream>
+
+
+static std::string strip_suffix(const std::string & path) {
+    return path.substr(0, path.rfind('.', std::string::npos));
+}
 
 void XYUVHeader::Run(const ::options & options) {
 
@@ -47,36 +53,37 @@ void XYUVHeader::Run(const ::options & options) {
         return;
     }
 
-    // Try to aquire each input stream and output stream.
-    std::vector<std::unique_ptr<std::istream>> istreams;
-    for ( const auto & path : options.input_files ) {
-        std::unique_ptr<std::istream> istream{new std::ifstream(path, std::ios::binary)};
-        if (!(*istream)) {
-            throw std::runtime_error("Could not open input file: '" + path + "'");
-        }
-        istreams.emplace_back(std::move(istream));
-    }
-
     // Try to aquire each output stream.
-    std::vector<std::unique_ptr<std::ostream>> ostreams;
+    bool detect_concatinate = options.concatinate;
+    std::vector<std::string> output_names;
+
     if (options.writeout) {
         // Make a set of output names to do argument validation.
         std::unordered_set<std::string> out_name_set;
-        std::vector<std::string> output_names;
 
         if ( options.output_name.size() == 0 ) {
             // If concatinating, use first file name as output.
-            if (options.concatinate) {
-                std::string out_path = options.input_files[0].substr(0, options.input_files[0].rfind('.',
-                                                                                                     std::string::npos));
+            if (detect_concatinate) {
+                std::string out_path = strip_suffix(options.input_files[0]) + ".xyuv";
                 out_name_set.emplace(out_path);
                 output_names.emplace_back(out_path);
             }
             else {
-                out_name_set.insert(options.output_name.begin(), options.output_name.end());
-                output_names.insert(output_names.begin(), options.output_name.begin(), options.output_name.end());
+                for (const auto & in_file : options.input_files ) {
+                    std::string out_path = strip_suffix(in_file) + ".xyuv";
+
+                    out_name_set.insert(out_path);
+                    output_names.emplace_back(out_path);
+                }
             }
         }
+        else {
+            for (const auto & out_path : options.output_name ) {
+                out_name_set.insert(out_path);
+                output_names.emplace_back(out_path);
+            }
+        }
+
         // Check that no two output files overwrite one another.
         if (out_name_set.size() != output_names.size()) {
             throw std::invalid_argument("The same output name is given more than once. This is illegal for one invocation of the program.");
@@ -93,16 +100,11 @@ void XYUVHeader::Run(const ::options & options) {
         // Check that the number of output files matches the number of input files
         // or one.
         if (output_names.size() != 1 && output_names.size() != options.input_files.size() ) {
-            throw std::invalid_argument("If supplied, the number of output files must exactly match the number of input files or one (which implies concatinate).");
+            throw std::invalid_argument("If supplied, the number of output files must exactly match the number of input files or one.");
         }
 
-        // Now, open the output files.
-        for ( const auto & path : output_names ) {
-            std::unique_ptr<std::ostream> ostream{ new std::ofstream(path, std::ios::binary) };
-            if (!(*ostream)) {
-                throw std::runtime_error("Could not open output file: '" + path + "'");
-            }
-            ostreams.emplace_back(std::move(ostream));
+        if (output_names.size() == 1 && options.input_files.size() > 1) {
+            detect_concatinate = true;
         }
     }
 
@@ -159,26 +161,52 @@ void XYUVHeader::Run(const ::options & options) {
         }
     }
 
-    if (options.display && istreams.size() != 1 ) {
+    if (options.display && options.input_files.size() != 1 ) {
         throw std::invalid_argument("--display only supported for a single input.");
     }
 
+    if (options.input_files.size() == 0) {
+        throw std::logic_error("Missing input files.");
+    }
+
+    if (options.input_files.size() > 0 && options.image_w * options.image_h == 0) {
+        throw std::logic_error("Image size must be non-zero.");
+    }
+
+    std::unique_ptr<std::ofstream> fout;
+    if (detect_concatinate) {
+        fout.reset(new std::ofstream(output_names[0], std::ios::binary | std::ios::app ));
+        if (!(*fout)) {
+            throw std::runtime_error("Could not open output file: '" + output_names[0] + "' for writing");
+        }
+    }
+
     // At this point everything looks good :) Lets load some formats.
-    for ( std::size_t i = 0; i < istreams.size(); i++) {
-        xyuv::frame frame = AddHeader(
-                format_templates.size() == 1 ? format_templates[0] : format_templates[i],
-                sitings.size() == 1 ? sitings[0] : sitings[i],
-                matrices.size() == 1 ? matrices[0] : matrices[i],
+    for ( std::size_t i = 0; i < options.input_files.size(); i++) {
+        xyuv::format target_format = xyuv::create_format(
                 options.image_w,
                 options.image_h,
-                *(istreams[i])
+                format_templates.size() == 1 ? format_templates[0] : format_templates[i],
+                matrices.size() == 1 ? matrices[0] : matrices[i],
+                sitings.size() == 1 ? sitings[0] : sitings[i]
         );
 
+        xyuv::frame frame = LoadConvertFrame(target_format, options.input_files[i]);
+
         if (options.writeout) {
-            xyuv::write_frame(
-                    ostreams.size() == 1 ? *(ostreams[0]) : *(ostreams[i]),
-                    frame
-            );
+            if (options.concatinate) {
+                // Append file at end of concatinated string.
+                xyuv::write_frame(*fout, frame);
+            }
+            else {
+                try {
+                    WriteFrame(frame, output_names[i]);
+                } catch (std::exception & e) {
+                    std::cout << "[Warning] Error occured while writing file '" <<
+                                 output_names[i] << "'\n   " <<
+                                 e.what() << "\n   Skipping file." << std::endl;
+                }
+            }
         }
 
         if (options.display) {
