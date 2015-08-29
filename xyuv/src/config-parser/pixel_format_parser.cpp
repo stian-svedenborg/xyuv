@@ -185,6 +185,7 @@ void format_template_parser::parse_sample(rapidjson::Value *sample_root, channel
     DECLARE_REQUIRED(*sample_root, int_bits, Uint);
     DECLARE_REQUIRED(*sample_root, frac_bits, Uint);
     DECLARE_REQUIRED(*sample_root, offset, Uint);
+    DECLARE_OPTIONAL(*sample_root, has_continuation, Bool);
 
     VALIDATE_RANGE(0, 255, plane, Uint);
     VALIDATE_RANGE(0, 255, int_bits, Uint);
@@ -198,6 +199,12 @@ void format_template_parser::parse_sample(rapidjson::Value *sample_root, channel
     sample.integer_bits = static_cast<uint8_t>(int_bits->GetUint());
     sample.fractional_bits = static_cast<uint8_t>(frac_bits->GetUint());
     sample.offset = static_cast<uint16_t>(offset->GetUint());
+
+    if (has_continuation) {
+        sample.has_continuation = has_continuation->GetBool();
+    } else {
+        sample.has_continuation = false;
+    }
 
     block->samples.push_back(sample);
 }
