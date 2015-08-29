@@ -29,6 +29,7 @@
 #include <xyuv/frame.h>
 #include "to_string.h"
 #include "assert.h"
+#include "config-parser/format_validator.h"
 
 #include <algorithm>
 #include <cstring>
@@ -110,6 +111,9 @@ xyuv::format create_format(
     for (std::size_t i = 0; i < format.channel_blocks.size(); i++) {
         format.channel_blocks[i] = format_template.channel_blocks[i];
     }
+
+    // Ensure that the format we created is conformant.
+    validate_format(format);
 
     return format;
 }

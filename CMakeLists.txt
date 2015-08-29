@@ -62,7 +62,10 @@ add_library(xyuv_core STATIC
     xyuv/src/comparison_operators.cpp
     xyuv/src/config-parser/parse_error.h
     xyuv/src/config-parser/parse_helpers.cpp
-xyuv/include/xyuv/large_buffer.h)
+    xyuv/include/xyuv/large_buffer.h
+    xyuv/src/config-parser/format_validator.h
+    xyuv/src/config-parser/format_validator.cpp
+)
 
 target_include_directories(xyuv_core
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>

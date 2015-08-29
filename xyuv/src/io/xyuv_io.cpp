@@ -26,6 +26,7 @@
 #include <xyuv/structures/format.h>
 #include "../assert.h"
 #include "io_structs.h"
+#include "../config-parser/format_validator.h"
 #include <limits>
 #include <ostream>
 #include <istream>
@@ -170,7 +171,7 @@ void read_frame(
         std::istream & istream
 ) {
     read_header(istream, frame->format);
-
+    validate_format(frame->format);
     frame->data.reset( new uint8_t[frame->format.size]);
     read_large_buffer(istream, reinterpret_cast<char*>(frame->data.get()), frame->format.size);
 

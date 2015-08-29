@@ -29,6 +29,7 @@
 #include "../utility.h"
 #include "../paths.h"
 #include "parse_error.h"
+#include "format_validator.h"
 #include <iostream>
 
 namespace xyuv {
@@ -40,9 +41,13 @@ void config_manager::load_format_templates(const std::string &dir_path) {
     for (auto &file : files) {
         try {
             xyuv::format_template format_template = parse_format_template(read_json(dir_path + "/" + file));
-            add(file, format_template);
+            if (validate_format_template(format_template)) {
+                add(file, format_template);
+            }
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;
+        } catch (std::logic_error & e) {
+            std::cerr << "Invalid format template '" << dir_path << file << "': " << e.what() << std::endl;
         }
     }
 }
