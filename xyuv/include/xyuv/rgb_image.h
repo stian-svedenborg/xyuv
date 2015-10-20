@@ -34,7 +34,6 @@ struct yuv_image;
 class rgb_image {
 public:
     void from_yuv_image(const xyuv::yuv_image &image_in, const xyuv::conversion_matrix &conversion_matrix);
-
     yuv_image to_yuv_image(const xyuv::conversion_matrix &conversion_matrix) const;
 
 protected:

@@ -74,7 +74,8 @@ void magick_wrapper::xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_44
             magick_rgb.red(rgb.r);
             magick_rgb.green(rgb.g);
             magick_rgb.blue(rgb.b);
-            if (has_a) magick_rgb.alpha(rgb.a);
+            // Imagemagick stores alpha as 0.0 = opaque
+            if (has_a) magick_rgb.alpha(1.0-rgb.a);
 
             // Assign pixel.
             pixels[y * image.columns() + x] = magick_rgb;
@@ -124,7 +125,8 @@ yuv_image magick_wrapper::xyuv_to_yuv_image_444(const xyuv::conversion_matrix &c
             rgb.r = static_cast<float>(magick_rgb.red());
             rgb.g = static_cast<float>(magick_rgb.green());
             rgb.b = static_cast<float>(magick_rgb.blue());
-            rgb.a = static_cast<float>(magick_rgb.alpha());
+            // Imagemagick stores alpha as 0.0 = opaque
+            rgb.a = static_cast<float>(1.0-magick_rgb.alpha());
 
             // Convert to yuv.
             to_yuv(&yuv, rgb, conversion_matrix);
