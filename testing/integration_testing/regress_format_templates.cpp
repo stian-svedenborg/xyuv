@@ -129,6 +129,9 @@ yuv_image FormatRegression::source_image;
 
 TEST_P(FormatRegression, FromYUVAndBackAgain) {
     SCOPED_TRACE(GetParam());
+
+    std::cout << "[ FORMAT   ] " <<  GetParam() << std::endl;
+
     ::format_template     format_template = Resources::config().get_format_template(GetParam());
     ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;

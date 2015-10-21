@@ -315,15 +315,27 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 has_negative_line_stride
         );
 
-    if (has_a)
+    if (has_a) {
+        const surface<pixel_quantum> *surf = &(yuva_in.a_plane);
+
+        // Alpha is special, if it is not present, we need to
+        // create a surface and default it to one.
+        std::unique_ptr<surface<pixel_quantum>> tempsurf;
+        if (yuva_in.a_plane.empty()) {
+            tempsurf.reset(new surface<pixel_quantum>(yuva_in.image_w, yuva_in.image_h));
+            tempsurf->fill(1.0f);
+            surf = tempsurf.get();
+        }
+
         encode_channel(
                 buffer.get(),
                 format.channel_blocks[channel::A],
-                yuva_in.a_plane,
+                *surf,
                 format.planes,
                 std::make_pair<float, float>(0.0f, 1.0f),
                 has_negative_line_stride
         );
+    }
 
 
     // Init frame info.
