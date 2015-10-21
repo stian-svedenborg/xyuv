@@ -52,6 +52,9 @@ void magick_wrapper::xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_44
         image.resize(Magick::Geometry(yuv_image_444.image_w, yuv_image_444.image_h));
     }
 
+    bool has_y = !yuv_image_444.y_plane.empty();
+    bool has_u = !yuv_image_444.u_plane.empty();
+    bool has_v = !yuv_image_444.v_plane.empty();
     bool has_a = !yuv_image_444.a_plane.empty();
     image.matte(has_a);
 
@@ -63,11 +66,12 @@ void magick_wrapper::xyuv_from_yuv_image_444(const xyuv::yuv_image &yuv_image_44
     Magick::PixelPacket *pixels = image.setPixels(0, 0, yuv_image_444.image_w, yuv_image_444.image_h);
     XYUV_ASSERT(pixels != nullptr);
 
+
     for (uint32_t y = 0; y < yuv_image_444.image_h; y++) {
         for (uint32_t x = 0; x < yuv_image_444.image_w; x++) {
             // Convert data.
             get_yuv_color(yuv, yuv_image_444, x, y);
-            to_rgb(&rgb, yuv, conversion_matrix);
+            to_rgb(&rgb, yuv, conversion_matrix, has_y, has_u, has_v);
 
             // Wrap into ImageMagick ColorRGB
             Magick::ColorRGB magick_rgb;

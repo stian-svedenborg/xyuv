@@ -33,18 +33,23 @@
 
 namespace xyuv {
 
-void to_rgb(rgb_color *rgb, const yuv_color &yuv_in, const conversion_matrix &matrix) {
+void to_rgb(rgb_color *rgb, const yuv_color &yuv_in, const conversion_matrix &matrix, bool has_y, bool has_u, bool has_v) {
     yuv_color yuv = yuv_in;
 
-    // Scale to [min, max]
-    yuv.y *= matrix.y_range.second - matrix.y_range.first;
-    yuv.u *= matrix.u_range.second - matrix.u_range.first;
-    yuv.v *= matrix.v_range.second - matrix.v_range.first;
-
-    // Shift minimum to min.
-    yuv.y += matrix.y_range.first;
-    yuv.u += matrix.u_range.first;
-    yuv.v += matrix.v_range.first;
+    // Assume, 0.0 is zero i.e. no contribution.
+    // Scale to [min, max], and shift minimum to min.
+    if (has_y) {
+        yuv.y *= matrix.y_range.second - matrix.y_range.first;
+        yuv.y += matrix.y_range.first;
+    }
+    if (has_u) {
+        yuv.u *= matrix.u_range.second - matrix.u_range.first;
+        yuv.u += matrix.u_range.first;
+    }
+    if (has_v) {
+        yuv.v *= matrix.v_range.second - matrix.v_range.first;
+        yuv.v += matrix.v_range.first;
+    }
 
     rgb->r = matrix.yuv_to_rgb[0] * yuv.y + matrix.yuv_to_rgb[1] * yuv.u + matrix.yuv_to_rgb[2] * yuv.v;
     rgb->g = matrix.yuv_to_rgb[3] * yuv.y + matrix.yuv_to_rgb[4] * yuv.u + matrix.yuv_to_rgb[5] * yuv.v;

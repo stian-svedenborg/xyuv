@@ -37,8 +37,8 @@
     # i.e. fractional bits will not be affected. (This allows us to use the same constants to encode for instance
     # 10-bit studio range, where the last two bits are fractional).
 
-    "y_packed_range" : [ 0.062745098, 0.921568627],
-    "u_packed_range" : [ 0.062745098, 0.941176471],
-    "v_packed_range" : [ 0.062745098, 0.941176471]
+    "y_packed_range" : [ 0.062745098, 0.921568627 ],
+    "u_packed_range" : [ 0.062745098, 0.941176471 ],
+    "v_packed_range" : [ 0.062745098, 0.941176471 ]
 
 }
