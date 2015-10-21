@@ -110,12 +110,12 @@ static float from_unorm(unorm_t unorm, uint8_t integer_bits, uint8_t fractional_
 
 static inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
     uint8_t &byte = buffer[offset / 8];
-    uint8_t mask = static_cast<uint8_t>(0x80 >> (offset % 8));
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
 }
 
 static inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
-    uint8_t mask = static_cast<uint8_t>(0x80 >> (offset % 8));
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     return (buffer[offset / 8] & mask) != 0;
 }
 
@@ -132,7 +132,7 @@ static void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &
 // Offset in bits form MSB to start of region.
 static unorm_t read_bits(unorm_t & unorm, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
 
-    for (uint8_t i = 0; i < bits; i++) {
+    for (uint8_t i = bits-1; i < bits; i--) {
         unorm <<= 1;
         if (get_bit(buffer, offset + i)) {
             unorm |= 0x1;
