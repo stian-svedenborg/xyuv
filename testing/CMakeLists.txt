@@ -17,7 +17,7 @@ add_executable(unit_tests
     TestResources.h
     continuation_blocks.cpp
     interleave_test.cpp
-)
+        bit_packing.cpp)
 
 
 

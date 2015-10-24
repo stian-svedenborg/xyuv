@@ -108,38 +108,43 @@ static float from_unorm(unorm_t unorm, uint8_t integer_bits, uint8_t fractional_
     return clamp(0.0f, 1.0f, static_cast<float>(dbl_val));
 }
 
-static inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+
+    inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
     uint8_t &byte = buffer[offset / 8];
     uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
 }
 
-static inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
     uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     return (buffer[offset / 8] & mask) != 0;
 }
 
-// Offset in bits form MSB to start of region.
-static void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &value) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t value) {
 
-    for (uint8_t i = bits-1; i < bits; i--) {
+    for (uint8_t i = 0; i < bits; i++) {
         set_bit(buffer, offset + i, (value & 0x1) != 0);
         value >>= 1;
     }
 }
 
-
-// Offset in bits form MSB to start of region.
-static unorm_t read_bits(unorm_t & unorm, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+unorm_t read_bits(unorm_t & value, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
 
     for (uint8_t i = bits-1; i < bits; i--) {
-        unorm <<= 1;
+        value <<= 1;
         if (get_bit(buffer, offset + i)) {
-            unorm |= 0x1;
+            value |= 0x1;
         }
     }
-
-    return unorm;
+    return value;
 }
 
 // The block iterator will iterate over each pixel in a block before moving on to the next one.
