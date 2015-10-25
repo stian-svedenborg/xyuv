@@ -30,13 +30,13 @@ namespace xyuv {
 
 //! \brief Internal struct used to pass around a single yuva color.
 //! \details Internally we let all components of yuv colors also go between [0.0, 1.0].
-//! This means that opaque black -> (y, u, v, a) == (0, 0.5, 0.5, 1.0).
+//! This means that opaque black -> (y, u, v, a) == (0, 0, 0, 1.0).
 struct yuv_color {
     yuv_color() = default;
 
     yuv_color(pixel_quantum y, pixel_quantum u, pixel_quantum v, pixel_quantum a) : y(y), u(u), v(v), a(a) { }
 
-    pixel_quantum y = 0.0, u = 0.5, v = 0.5, a = 1.0;
+    pixel_quantum y = 0.0, u = 0.0, v = 0.0, a = 1.0;
 };
 
 //! \brief Internal struct used to pass around a single rgba value.

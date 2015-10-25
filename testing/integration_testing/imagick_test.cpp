@@ -88,6 +88,7 @@ TEST_F(ImageMagickWrapperTest, RGB_to_and_from_YUV) {
 
 void ImageMagickWrapperTest::read_write_store_image(const std::string & fmt_name) {
 
+    std::cout << "[ FORMAT   ] " <<  GetParam() << std::endl;
     Magick::Image image_expected = Resources::get_default();
     ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
     ::format_template fmt_template = Resources::config().get_format_template(fmt_name);

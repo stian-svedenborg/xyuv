@@ -33,79 +33,202 @@
 
 using namespace xyuv;
 
-static xyuv::format create_continuation_block_format () {
-    xyuv::format format;
+class SinglePixelSingleChannelTest : public ::testing::Test {
+private:
+    // Initialized with everything but the samples
+    xyuv::format fmt;
 
-    format.chroma_siting = Resources::config().get_chroma_siting("444");
-    format.conversion_matrix = Resources::config().get_conversion_matrix("identity");
+protected:
 
-    format.image_w = 1;
-    format.image_h = 1;
+    const pixel_quantum TEST_VAL = 0.710692402f;
 
-    format.size = 2;
+    xyuv::frame encode_pixel(const xyuv::format & fmt) {
+        // Create single pixel single channel image.
+        xyuv::yuv_image testimage = xyuv::create_yuv_image_444(1, 1, true, false, false, false);
 
-    xyuv::plane plane;
-    plane.size = 2;
-    plane.base_offset = 0;
-    plane.interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
-    plane.block_stride = 16;
-    plane.line_stride = 2;
+        // Fill it with the value UNORM 8.8 0b 10110101 00111010 = 0xB53A = 0.710692402
+        testimage.y_plane.set(0, 0, TEST_VAL );
 
-    format.planes.push_back(plane);
+        return xyuv::encode_frame(testimage, fmt);
 
-    xyuv::channel_block & block = format.channel_blocks[xyuv::channel::Y];
-    block.w = 1;
-    block.h = 1;
+    }
 
-    xyuv::sample s0;
-    s0.integer_bits = 6;
-    s0.fractional_bits = 0;
-    s0.offset = 8;
-    s0.plane = 0;
-    s0.has_continuation = true;
+    // Overwrites the samples in the Y channel block of the default format and
+    // returns it.
+    const xyuv::format& get_format(const std::vector<xyuv::sample> &samples) {
+        fmt.channel_blocks[xyuv::channel::Y].samples = samples;
+        return fmt;
+    }
 
-    xyuv::sample s1;
-    s1.integer_bits = 2;
-    s1.fractional_bits = 0;
-    s1.offset = 14;
-    s1.plane = 0;
-    s1.has_continuation = true;
+    virtual void SetUp() override {
+        fmt.chroma_siting = Resources::config().get_chroma_siting("444");
+        fmt.conversion_matrix = Resources::config().get_conversion_matrix("identity");
 
-    xyuv::sample s2;
-    s2.integer_bits = 0;
-    s2.fractional_bits = 4;
-    s2.offset = 0;
-    s2.plane = 0;
-    s2.has_continuation = true;
+        fmt.image_w = 1;
+        fmt.image_h = 1;
 
-    xyuv::sample s3;
-    s3.integer_bits = 0;
-    s3.fractional_bits = 4;
-    s3.offset = 4;
-    s3.plane = 0;
-    s3.has_continuation = false;
+        fmt.size = 2;
+
+        xyuv::plane plane;
+        plane.size = 2;
+        plane.base_offset = 0;
+        plane.interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
+        plane.block_stride = 16;
+        plane.line_stride = 2;
+
+        fmt.planes.push_back(plane);
+
+        xyuv::channel_block & block = fmt.channel_blocks[xyuv::channel::Y];
+        block.w = 1;
+        block.h = 1;
+    }
+};
 
 
-    block.samples.push_back(s0);
-    block.samples.push_back(s1);
-    block.samples.push_back(s2);
-    block.samples.push_back(s3);
+TEST_F(SinglePixelSingleChannelTest, PlainUnorm_8_8) {
+    std::vector<xyuv::sample> samples;
+    xyuv::sample s;
 
-    return format;
+    s.offset = 0;
+    s.integer_bits = 8;
+    s.fractional_bits = 8;
+    s.plane = 0;
+    samples.push_back(s);
+
+    xyuv::format fmt = get_format(samples);
+
+    // Encode the test image using fmt:
+    xyuv::frame frame = encode_pixel(fmt);
+    ASSERT_EQ(0x3a, frame.data[0]);
+    ASSERT_EQ(0xb5, frame.data[1]);
+
+
+    // Decode the same frame.
+    xyuv::yuv_image decoded = xyuv::decode_frame(frame);
+    ASSERT_EQ(TEST_VAL, decoded.y_plane[0][0]);
+}
+
+TEST_F(SinglePixelSingleChannelTest, ContinuationUnorm_8_8) {
+    std::vector<xyuv::sample> samples;
+    xyuv::sample s;
+
+    s.offset = 8;
+    s.integer_bits = 8;
+    s.fractional_bits = 0;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 0;
+    s.integer_bits = 0;
+    s.fractional_bits = 8;
+    s.plane = 0;
+    s.has_continuation = false;
+    samples.push_back(s);
+
+    xyuv::format fmt = get_format(samples);
+
+    // Encode the test image using fmt:
+    xyuv::frame frame = encode_pixel(fmt);
+    ASSERT_EQ(0x3a, frame.data[0]);
+    ASSERT_EQ(0xb5, frame.data[1]);
+
+    // Decode the same frame.
+    xyuv::yuv_image decoded = xyuv::decode_frame(frame);
+    ASSERT_EQ(TEST_VAL, decoded.y_plane[0][0]);
+}
+
+TEST_F(SinglePixelSingleChannelTest, ComplexContinuationUnorm_8_8) {
+    std::vector<xyuv::sample> samples;
+    xyuv::sample s;
+
+    s.offset = 12;
+    s.integer_bits = 4;
+    s.fractional_bits = 0;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 8;
+    s.integer_bits = 4;
+    s.fractional_bits = 0;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 4;
+    s.integer_bits = 0;
+    s.fractional_bits = 4;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 0;
+    s.integer_bits = 0;
+    s.fractional_bits = 4;
+    s.plane = 0;
+    s.has_continuation = false;
+    samples.push_back(s);
+
+
+    xyuv::format fmt = get_format(samples);
+
+    // Encode the test image using fmt:
+    xyuv::frame frame = encode_pixel(fmt);
+    ASSERT_EQ(0x3a, frame.data[0]);
+    ASSERT_EQ(0xb5, frame.data[1]);
+
+    // Decode the same frame.
+    xyuv::yuv_image decoded = xyuv::decode_frame(frame);
+    ASSERT_EQ(TEST_VAL, decoded.y_plane[0][0]);
+}
+
+TEST_F(SinglePixelSingleChannelTest, ShuffledContinuationUnorm_8_8) {
+    std::vector<xyuv::sample> samples;
+    xyuv::sample s;
+
+    s.offset = 12;
+    s.integer_bits = 4;
+    s.fractional_bits = 0;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 4;
+    s.integer_bits = 4;
+    s.fractional_bits = 0;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 8;
+    s.integer_bits = 0;
+    s.fractional_bits = 4;
+    s.plane = 0;
+    s.has_continuation = true;
+    samples.push_back(s);
+
+    s.offset = 0;
+    s.integer_bits = 0;
+    s.fractional_bits = 4;
+    s.plane = 0;
+    s.has_continuation = false;
+    samples.push_back(s);
+
+    xyuv::format fmt = get_format(samples);
+
+    // Encode the test image using fmt:
+    xyuv::frame frame = encode_pixel(fmt);
+    ASSERT_EQ(0x5a, frame.data[0]);
+    ASSERT_EQ(0xb3, frame.data[1]);
+
+    // Decode the same frame.
+    xyuv::yuv_image decoded = xyuv::decode_frame(frame);
+    ASSERT_EQ(TEST_VAL, decoded.y_plane[0][0]);
+
 }
 
 
-TEST(ContinuationBlocks, ContinuationBlocks) {
-    xyuv::frame frame = xyuv::create_frame(create_continuation_block_format(), nullptr, 0);
 
-    frame.data[0] = 0x55;
-    frame.data[1] = 0x7f;
 
-    yuv_image image = decode_frame(frame);
 
-    xyuv::frame encoded_frame = encode_frame(image, frame.format);
-
-    ASSERT_EQ(frame.data[0], encoded_frame.data[0]);
-    ASSERT_EQ(frame.data[1], encoded_frame.data[1]);
-
-}

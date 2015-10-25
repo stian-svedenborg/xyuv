@@ -88,6 +88,8 @@ public:
 
         surface *parent;
         uint32_t x_coord;
+
+        friend class surface;
     };
 
     //! \brief \see row_proxy

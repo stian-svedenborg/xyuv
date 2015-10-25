@@ -40,7 +40,7 @@ TEST(RGBTest, EncodeDecode) {
     to_yuv(&yuv, rgb_expected, conversion_matrix);
 
     rgb_color rgb_observed;
-    to_rgb(&rgb_observed, yuv, conversion_matrix);
+    to_rgb(&rgb_observed, yuv, conversion_matrix, true, true, true);
 
     ASSERT_NEAR(rgb_expected.r, rgb_observed.r, 0.00001f);
     ASSERT_NEAR(rgb_expected.g, rgb_observed.g, 0.00001f);

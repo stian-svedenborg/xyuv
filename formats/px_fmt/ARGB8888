@@ -2,10 +2,10 @@
 #                RGBA8888                #
 ##########################################
 # Byte order of RGBA8888 is:
-# Low byte: R
+# Low byte: A
+# Next increasing byte address: R
 # Next increasing byte address: G
 # Next increasing byte address: B
-# Next increasing byte address: A
 ##########################################
 
 {
@@ -40,7 +40,7 @@
                 "plane" : 0,
                 "int_bits" : 8,
                 "frac_bits" : 0,
-                "offset" : 0
+                "offset" : 8
             }
         ]
     },
@@ -53,7 +53,7 @@
                 "plane" : 0,
                 "int_bits" : 8,
                 "frac_bits" : 0,
-                "offset" : 8
+                "offset" : 16
             }
         ]
     },
@@ -66,7 +66,7 @@
                 "plane" : 0,
                 "int_bits" : 8,
                 "frac_bits" : 0,
-                "offset" : 16
+                "offset" : 24
             }
         ]
     },
@@ -79,7 +79,7 @@
                 "plane" : 0,
                 "int_bits" : 8,
                 "frac_bits" : 0,
-                "offset" : 24
+                "offset" : 0
             }
         ]
     }

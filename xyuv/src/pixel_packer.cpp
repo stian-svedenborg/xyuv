@@ -108,38 +108,44 @@ static float from_unorm(unorm_t unorm, uint8_t integer_bits, uint8_t fractional_
     return clamp(0.0f, 1.0f, static_cast<float>(dbl_val));
 }
 
-static inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+
+    inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
     uint8_t &byte = buffer[offset / 8];
-    uint8_t mask = static_cast<uint8_t>(0x80 >> (offset % 8));
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
 }
 
-static inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
-    uint8_t mask = static_cast<uint8_t>(0x80 >> (offset % 8));
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
     return (buffer[offset / 8] & mask) != 0;
 }
 
-// Offset in bits form MSB to start of region.
-static void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &value) {
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+//! Value is sent by reference because it needs to be destroyed when writing continuation blocks.
+void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &value) {
 
-    for (uint8_t i = bits-1; i < bits; i--) {
+    for (uint8_t i = 0; i < bits; i++) {
         set_bit(buffer, offset + i, (value & 0x1) != 0);
         value >>= 1;
     }
 }
 
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+unorm_t read_bits(unorm_t & value, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
 
-// Offset in bits form MSB to start of region.
-static unorm_t read_bits(unorm_t & unorm, const uint8_t *buffer, uint64_t offset, uint8_t bits) {
-
-    for (uint8_t i = 0; i < bits; i++) {
-        unorm <<= 1;
+    for (uint8_t i = bits-1; i < bits; i--) {
+        value <<= 1;
         if (get_bit(buffer, offset + i)) {
-            unorm |= 0x1;
+            value |= 0x1;
         }
     }
-
-    return unorm;
+    return value;
 }
 
 // The block iterator will iterate over each pixel in a block before moving on to the next one.
@@ -315,15 +321,27 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 has_negative_line_stride
         );
 
-    if (has_a)
+    if (has_a) {
+        const surface<pixel_quantum> *surf = &(yuva_in.a_plane);
+
+        // Alpha is special, if it is not present, we need to
+        // create a surface and default it to one.
+        std::unique_ptr<surface<pixel_quantum>> tempsurf;
+        if (yuva_in.a_plane.empty()) {
+            tempsurf.reset(new surface<pixel_quantum>(yuva_in.image_w, yuva_in.image_h));
+            tempsurf->fill(1.0f);
+            surf = tempsurf.get();
+        }
+
         encode_channel(
                 buffer.get(),
                 format.channel_blocks[channel::A],
-                yuva_in.a_plane,
+                *surf,
                 format.planes,
                 std::make_pair<float, float>(0.0f, 1.0f),
                 has_negative_line_stride
         );
+    }
 
 
     // Init frame info.
