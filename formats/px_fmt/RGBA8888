@@ -1,7 +1,11 @@
 ##########################################
 #                RGBA8888                #
 ##########################################
-#
+# Byte order of RGBA8888 is:
+# Low byte: R
+# Next increasing byte address: G
+# Next increasing byte address: B
+# Next increasing byte address: A
 ##########################################
 
 {
