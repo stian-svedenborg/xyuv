@@ -126,7 +126,8 @@ inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
 
 //! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
 //! Offset is in bits from least significant bit of buffer to least significant bit of value
-void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t value) {
+//! Value is sent by reference because it needs to be destroyed when writing continuation blocks.
+void write_bits(uint8_t *buffer, uint64_t offset, uint8_t bits, unorm_t &value) {
 
     for (uint8_t i = 0; i < bits; i++) {
         set_bit(buffer, offset + i, (value & 0x1) != 0);
