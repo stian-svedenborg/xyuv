@@ -170,13 +170,17 @@ void XYUVHeader::PrintHelp() {
                        "Set the load-format for an input file, this argument must be given once for each input file, or exactly once "
                                "meaning that one format will be used for all inputs."
                                "\nA list of valid keys is listed by the --list option."
+                       "\nSpecial: You may supply a file-name directly to this flag, the tool will first look for a corresponding "
+                       "key in the store, and if no key is found, it will try to open that file."
     );
 
     print_help_section("-s CS_KEY",
-                       "--chroma_siting CS_KEY",
+                       "--chroma-siting CS_KEY",
                        "Set the chroma siting key for an input file, this argument must be given once for each input file, or exactly once "
                                "meaning that one siting will be used for all inputs."
                                "\nA list of valid keys is listed by the --list option."
+                               "\nSpecial: You may supply a file-name directly to this flag, the tool will first look for a corresponding "
+                               "key in the store, and if no key is found, it will try to open that file."
     );
 
     print_help_section("-m CM_KEY",
@@ -184,6 +188,8 @@ void XYUVHeader::PrintHelp() {
                        "Set the conversion matrix key for an input file, this argument must be given once for each input file, or exactly once "
                                "meaning that one matrix will be used for all inputs."
                                "\nA list of valid keys is listed by the --list option."
+                               "\nSpecial: You may supply a file-name directly to this flag, the tool will first look for a corresponding "
+                               "key in the store, and if no key is found, it will try to open that file."
     );
 
 
