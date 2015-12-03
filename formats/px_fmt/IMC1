@@ -54,7 +54,7 @@
         },
         {
             # The U plane must start at a line that is a multiple of 16. [MSDN]
-            "base_offset"  : "next_multiple(plane[1].base_offset + plane[1].size, 16 * plane[0].line_stride )",
+            "base_offset"  : "next_multiple(plane[1].base_offset + plane[1].plane_size, 16 * plane[0].line_stride )",
 
             # Much the same as for the V plane
             "line_stride"  : "plane[0].line_stride",

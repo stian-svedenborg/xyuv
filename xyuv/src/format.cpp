@@ -89,7 +89,7 @@ xyuv::format create_format(
         std::string prefix = "plane[" + to_string(i) + "].";
         available_variables[prefix + "base_offset"] = plane.base_offset;
         available_variables[prefix + "line_stride"] = plane.line_stride;
-        available_variables[prefix + "size"] = plane.size;
+        available_variables[prefix + "plane_size"] = plane.size;
 
 
         format.planes.push_back(plane);
