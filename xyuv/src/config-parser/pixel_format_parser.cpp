@@ -160,6 +160,20 @@ void format_template_parser::parse_origin(rapidjson::Value *origin, format_templ
     out->origin = it->second;
 }
 
+static xyuv::interleave_pattern interleavePatternParser(rapidjson::Value* val) {
+    std::string str(val->GetString());
+    if (str == "NO_INTERLEAVING") {
+        return xyuv::interleave_pattern::NO_INTERLEAVING;
+    }
+    if (str == "INTERLEAVE_1_3_5__0_2_4") {
+        return xyuv::interleave_pattern::INTERLEAVE_1_3_5__0_2_4;
+    }
+    if (str == "INTERLEAVE_0_2_4__1_3_5") {
+        return xyuv::interleave_pattern::INTERLEAVE_0_2_4__1_3_5;
+    }
+    throw parse_error("Interleave pattern not recognized, must be one of: NO_INTERLEAVING, INTERLEAVE_1_3_5__0_2_4 or INTERLEAVE_0_2_4__1_3_5");
+}
+
 void format_template_parser::parse_plane(rapidjson::Value *plane_root, plane_template *plane) {
     DECLARE_REQUIRED(*plane_root, base_offset, String);
     DECLARE_REQUIRED(*plane_root, line_stride, String);
@@ -172,8 +186,7 @@ void format_template_parser::parse_plane(rapidjson::Value *plane_root, plane_tem
     plane->plane_size_expression = plane_size->GetString();
     plane->block_stride = block_stride->GetUint();
     if (interleave_pattern) {
-        // TODO: Support interleaving.
-        plane->interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
+        plane->interleave_mode = interleavePatternParser(interleave_pattern);
     }
     else {
         plane->interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
@@ -191,8 +204,6 @@ void format_template_parser::parse_sample(rapidjson::Value *sample_root, channel
     VALIDATE_RANGE(0, 255, int_bits, Uint);
     VALIDATE_RANGE(0, 255, frac_bits, Uint);
     VALIDATE_RANGE(0, std::numeric_limits<uint16_t>::max(), offset, Uint);
-
-    // TODO: Support continuation samples.
 
     xyuv::sample sample;
     sample.plane = static_cast<uint8_t>(plane->GetUint());
