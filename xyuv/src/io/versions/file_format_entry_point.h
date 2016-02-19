@@ -22,46 +22,17 @@
  * THE SOFTWARE.
  */
 
-//
-// Created by stian on 30/05/15.
-//
 
-#include "../xyuv/src/paths.h"
-#include "TestResources.h"
+#ifndef CROSSYUV_FILE_FORMAT_ENTRY_POINT_H_H
+#define CROSSYUV_FILE_FORMAT_ENTRY_POINT_H_H
 
-using namespace xyuv;
+#include <iosfwd>
+#include "core_io_structs.h"
 
-const config_manager & Resources::config() {
-    return get().config_;
-}
+namespace xyuv {
+    struct format;
+    using file_format_loader = void (*)(std::istream &, xyuv::format &, const xyuv::io_file_header &);
+    using file_format_writer = void (*)(std::ostream &, const xyuv::format &);
+};
 
-const Magick::Image & Resources::get_lena512() {
-    return get().Lena512;
-}
-const Magick::Image & Resources::get_tiny() {
-    return get().Tiny;
-}
-const Magick::Image & Resources::get_default() {
-    return get_lena512();
-}
-
-const Resources & Resources::get() {
-    static Resources instance;
-    return instance;
-}
-
-std::vector<std::string> Resources::get_all_formats() {
-    std::vector<std::string> ret_val;
-    for (auto & elem : config().get_format_templates()) {
-        ret_val.push_back(elem.first);
-    }
-    return ret_val;
-}
-
-Resources::Resources()
-    : config_(FORMATS_SEARCH_PATH)
-    , Lena512("testing/integration_testing/test_data/lena512color.png")
-    , Tiny("testing/integration_testing/test_data/tiny.png")
-{
-    config_.load_configurations("testing/integration_testing/test_data/formats/");
-}
+#endif //CROSSYUV_FILE_FORMAT_ENTRY_POINT_H_H

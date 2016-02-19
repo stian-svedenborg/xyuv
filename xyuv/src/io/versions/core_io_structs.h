@@ -23,43 +23,36 @@
  */
 
 #pragma once
-#include "file_header.h"
-#include "xyuv/structures/format.h"
+
+#include <cstdint>
 
 namespace xyuv {
+    struct format;
 
-void to_io_file_header(io_file_header *file_header, const xyuv::format &format);
+// NB! PACKED_STRUCT is only valid within this file.
+#ifdef _MSC_VER
+    #    define PACKED_STRUCT struct
+#    pragma pack( push, 1 )
+#else
+#    define PACKED_STRUCT struct __attribute__ ((packed, aligned(1)))
+#endif
 
-void to_io_frame_header(io_frame_header *frame_header, const xyuv::format &format);
-
-void to_io_plane_descriptor(io_plane_descriptor *plane_descriptor, const xyuv::plane &plane);
-
-void to_io_channel_block(io_channel_block *channel_block_out, const xyuv::channel_block &channel_block_in);
-
-void to_io_sample_descriptor(io_sample_descriptor *sample_out, const xyuv::sample sample_in);
-
-void from_io_file_header(
-        format *fmt,
-        uint16_t *offset_to_data,
-        uint32_t *checksum,
-        const io_file_header &file_header
-);
-
-void from_io_frame_header(
-        format *fmt,
-        uint8_t *n_planes,
-        const io_frame_header &frame_header
-);
+    extern const uint32_t CURRENT_FILE_FORMAT_VERSION;
 
 
-void from_io_plane_descriptor(plane *plane_out, const io_plane_descriptor &plane_descriptor);
+    PACKED_STRUCT io_file_header {
+        // File format specific
+        char magic[8]; // Must be: "XYUV_FMT" (no '\0')
+        uint32_t checksum; // MD5 Checksum of all following fields (header only).
+        uint16_t version;  // Version of fileformat
 
-void from_io_channel_block(
-        xyuv::channel_block *channel_block_in,
-        uint32_t *n_samples,
-        const io_channel_block &channel_block_out
-);
+        // Information needed to quickly read the binary data without having to parse remainder of header.
+        uint16_t offset_to_data; // this + offset is the first byte of the workload.
+        uint64_t payload_size;     // Size of this frame, this + offset_to_data + payload_size gives the address of the next frame header.
+    };
 
-void from_io_sample_descriptor(sample *sample_out, const io_sample_descriptor &sample_in);
+#ifdef _MSC_VER
+#    pragma pack( pop )
+#endif
 
 } // namespace xyuv

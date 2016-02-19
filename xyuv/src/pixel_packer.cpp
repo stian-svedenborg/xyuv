@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,10 @@
 #include "config-parser/minicalc/minicalc.h"
 #include "utility.h"
 #include "assert.h"
+#include "block_reorder.h"
 
 #include <algorithm>
+#include <string.h>
 
 namespace xyuv {
 
@@ -108,21 +110,7 @@ static float from_unorm(unorm_t unorm, uint8_t integer_bits, uint8_t fractional_
     return clamp(0.0f, 1.0f, static_cast<float>(dbl_val));
 }
 
-//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
-//! Offset is in bits from least significant bit of buffer to least significant bit of value
 
-    inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
-    uint8_t &byte = buffer[offset / 8];
-    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
-    byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
-}
-
-//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
-//! Offset is in bits from least significant bit of buffer to least significant bit of value
-inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
-    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
-    return (buffer[offset / 8] & mask) != 0;
-}
 
 //! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
 //! Offset is in bits from least significant bit of buffer to least significant bit of value
@@ -185,6 +173,8 @@ private:
     surface<float> *surf;
 };
 
+
+
 static void encode_channel(uint8_t *base_addr, const channel_block &block, const surface<float> &surf,
                            const std::vector<plane> &planes, const std::pair<float, float> range, bool negative_line_stride) {
     block_iterator it(block.w, block.h, &surf);
@@ -239,11 +229,16 @@ static void encode_channel(uint8_t *base_addr, const channel_block &block, const
         }
     }
 
+    // Finally iterate over the image
     for (uint32_t line = 0; line < n_block_lines; line++) {
+        // Precompute interleaved lines
+        uint32_t interleaved_line[3] = {
+                get_line(line, static_cast<interleave_pattern>(0), n_block_lines),
+                get_line(line, static_cast<interleave_pattern>(1), n_block_lines),
+                get_line(line, static_cast<interleave_pattern>(2), n_block_lines),
+        };
         for (uint32_t b = 0; b < n_blocks_in_line; b++) {
             for (std::size_t s = 0; s < samples.size(); ) {
-
-
                 uint8_t integer_bits = samples[s].integer_bits;
                 uint8_t fractional_bits = samples[s].fractional_bits;
 
@@ -267,7 +262,7 @@ static void encode_channel(uint8_t *base_addr, const channel_block &block, const
                             // Add the size of the plane if applicable.
                             line_offsets[sample.plane].second +
                             // Add offset to current line.
-                            get_line(line, planes[sample.plane].interleave_mode, n_block_lines) * line_offsets[sample.plane].first;
+                            interleaved_line[static_cast<uint32_t>(planes[sample.plane].interleave_mode)] * line_offsets[sample.plane].first;
 
                     // Read bits written bits from LSb fractional to MSb integer bit.
                     write_bits( ptr_to_line,
@@ -301,7 +296,6 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 format.conversion_matrix.y_packed_range,
                 has_negative_line_stride
         );
-
     if (has_u)
         encode_channel(
                 buffer.get(),
@@ -341,8 +335,13 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
                 std::make_pair<float, float>(0.0f, 1.0f),
                 has_negative_line_stride
         );
+
+
     }
 
+    for (auto & plane : format.planes ) {
+        reorder_transform(buffer.get(), plane );
+    }
 
     // Init frame info.
     xyuv::frame frame;
@@ -461,9 +460,26 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
 
     bool has_negative_line_stride = (frame_in.format.origin == image_origin::LOWER_LEFT);
 
+    const uint8_t * raw_data = frame_in.data.get();
+
+    std::unique_ptr<uint8_t> tmp_buffer;
+    if (needs_reorder(frame_in.format)) {
+        // Todo: If needed optimize this for memory.
+        // At some point we will have allocated 2x frame + 1 plane.
+        tmp_buffer.reset(new uint8_t[frame_in.format.size]);
+        memcpy(tmp_buffer.get(), raw_data, frame_in.format.size);
+
+        // Use the copy instead.
+        raw_data = tmp_buffer.get();
+
+        for (auto & plane : frame_in.format.planes) {
+            reorder_inverse(tmp_buffer.get(), plane);
+        }
+    }
+
     if (has_y)
         decode_channel(
-                frame_in.data.get(),
+                raw_data,
                 frame_in.format.channel_blocks[channel::Y],
                 &(yuva_out.y_plane),
                 frame_in.format.planes,
@@ -472,7 +488,7 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
         );
     if (has_u)
         decode_channel(
-                frame_in.data.get(),
+                raw_data,
                 frame_in.format.channel_blocks[channel::U],
                 &(yuva_out.u_plane),
                 frame_in.format.planes,
@@ -481,7 +497,7 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
         );
     if (has_v)
         decode_channel(
-                frame_in.data.get(),
+                raw_data,
                 frame_in.format.channel_blocks[channel::V],
                 &(yuva_out.v_plane),
                 frame_in.format.planes,
@@ -490,13 +506,15 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
         );
     if (has_a)
         decode_channel(
-                frame_in.data.get(),
+                raw_data,
                 frame_in.format.channel_blocks[channel::A],
                 &(yuva_out.a_plane),
                 frame_in.format.planes,
                 std::make_pair<float, float>(0.0f, 1.0f),
                 has_negative_line_stride
         );
+
+
 
     return yuva_out;
 }

@@ -62,6 +62,8 @@ private:
     void parse_origin(rapidjson::Value *licence_root, format_template *out);
 
     // Parsing of planes.
+    void parse_block_order(rapidjson::Value *plane_root, block_order *block_order);
+
     void parse_plane(rapidjson::Value *plane_root, plane_template *plane);
 
     // Parsing of Channels
@@ -160,6 +162,48 @@ void format_template_parser::parse_origin(rapidjson::Value *origin, format_templ
     out->origin = it->second;
 }
 
+static void parse_block_order_swizzle(rapidjson::Value *array, uint8_t (&out)[32] ) {
+    std::vector<uint8_t> swizzles;
+    for (auto it = array->Begin(); it != array->End(); ++it) {
+        if (it->IsString() && std::string{ it->GetString(), it->GetStringLength() } == "-") {
+            swizzles.push_back(block_order::NOT_USED);
+        }
+        else {
+            if (!it->IsUint()) {
+                throw parse_error("Block order bit swizzle not recognized. Expected integer or '-'.");
+            }
+            uint32_t val = it->GetUint();
+            if (val >= 32) {
+                throw parse_error("Block order bit swizzle out or range, must be between 0 and 31. (Or '-' if unused.)");
+            }
+            swizzles.push_back(static_cast<uint8_t>(val));
+        }
+    }
+
+    if (swizzles.size() >= 32) {
+        throw parse_error("Block order bit swizzles are only supported up to 32 bit swizzle patterns. The given pattern is too big.");
+    }
+
+    // The bit pattern is stored with the least significant bit first in the array. So we need to reverse the vector.
+    uint32_t i = 0;
+    for (auto rit = swizzles.rbegin(); rit != swizzles.rend(); ++rit) {
+        out[i++] = *rit;
+    }
+}
+
+void format_template_parser::parse_block_order(rapidjson::Value *block_order_root, block_order *block_order) {
+    DECLARE_REQUIRED(*block_order_root, mega_block_width, Uint);
+    DECLARE_REQUIRED(*block_order_root, mega_block_height, Uint);
+    DECLARE_REQUIRED(*block_order_root, x_mask, Array);
+    DECLARE_REQUIRED(*block_order_root, y_mask, Array);
+
+    block_order->mega_block_width = mega_block_width->GetUint();
+    block_order->mega_block_height = mega_block_height->GetUint();
+
+    DECORATE("x_mask", parse_block_order_swizzle(x_mask, block_order->x_mask));
+    DECORATE("y_mask", parse_block_order_swizzle(y_mask, block_order->y_mask));
+}
+
 static xyuv::interleave_pattern interleavePatternParser(rapidjson::Value* val) {
     std::string str(val->GetString());
     if (str == "NO_INTERLEAVING") {
@@ -180,6 +224,7 @@ void format_template_parser::parse_plane(rapidjson::Value *plane_root, plane_tem
     DECLARE_REQUIRED(*plane_root, plane_size, String);
     DECLARE_REQUIRED(*plane_root, block_stride, Uint);
     DECLARE_OPTIONAL(*plane_root, interleave_pattern, String);
+    DECLARE_OPTIONAL(*plane_root, block_order, Object);
 
     plane->base_offset_expression = base_offset->GetString();
     plane->line_stride_expression = line_stride->GetString();
@@ -190,6 +235,10 @@ void format_template_parser::parse_plane(rapidjson::Value *plane_root, plane_tem
     }
     else {
         plane->interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
+    }
+
+    if (block_order) {
+        DECORATE("block_order", parse_block_order(block_order, &plane->block_order));
     }
 }
 

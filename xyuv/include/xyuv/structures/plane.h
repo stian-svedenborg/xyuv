@@ -24,6 +24,7 @@
 
 #pragma once
 #include "constants.h"
+#include "block_order.h"
 #include <string>
 
 namespace xyuv {
@@ -34,14 +35,16 @@ struct plane_template {
     std::string plane_size_expression;
     uint32_t block_stride; // The stride of a block in this plane.
     interleave_pattern interleave_mode;
+    ::block_order block_order;
 };
 
 struct plane {
     uint64_t base_offset;
     uint64_t size;
     uint32_t line_stride;
-    uint32_t block_stride; // The stride of a block in this plane.
+    uint32_t block_stride; // The stride of a block in this plane in bits.
     interleave_pattern interleave_mode;
+    ::block_order block_order;
 };
 
 bool operator==(const plane &lhs, const plane &rhs);

@@ -40,4 +40,26 @@ static inline pixel_quantum clamp( pixel_quantum min_, pixel_quantum max_, pixel
     return min(max_, max(min_, val));
 }
 
+uint32_t gcd(uint32_t u, uint32_t v);
+uint32_t lcm(uint32_t a, uint32_t b);
+
+    uint32_t next_multiple(uint32_t base, uint32_t multiplier);
+
+
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+
+inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
+    uint8_t &byte = buffer[offset / 8];
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
+    byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
+}
+
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
+    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
+    return (buffer[offset / 8] & mask) != 0;
+}
+
 } // namespace xyuv

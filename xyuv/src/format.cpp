@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@
 #include "to_string.h"
 #include "assert.h"
 #include "config-parser/format_validator.h"
+#include "utility.h"
 
 #include <algorithm>
 #include <cstring>
@@ -71,6 +72,13 @@ xyuv::format create_format(
     for (std::size_t i = 0; i < format_template.planes.size(); i++) {
         xyuv::plane plane;
 
+        // If the texel has mega_blocks, ensure we allocate enough padding
+        uint32_t padded_width  = next_multiple(width, format_template.planes[i].block_order.mega_block_width);
+        uint32_t padded_height = next_multiple(width, format_template.planes[i].block_order.mega_block_width);
+
+        available_variables["image_w"] = padded_width;
+        available_variables["image_h"] = padded_height;
+
         // Set default.
         plane.base_offset = minicalc_evaluate(format_template.planes[i].base_offset_expression, &available_variables);
         plane.line_stride = static_cast<uint32_t>(minicalc_evaluate(format_template.planes[i].line_stride_expression,
@@ -84,13 +92,13 @@ xyuv::format create_format(
         // Set remaining fields.
         plane.block_stride = format_template.planes[i].block_stride;
         plane.interleave_mode = format_template.planes[i].interleave_mode;
+        plane.block_order = format_template.planes[i].block_order;
 
         // Update variables with the new fields.
         std::string prefix = "plane[" + to_string(i) + "].";
         available_variables[prefix + "base_offset"] = plane.base_offset;
         available_variables[prefix + "line_stride"] = plane.line_stride;
         available_variables[prefix + "plane_size"] = plane.size;
-
 
         format.planes.push_back(plane);
 
