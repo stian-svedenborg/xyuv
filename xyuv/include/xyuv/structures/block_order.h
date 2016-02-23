@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,46 +22,27 @@
  * THE SOFTWARE.
  */
 
-//
-// Created by stian on 30/05/15.
-//
 
-#include "../xyuv/src/paths.h"
-#include "TestResources.h"
+#ifndef CROSSYUV_BLOCK_ORDER_H
+#define CROSSYUV_BLOCK_ORDER_H
 
-using namespace xyuv;
+#include <cstring>
 
-const config_manager & Resources::config() {
-    return get().config_;
-}
+struct block_order {
+    enum : uint8_t {
+        NOT_USED = 32,
+    };
 
-const Magick::Image & Resources::get_lena512() {
-    return get().Lena512;
-}
-const Magick::Image & Resources::get_tiny() {
-    return get().Tiny;
-}
-const Magick::Image & Resources::get_default() {
-    return get_lena512();
-}
-
-const Resources & Resources::get() {
-    static Resources instance;
-    return instance;
-}
-
-std::vector<std::string> Resources::get_all_formats() {
-    std::vector<std::string> ret_val;
-    for (auto & elem : config().get_format_templates()) {
-        ret_val.push_back(elem.first);
+    block_order() {
+        memset(x_mask, NOT_USED, sizeof(x_mask));
+        memset(y_mask, NOT_USED, sizeof(y_mask));
     }
-    return ret_val;
-}
 
-Resources::Resources()
-    : config_(FORMATS_SEARCH_PATH)
-    , Lena512("testing/integration_testing/test_data/lena512color.png")
-    , Tiny("testing/integration_testing/test_data/tiny.png")
-{
-    config_.load_configurations("testing/integration_testing/test_data/formats/");
-}
+    // Width and height of mega_block (in atomic blocks)
+    uint32_t mega_block_width = 1, mega_block_height = 1;
+    uint8_t x_mask[32], y_mask[32];
+};
+
+bool operator==(const block_order & lhs, const block_order & rhs);
+
+#endif //CROSSYUV_BLOCK_ORDER_H

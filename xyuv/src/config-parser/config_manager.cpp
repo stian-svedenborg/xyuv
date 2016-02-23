@@ -31,19 +31,42 @@
 #include "parse_error.h"
 #include "format_validator.h"
 #include <iostream>
+#include <stdexcept>
 
 namespace xyuv {
 
 // Helper functions
+
+format_template config_manager::load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error)
+{
+    xyuv::format_template format_template = parse_format_template(read_json(path));
+    if (validate_format_template(format_template)) {
+        return format_template;
+    }
+    else {
+        throw std::runtime_error("Format template " + path + " did not validate.");
+    }
+}
+
+chroma_siting config_manager::load_chroma_siting(const std::string &path) throw(std::runtime_error, std::logic_error)
+{
+    return parse_chroma_siting(read_json(path));
+}
+
+conversion_matrix config_manager::load_conversion_matrix(const std::string &path) throw(std::runtime_error, std::logic_error)
+{
+    return parse_conversion_matrix(read_json(path));
+}
+
+
+
 void config_manager::load_format_templates(const std::string &dir_path) {
     std::vector<std::string> files = list_files_in_folder(dir_path);
 
     for (auto &file : files) {
         try {
-            xyuv::format_template format_template = parse_format_template(read_json(dir_path + "/" + file));
-            if (validate_format_template(format_template)) {
-                add(file, format_template);
-            }
+            xyuv::format_template format_template = load_format_template(dir_path + "/" + file);
+            add(file, format_template);
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;
         } catch (std::logic_error & e) {
@@ -59,7 +82,7 @@ void config_manager::load_chroma_sitings(const std::string &dir_path) {
 
     for (auto &file : files) {
         try {
-            xyuv::chroma_siting chroma_siting = parse_chroma_siting(read_json(dir_path + file));
+            xyuv::chroma_siting chroma_siting = load_chroma_siting(dir_path + "/" + file);
             add(file, chroma_siting);
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;
@@ -72,7 +95,7 @@ void config_manager::load_conversion_matrices(const std::string &dir_path) {
 
     for (auto &file : files) {
         try {
-            xyuv::conversion_matrix conversion_matrix = parse_conversion_matrix(read_json(dir_path + file));
+            xyuv::conversion_matrix conversion_matrix = load_conversion_matrix(dir_path + "/" + file);
             add(file, conversion_matrix);
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;

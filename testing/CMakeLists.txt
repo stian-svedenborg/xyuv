@@ -6,27 +6,27 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 # Add targets
 add_executable(unit_tests
-    main.cpp
-    parsing_test.cpp
-    utility_testing.cpp
-    yuv_image_testing.cpp
-    rgb_test.cpp
-    unorm_test.cpp
-    sampling_test.cpp
-    TestResources.cpp
-    TestResources.h
-    continuation_blocks.cpp
-    interleave_test.cpp
-        bit_packing.cpp)
+        main.cpp
+        parsing_test.cpp
+        utility_testing.cpp
+        yuv_image_testing.cpp
+        rgb_test.cpp
+        unorm_test.cpp
+        sampling_test.cpp
+        TestResources.cpp
+        TestResources.h
+        continuation_blocks.cpp
+        interleave_test.cpp
+        bit_packing.cpp block_reorder.cpp)
 
 
 
 add_executable(integration_testing
-    integration_testing/main.cpp
-    integration_testing/regress_format_templates.cpp
-    integration_testing/file_format_testing.cpp
+        integration_testing/main.cpp
+        integration_testing/regress_format_templates.cpp
+        integration_testing/file_format_testing.cpp
 
-TestResources.cpp TestResources.h)
+        TestResources.cpp TestResources.h integration_testing/specific_formats_testing.cpp)
 
 target_include_directories(unit_tests
     PRIVATE xyuv.PUBLIC

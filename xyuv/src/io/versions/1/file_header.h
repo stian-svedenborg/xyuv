@@ -39,72 +39,66 @@ namespace xyuv {
 
 extern const uint32_t CURRENT_FILE_FORMAT_VERSION;
 
-PACKED_STRUCT io_chroma_siting {
-    uint8_t macro_px_w;
-    uint8_t macro_px_h;
-    float u_x;
-    float u_y;
-    float v_x;
-    float v_y;
-};
+    namespace fileformat_version_1 {
 
-PACKED_STRUCT io_conversion_matrix {
-    float rgb_to_yuv[9];
-    float yuv_to_rgb[9];
+        PACKED_STRUCT io_chroma_siting {
+            uint8_t macro_px_w;
+            uint8_t macro_px_h;
+            float u_x;
+            float u_y;
+            float v_x;
+            float v_y;
+        };
 
-    float y_range_min, y_range_max;
-    float u_range_min, u_range_max;
-    float v_range_min, v_range_max;
+        PACKED_STRUCT io_conversion_matrix {
+            float rgb_to_yuv[9];
+            float yuv_to_rgb[9];
 
-    float y_packed_range_min, y_packed_range_max;
-    float u_packed_range_min, u_packed_range_max;
-    float v_packed_range_min, v_packed_range_max;
-};
+            float y_range_min, y_range_max;
+            float u_range_min, u_range_max;
+            float v_range_min, v_range_max;
 
+            float y_packed_range_min, y_packed_range_max;
+            float u_packed_range_min, u_packed_range_max;
+            float v_packed_range_min, v_packed_range_max;
+        };
 
-PACKED_STRUCT io_file_header {
-    // File format specific
-    char magic[8]; // Must be: "XYUV_FMT" (no '\0')
-    uint32_t checksum; // MD5 Checksum of all following fields (header only).
-    uint16_t version;  // Version of fileformat
+        PACKED_STRUCT io_frame_header {
+            char fourcc[4];
+            uint32_t reserved;
+            uint8_t origin;
 
-    // Information needed to quickly read the binary data without having to parse remainder of header.
-    uint16_t offset_to_data; // this + offset is the first byte of the workload.
-    uint64_t payload_size;     // Size of this frame, this + offset_to_data + payload_size gives the address of the next frame header.
-};
+            // Dimensions of the image in luma-samples.
+            uint32_t width;
+            uint32_t height;
+            uint8_t n_planes;
 
-PACKED_STRUCT io_frame_header {
-    char fourcc[4];
-    uint32_t reserved;
-    uint8_t origin;
-
-    // Dimensions of the image in luma-samples.
-    uint32_t width;
-    uint32_t height;
-    uint8_t n_planes;
-
-    // High level conversion info
-    io_chroma_siting chroma_siting; // Macro_px dimensions are also read from here.
-    io_conversion_matrix conversion_matrix;
-};
+            // High level conversion info
+            io_chroma_siting chroma_siting; // Macro_px dimensions are also read from here.
+            io_conversion_matrix conversion_matrix;
+        };
 
 // Following the io_frame_header struct comes n_planes io_plane_descriptors
 
 // Placeholder Plane descriptor.
-PACKED_STRUCT io_plane_descriptor {
-    uint64_t offset_to_plane;
-    uint64_t plane_size;
-    uint32_t line_stride;  // The stride of a line in this plane.
-    uint32_t block_stride; // The stride of a block in this plane.
-    uint8_t interleave_mode;
-};
+        PACKED_STRUCT io_plane_descriptor {
+            uint64_t offset_to_plane;
+            uint64_t plane_size;
+            uint32_t line_stride;  // The stride of a line in this plane.
+            uint32_t block_stride; // The stride of a block in this plane.
+            uint8_t interleave_mode;
+            uint32_t mega_block_width;
+            uint32_t mega_block_height;
+            uint8_t x_mask[32];
+            uint8_t y_mask[32];
+        };
 
-PACKED_STRUCT io_channel_block {
-    // The block dimensions of this channel
-    uint16_t block_w;
-    uint16_t block_h;
-    uint32_t n_continuation_samples;
-};
+        PACKED_STRUCT io_channel_block {
+            // The block dimensions of this channel
+            uint16_t block_w;
+            uint16_t block_h;
+            uint32_t n_continuation_samples;
+        };
 
 // Next follows block_w*block_h + n_continuation_samples, io_sample_descriptors.
 
@@ -113,16 +107,18 @@ PACKED_STRUCT io_channel_block {
 // the second Y1 etc in this order:
 //  |  Y0  |  Y1  |
 //  |  Y2  |  Y3  |
-PACKED_STRUCT io_sample_descriptor {
-    uint8_t plane;
-    uint8_t integer_bits;
-    uint8_t fractional_bits;
-    bool has_continuation;
-    uint16_t offset;
-};
+        PACKED_STRUCT io_sample_descriptor {
+            uint8_t plane;
+            uint8_t integer_bits;
+            uint8_t fractional_bits;
+            bool has_continuation;
+            uint16_t offset;
+        };
 
 #ifdef _MSC_VER
 #    pragma pack( pop ) 
 #endif
+
+    } // fileformat_version_0
 
 } // namespace xyuv

@@ -27,9 +27,8 @@ set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
     "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
 
 # Primary library.
-add_library(xyuv 
-    xyuv/src/xyuv.cpp
-)
+add_library(xyuv
+        xyuv/src/xyuv.cpp)
 
 target_include_directories(xyuv
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
@@ -38,34 +37,51 @@ target_include_directories(xyuv
 
 # Primary library
 add_library(xyuv_core STATIC
-    xyuv/src/pixel_packer.cpp
-    xyuv/src/rgb_conversion.cpp
-    xyuv/src/utility.cpp
-    xyuv/src/config-parser/chroma_siting_parser.cpp
-    xyuv/src/config-parser/pixel_format_parser.cpp
-    xyuv/src/config-parser/read_json.cpp
-    xyuv/src/config-parser/rgb_conversion_parser.cpp
-    xyuv/src/config-parser/minicalc/ast.cpp
-    xyuv/src/config-parser/minicalc/minicalc.cpp
-    xyuv/src/config-parser/minicalc/parser.cpp
-    xyuv/src/config-parser/minicalc/operations.cpp
-    xyuv/src/config-parser/minicalc_entry_point.cpp
-    xyuv/src/io/xyuv_io.cpp
-    xyuv/src/io/io_structs.cpp
-    xyuv/src/format.cpp
-    xyuv/src/yuv_image.cpp
-    xyuv/src/subsampler.cpp
-    xyuv/src/coder.cpp
-    xyuv/src/rgb_image.cpp
-    xyuv/src/config-parser/config_manager.cpp
-    xyuv/src/frame_manipulation.cpp
-    xyuv/src/comparison_operators.cpp
-    xyuv/src/config-parser/parse_error.h
-    xyuv/src/config-parser/parse_helpers.cpp
-    xyuv/include/xyuv/large_buffer.h
-    xyuv/src/config-parser/format_validator.h
-    xyuv/src/config-parser/format_validator.cpp
-)
+        xyuv/src/pixel_packer.cpp
+        xyuv/src/rgb_conversion.cpp
+        xyuv/src/utility.cpp
+        xyuv/src/config-parser/chroma_siting_parser.cpp
+        xyuv/src/config-parser/pixel_format_parser.cpp
+        xyuv/src/config-parser/read_json.cpp
+        xyuv/src/config-parser/rgb_conversion_parser.cpp
+        xyuv/src/config-parser/minicalc/ast.cpp
+        xyuv/src/config-parser/minicalc/minicalc.cpp
+        xyuv/src/config-parser/minicalc/parser.cpp
+        xyuv/src/config-parser/minicalc/operations.cpp
+        xyuv/src/config-parser/minicalc_entry_point.cpp
+        xyuv/src/format.cpp
+        xyuv/src/yuv_image.cpp
+        xyuv/src/subsampler.cpp
+        xyuv/src/coder.cpp
+        xyuv/src/rgb_image.cpp
+        xyuv/src/config-parser/config_manager.cpp
+        xyuv/src/frame_manipulation.cpp
+        xyuv/src/comparison_operators.cpp
+        xyuv/src/config-parser/parse_error.h
+        xyuv/src/config-parser/parse_helpers.cpp
+        xyuv/include/xyuv/large_buffer.h
+        xyuv/src/config-parser/format_validator.h
+        xyuv/src/config-parser/format_validator.cpp
+        xyuv/src/block_reorder.cpp
+        xyuv/src/block_reorder.h
+        xyuv/src/io/xyuv_io.cpp
+        xyuv/src/io/versions/core_io_structs.h
+        xyuv/src/io/versions/core_io_structs.cpp
+        xyuv/src/io/versions/file_format_entry_point.h
+        # File format versions
+        xyuv/src/io/versions/0/entry_point.h
+        xyuv/src/io/versions/0/entry_point.cpp
+        xyuv/src/io/versions/0/file_header.h
+        xyuv/src/io/versions/0/io_structs.h
+        xyuv/src/io/versions/0/io_structs.cpp
+
+        xyuv/src/io/versions/1/entry_point.h
+        xyuv/src/io/versions/1/entry_point.cpp
+        xyuv/src/io/versions/1/file_header.h
+        xyuv/src/io/versions/1/io_structs.h
+        xyuv/src/io/versions/1/io_structs.cpp
+
+        )
 
 target_include_directories(xyuv_core
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>

@@ -25,15 +25,25 @@
 #include <xyuv/frame.h>
 #include <xyuv/structures/format.h>
 #include "../assert.h"
-#include "io_structs.h"
 #include "../config-parser/format_validator.h"
+#include "versions/core_io_structs.h"
+#include "versions/file_format_entry_point.h"
 #include <limits>
 #include <ostream>
 #include <istream>
 
-namespace xyuv {
+// Include the versions' entry points.
+#include "versions/0/entry_point.h"
+#include "versions/1/entry_point.h"
+#include "endianess.h"
 
-const uint32_t CURRENT_FILE_FORMAT_VERSION = 0;
+
+
+// Set the current format version
+namespace xyuv { const uint32_t CURRENT_FILE_FORMAT_VERSION = 1; }
+
+
+namespace xyuv {
 
 // Helper functions:
 
@@ -65,116 +75,55 @@ uint64_t  read_large_buffer(std::istream & stream, char * data, uint64_t size) {
     return read;
 }
 
-static void write_header(std::ostream & ostream, const xyuv::format & format ) {
-    XYUV_ASSERT(ostream);
+void write_frame(
+        std::ostream & ostream,
+        const xyuv::frame & frame,
+        uint32_t version
+) {
+    std::vector<file_format_writer> file_format_writers {
+            fileformat_version_0::write_header,
+            fileformat_version_1::write_header
+    };
 
-    // Write file header.
-    io_file_header file_header;
-    to_io_file_header(&file_header, format);
-    ostream.write(reinterpret_cast<const char*>(&file_header), sizeof(file_header));
-    XYUV_ASSERT(ostream);
+    XYUV_ASSERT(version < file_format_writers.size() && "ERROR: File format too new for this library.");
 
-    // Write frame header.
-    io_frame_header frame_header;
-    to_io_frame_header(&frame_header, format);
-    ostream.write(reinterpret_cast<const char*>(&frame_header), sizeof(frame_header));
-    XYUV_ASSERT(ostream);
-
-    // Write each plane.
-    for (auto & plane : format.planes) {
-        io_plane_descriptor plane_descriptor;
-        to_io_plane_descriptor(&plane_descriptor, plane);
-        ostream.write(reinterpret_cast<const char*>(&plane_descriptor), sizeof(plane_descriptor));
-        XYUV_ASSERT(ostream);
-    }
-
-    // Write each channel block.
-    for (auto & channel_block : format.channel_blocks ) {
-        io_channel_block block;
-        to_io_channel_block(&block, channel_block);
-        ostream.write(reinterpret_cast<const char*>(&block), sizeof(block));
-        XYUV_ASSERT(ostream);
-        // And for each block write all the samples.
-        for (auto & sample : channel_block.samples ) {
-            io_sample_descriptor sample_descriptor;
-            to_io_sample_descriptor(&sample_descriptor, sample);
-            ostream.write(reinterpret_cast<const char*>(&sample_descriptor), sizeof(sample_descriptor));
-            XYUV_ASSERT(ostream);
-        }
-    }
+    file_format_writers[version](ostream, frame.format);
+    write_large_buffer(ostream, reinterpret_cast<const char *>(frame.data.get()), frame.format.size );
 }
 
 void write_frame(
         std::ostream & ostream,
         const xyuv::frame & frame
 ) {
-    write_header(ostream, frame.format);
-    write_large_buffer(ostream, reinterpret_cast<const char *>(frame.data.get()), frame.format.size );
+    write_frame(ostream, frame, CURRENT_FILE_FORMAT_VERSION);
 }
 
-static void read_header(std::istream & istream, xyuv::format & format ) {
-    XYUV_ASSERT(istream);
-
+static void read_file_header(std::istream & istream, io_file_header& file_header) {
     // Read file header.
-    io_file_header file_header;
     istream.read(reinterpret_cast<char*>(&file_header), sizeof(file_header));
     XYUV_ASSERT(istream);
-
-    uint16_t offset_to_data = 0; // unused
-    uint32_t checksum = 0; // unused
-    from_io_file_header(&format, &offset_to_data, &checksum, file_header);
-
-    // Read frame header.
-    io_frame_header frame_header;
-    istream.read(reinterpret_cast<char*>(&frame_header), sizeof(frame_header));
-    XYUV_ASSERT(istream);
-
-    uint8_t n_planes = 0;
-    from_io_frame_header(&format, &n_planes, frame_header);
-
-    // Read each plane descriptor.
-    for (uint32_t i = 0; i < n_planes; i++) {
-        io_plane_descriptor plane_descriptor;
-        xyuv::plane plane;
-        istream.read(reinterpret_cast<char*>(&plane_descriptor), sizeof(plane_descriptor));
-        XYUV_ASSERT(istream);
-
-        from_io_plane_descriptor(&plane, plane_descriptor);
-
-        format.planes.push_back(plane);
-    }
-
-    // Write each channel block.
-    for (auto & channel_block : format.channel_blocks ) {
-        io_channel_block block;
-        uint32_t n_samples = 0;
-        istream.read(reinterpret_cast<char*>(&block), sizeof(block));
-        XYUV_ASSERT(istream);
-
-        from_io_channel_block(&channel_block, &n_samples, block);
-
-        // And for each block write all the samples.
-        for (uint32_t i = 0; i < n_samples; i++ ) {
-            io_sample_descriptor sample_descriptor;
-            xyuv::sample sample;
-            istream.read(reinterpret_cast<char*>(&sample_descriptor), sizeof(sample_descriptor));
-            XYUV_ASSERT(istream);
-
-            from_io_sample_descriptor(&sample, sample_descriptor);
-            channel_block.samples.push_back(sample);
-        }
-    }
 }
 
 void read_frame(
         xyuv::frame * frame,
         std::istream & istream
 ) {
-    read_header(istream, frame->format);
+    std::vector<file_format_loader> file_format_loaders {
+            fileformat_version_0::read_header,
+            fileformat_version_1::read_header
+    };
+
+    io_file_header file_header;
+    read_file_header(istream, file_header);
+
+    uint16_t version = be_to_host(file_header.version);
+    XYUV_ASSERT(version < file_format_loaders.size() && "ERROR: File format too new for this library.");
+
+    file_format_loaders[version](istream, frame->format, file_header);
+
     validate_format(frame->format);
     frame->data.reset( new uint8_t[frame->format.size]);
     read_large_buffer(istream, reinterpret_cast<char*>(frame->data.get()), frame->format.size);
-
 }
 
 } // namespace xyuv

@@ -104,13 +104,28 @@ xyuv::format create_format(
 //! \brief Write a frame to an output stream.
 //!
 //! \details This will write a frame to a C++ standard output stream in an architecture neutral fashion. i.e. frame may be
-//! written to a file or sent over a network.
+//! written to a file or sent over a network. The file format will be the most recent supported by this version of the
+//! library.
 //! \warning \a ostream should be opened in binary mode, otherwise the resulting image may be invalid on certain platforms.
 //! \param [out] ostream C++ standard library output stream which to write the frame.
 //! \param [in] a valid frame object to serialise.
 void write_frame(
         std::ostream &ostream,
         const xyuv::frame &frame
+);
+
+//! \brief Write a frame to an output stream.
+//!
+//! \details This will write a frame to a C++ standard output stream in an architecture neutral fashion. i.e. frame may be
+//! written to a file or sent over a network.
+//! \warning \a ostream should be opened in binary mode, otherwise the resulting image may be invalid on certain platforms.
+//! \param [out] ostream C++ standard library output stream which to write the frame.
+//! \param [in] a valid frame object to serialise.
+//! \param [in] file format version to write.
+void write_frame(
+        std::ostream & ostream,
+        const xyuv::frame & frame,
+        uint32_t version
 );
 
 //! \brief Read a frame from an input stream.

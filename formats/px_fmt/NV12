@@ -29,7 +29,7 @@
 			"interleave_pattern" : "NO_INTERLEAVING"
 		},
 		{
-			"base_offset"  : "plane[0].base_offset + plane[0].size",
+			"base_offset"  : "plane[0].base_offset + plane[0].plane_size",
 			"line_stride"  : "(next_multiple(image_w, macro_px_w)/macro_px_w)*2",
 			"plane_size"   : "(next_multiple(image_w, macro_px_w)/macro_px_w)*(next_multiple(image_h, macro_px_h)/macro_px_h)*2",
 			"block_stride" : 16,

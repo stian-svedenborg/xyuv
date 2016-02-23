@@ -115,9 +115,17 @@ void XYUVHeader::Run(const ::options & options) {
 
     for (const auto & format_template : options.output_formats ) {
         try {
-            format_templates.push_back(config_manager_.get_format_template(format_template));
+            // Try to load the format-template from file.
+            format_templates.push_back(xyuv::config_manager::load_format_template(format_template));
         } catch (std::runtime_error & e) {
-            throw std::invalid_argument(std::string(e.what()) + ". Please check the spelling of the argument.");
+            try {
+                // If that failed look it up in the config manager.
+                format_templates.push_back(config_manager_.get_format_template(format_template));
+            } catch (std::exception e2) {
+                std::string err_msg = std::string("Could not load format template ") + format_template +
+                        ": " + e.what() + " and " + e2.what() + ". Please check the spelling of the argument.";
+                throw std::invalid_argument(std::string(err_msg));
+            }
         }
     }
     if (format_templates.size() != 1 && format_templates.size() != options.input_files.size()) {
@@ -126,9 +134,17 @@ void XYUVHeader::Run(const ::options & options) {
 
     for (const auto & siting : options.output_siting ) {
         try {
-            sitings.push_back(config_manager_.get_chroma_siting(siting));
+            // Try to load the siting from file.
+            sitings.push_back(xyuv::config_manager::load_chroma_siting(siting));
         } catch (std::runtime_error & e) {
-            throw std::invalid_argument(std::string(e.what()) + ". Please check the spelling of the argument.");
+            try {
+                // If that failed look it up in the config manager.
+                sitings.push_back(config_manager_.get_chroma_siting(siting));
+            } catch (std::exception e2) {
+                std::string err_msg = std::string("Could not load chroma siting ") + siting +
+                                      ": " + e.what() + " and " + e2.what() + ". Please check the spelling of the argument.";
+                throw std::invalid_argument(std::string(err_msg));
+            }
         }
     }
     if (sitings.size() != 1 && sitings.size() != options.input_files.size()) {
@@ -137,9 +153,17 @@ void XYUVHeader::Run(const ::options & options) {
 
     for (const auto & matrix : options.output_matrix ) {
         try {
-            matrices.push_back(config_manager_.get_conversion_matrix(matrix));
+            // Try to load the matrix from file.
+            matrices.push_back(xyuv::config_manager::load_conversion_matrix(matrix));
         } catch (std::runtime_error & e) {
-            throw std::invalid_argument(std::string(e.what()) + ". Please check the spelling of the argument.");
+            try {
+                // If that failed look it up in the config manager.
+                matrices.push_back(config_manager_.get_conversion_matrix(matrix));
+            } catch (std::exception e2) {
+                std::string err_msg = std::string("Could not load conversion matrix ") + matrix +
+                                      ": " + e.what() + " and " + e2.what() + ". Please check the spelling of the argument.";
+                throw std::invalid_argument(std::string(err_msg));
+            }
         }
     }
     if (matrices.size() != 1 && matrices.size() != options.input_files.size()) {

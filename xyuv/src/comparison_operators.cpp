@@ -47,6 +47,10 @@ bool operator==(const conversion_matrix &lhs, const conversion_matrix &rhs) {
            &&  ( lhs.v_range == rhs.v_range );
 }
 
+bool operator==(const block_order & lhs, const block_order & rhs) {
+    return !memcmp(&lhs, &rhs, sizeof(block_order));
+}
+
 bool operator==(const plane &lhs, const plane &rhs) {
     return (lhs.base_offset == rhs.base_offset) &&
             (lhs.interleave_mode == rhs.interleave_mode) &&

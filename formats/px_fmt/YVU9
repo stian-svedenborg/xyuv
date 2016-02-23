@@ -31,14 +31,14 @@
 			"interleave_pattern" : "NO_INTERLEAVING"
 		},
 		{
-			"base_offset"  : "plane[0].base_offset + plane[0].size",
+			"base_offset"  : "plane[0].base_offset + plane[0].plane_size",
 			"line_stride"  : "image_w/macro_px_w",
 			"plane_size"   : "(next_multiple(image_w, macro_px_w)/macro_px_w)*(next_multiple(image_h, macro_px_h)/macro_px_h)",
 			"block_stride" : 8,
 			"interleave_pattern" : "NO_INTERLEAVING"
 		},
 		{
-			"base_offset"  : "plane[1].base_offset + plane[1].size",
+			"base_offset"  : "plane[1].base_offset + plane[1].plane_size",
 			"line_stride"  : "image_w/macro_px_w",
 			"plane_size"   : "(next_multiple(image_w, macro_px_w)/macro_px_w)*(next_multiple(image_h, macro_px_h)/macro_px_h)",
 			"block_stride" : 8,

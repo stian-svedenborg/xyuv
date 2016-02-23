@@ -121,6 +121,13 @@ public:
     //! \brief Return all loaded conversion matrices.
     const std::map<std::string, conversion_matrix> &get_conversion_matrices() const;
 
+    //! \brief Static helper accessor that will attempt to load a format template matrix descriptor from \a path.
+    static format_template load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error);
+    //! \brief Static helper accessor that will attempt to load a chroma siting descriptor from \a path.
+    static chroma_siting load_chroma_siting(const std::string &path) throw(std::runtime_error, std::logic_error);
+    //! \brief Static helper accessor that will attempt to load a conversion matrix descriptor from \a path.
+    static conversion_matrix load_conversion_matrix(const std::string &path) throw(std::runtime_error, std::logic_error);
+
 private:
     std::map<std::string, format_template> format_templates_;
 
