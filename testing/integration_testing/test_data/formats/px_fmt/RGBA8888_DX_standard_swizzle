@@ -1,0 +1,96 @@
+##########################################
+#                RGBA8888                #
+##########################################
+# Byte order of RGBA8888 is:
+# Low byte: R
+# Next increasing byte address: G
+# Next increasing byte address: B
+# Next increasing byte address: A
+##########################################
+# The format is block-reordered according to
+# https://msdn.microsoft.com/en-us/library/windows/desktop/dn770442%28v=vs.85%29.aspx
+##########################################
+
+{
+    "fourcc" : "",
+
+    "licence" : {
+        "type" : "no_licence"
+    },
+
+    "origin" : "upper_left",
+
+    "subsampling_mode" : {
+        "macro_px_w" : 1,
+        "macro_px_h" : 1
+    },
+
+    "planes" : [
+        {
+            "base_offset"  : "0",
+            "line_stride"  : "image_w*32/8",
+            "plane_size"   : "line_stride*image_h",
+            "block_stride" : 32,
+
+            "interleave_pattern" : "NO_INTERLEAVING",
+            "block_order" : {
+                "mega_block_width"  : 128,
+                "mega_block_height" : 128,
+                "x_mask" : [   6, "-",   5, "-",     4, "-",   3, "-",     2, "-", "-", "-",      1,   0 ],
+                "y_mask" : [ "-",   6, "-",   5,   "-",   4, "-",   3,   "-",   2,   1,   0,    "-", "-" ]
+            }
+        }
+    ],
+
+    "y_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 0
+            }
+        ]
+    },
+
+    "u_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 8
+            }
+        ]
+    },
+
+    "v_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 16
+            }
+        ]
+    },
+
+    "a_block" : {
+        "block_w" : 1,
+        "block_h" : 1,
+        "samples" : [
+            {
+                "plane" : 0,
+                "int_bits" : 8,
+                "frac_bits" : 0,
+                "offset" : 24
+            }
+        ]
+    }
+}
