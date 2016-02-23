@@ -39,13 +39,20 @@ static xyuv::format create_block_reordered_format() {
     format.chroma_siting = Resources::config().get_chroma_siting("444");
     format.conversion_matrix = Resources::config().get_conversion_matrix("identity");
 
-    format.image_w = 500;
-    format.image_h = 256;
+    format.image_w = 2;
+    format.image_h = 2;
 
     xyuv::plane plane;
 
-    plane.block_order.mega_block_width = 256;
-    plane.block_order.mega_block_height = 256;
+    plane.block_order.mega_block_width = 2;
+    plane.block_order.mega_block_height = 2;
+
+    plane.block_order.x_mask[0] = block_order::NOT_USED;
+    plane.block_order.x_mask[1] = 0;
+
+    plane.block_order.y_mask[0] = 0;
+    plane.block_order.y_mask[1] = block_order::NOT_USED;
+
 
     plane.base_offset = 0;
     plane.interleave_mode = xyuv::interleave_pattern::NO_INTERLEAVING;
@@ -55,30 +62,6 @@ static xyuv::format create_block_reordered_format() {
     format.size = plane.line_stride*format.image_h;
     plane.size = format.size;
 
-    for (int i = 0; i < 32; i++) {
-        plane.block_order.x_mask[i] = block_order::NOT_USED;
-        plane.block_order.y_mask[i] = block_order::NOT_USED;
-    }
-
-    plane.block_order.x_mask[0] = 0;
-    plane.block_order.x_mask[1] = 1;
-    plane.block_order.x_mask[2] = 2;
-    plane.block_order.x_mask[3] = 3;
-
-    plane.block_order.x_mask[9] = 4;
-    plane.block_order.x_mask[11] = 5;
-    plane.block_order.x_mask[13] = 6;
-    plane.block_order.x_mask[15] = 7;
-
-    plane.block_order.y_mask[4] = 0;
-    plane.block_order.y_mask[5] = 1;
-    plane.block_order.y_mask[6] = 2;
-    plane.block_order.y_mask[7] = 3;
-
-    plane.block_order.y_mask[8] = 4;
-    plane.block_order.y_mask[10] = 5;
-    plane.block_order.y_mask[12] = 6;
-    plane.block_order.y_mask[14] = 7;
 
     format.planes.push_back(plane);
 
@@ -129,17 +112,30 @@ TEST(BlockReorder, BlockOffset) {
 TEST(BlockReorder, ReorderTest) {
     xyuv::frame frame = xyuv::create_frame(create_block_reordered_format(), nullptr, 0);
 
-    for (uint32_t i = 0; i < frame.format.size; i++) {
-        frame.data[i] = static_cast<uint8_t>(i);
-    }
+    frame.data[0] = 0;
+    frame.data[1] = 2;
+    frame.data[2] = 1;
+    frame.data[3] = 3;
+
 
     xyuv::yuv_image image = decode_frame(frame);
 
     // Check that lines are loaded correctly.
-    xyuv::frame linear_frame = encode_frame(image, frame.format);
+    auto fmt1 = frame.format;
+    fmt1.planes[0].block_order.mega_block_width = 1;
+    fmt1.planes[0].block_order.mega_block_height = 1;
+
+    xyuv::frame linear_frame = encode_frame(image, fmt1);
     for (std::size_t i = 0; i < frame.format.size; i++) {
         SCOPED_TRACE("First " + xyuv::to_string(i));
         ASSERT_EQ(static_cast<uint8_t>(i), linear_frame.data[i]);
+    }
+
+    // Check that operation is invertible
+    xyuv::frame repacked_frame = encode_frame(image, frame.format);
+    for (std::size_t i = 0; i < frame.format.size; i++) {
+        SCOPED_TRACE("First " + xyuv::to_string(i));
+        ASSERT_EQ(static_cast<uint8_t>(frame.data[i]), repacked_frame.data[i]);
     }
 
 
