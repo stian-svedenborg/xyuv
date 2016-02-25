@@ -28,6 +28,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include "../xyuv/src/assert.h"
 
 uint64_t hex2uint(const char * hex_str) {
     uint64_t v = 0;
@@ -114,7 +115,9 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
 
         // If the word ends with a ':' then this is a memory address:
         if (word.back() == ':') {
-            current_offset = hex2uint(word.c_str()) - starting_address;
+            uint64_t addr = hex2uint(word.c_str());
+            XYUV_ASSERT(starting_address < addr && "Unsorted hex files not supported.");
+            current_offset = addr - starting_address;
         }
         else {
             // Otherwise this is a little endian data_value:
