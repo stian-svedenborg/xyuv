@@ -14,10 +14,6 @@
 {
     "fourcc" : "",
 
-    "licence" : {
-        "type" : "no_licence"
-    },
-
     "origin" : "upper_left",
 
     "subsampling_mode" : {
