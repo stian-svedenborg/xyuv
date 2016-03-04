@@ -26,7 +26,7 @@ add_executable(integration_testing
         integration_testing/regress_format_templates.cpp
         integration_testing/file_format_testing.cpp
 
-        TestResources.cpp TestResources.h integration_testing/specific_formats_testing.cpp)
+        TestResources.cpp TestResources.h integration_testing/conversion_matrices.cpp)
 
 target_include_directories(unit_tests
     PRIVATE xyuv.PUBLIC

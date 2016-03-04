@@ -36,6 +36,7 @@ public:
     static const Magick::Image & get_default();
 
     static std::vector<std::string> get_all_formats();
+    static std::vector<std::string> get_all_conversion_matrices();
 
 private:
     static const Resources & get();
