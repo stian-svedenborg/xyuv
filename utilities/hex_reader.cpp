@@ -28,21 +28,21 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <iomanip>
 #include "../xyuv/src/assert.h"
 
 uint64_t hex2uint(const char * hex_str) {
     uint64_t v = 0;
+    // Unrecognized characters are read as 0.
     while (*hex_str != '\0') {
+        v <<= 4;
         if (*hex_str >= '0' && *hex_str <= '9') {
-            v <<= 4;
             v |= *hex_str - '0';
         }
         else if (*hex_str >= 'a' && *hex_str <= 'f') {
-            v <<= 4;
             v |= *hex_str - 'a' + 10;
         }
         else if (*hex_str >= 'A' && *hex_str <= 'F') {
-            v <<= 4;
             v |= *hex_str - 'A' + 10;
         }
         ++hex_str;
@@ -79,7 +79,6 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
 
     std::string line, word;
 
-
     std::vector<uint8_t> data;
 
     // Parse the first line specially as we need to set some state.
@@ -92,6 +91,8 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
 
         // If the word ends with a ':' then this is a memory address:
         if (word.back() == ':') {
+            // Set : -> '\0' to make sure that only numbers show in the address.
+            word.back() = '\0';
             starting_address = hex2uint(word.c_str());
         }
         else {
@@ -115,6 +116,8 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
 
         // If the word ends with a ':' then this is a memory address:
         if (word.back() == ':') {
+            // Set : -> '\0' to make sure that only numbers show in the address.
+            word.back() = '\0';
             uint64_t addr = hex2uint(word.c_str());
             XYUV_ASSERT(starting_address < addr && "Unsorted hex files not supported.");
             current_offset = addr - starting_address;
@@ -133,3 +136,58 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
     return std::move(data);
 }
 
+
+void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size) {
+    constexpr uint32_t words_per_line = 4;
+    const uint64_t uint32_rounds = size/sizeof(uint32_t);
+
+    const uint32_t * word_ptr = reinterpret_cast<const uint32_t *>(data);
+
+    std::ofstream fout(filename, std::ios::trunc | std::ios::out );
+
+    if (!fout) {
+        throw std::runtime_error("Could not open output file: '" + filename + "'");
+    }
+
+    fout.setf(std::ios::hex);
+
+    for (uint64_t i = 0; i < uint32_rounds/words_per_line; i++) {
+        XYUV_ASSERT(fout && "IO ERROR occured.");
+
+        // Write address:
+        uint64_t addr = i * sizeof(uint32_t)*words_per_line;
+        fout << std::setw(16) << std::setfill('0') << std::noshowbase << std::hex << addr << ":";
+
+        for (uint32_t i = 0; i < words_per_line; i++) {
+            // Write lines of complete buffers.
+            fout << ' ' <<  std::setw(8) << std::setfill('0') << std::noshowbase << std::hex << *word_ptr++;
+        }
+        fout << '\n';
+    }
+
+
+    uint64_t bytes_written = uint32_rounds * words_per_line * sizeof(uint32_t);
+    if (bytes_written < size) {
+        // Write last line.
+        fout << std::setw(16) << std::setfill('0') << std::noshowbase << std::hex << bytes_written << ": ";
+
+        // Write the last full words if possible
+        while (bytes_written + sizeof(uint32_t) <= size) {
+            fout << ' ' << std::setw(8) << std::setfill('0') << std::noshowbase << std::hex  << *word_ptr++;
+            bytes_written += sizeof(uint32_t);
+        }
+
+        // If we are not done, write the last partial word.
+        if (bytes_written < size) {
+            uint32_t last_word = 0;
+            const uint8_t * last_bytes = reinterpret_cast<const uint8_t *>(word_ptr);
+            XYUV_ASSERT((size - bytes_written) < 4);
+            for (uint32_t i = 0; bytes_written++ < size; i++) {
+                last_word |= static_cast<uint32_t>(*(last_bytes++)) << (i*8);
+            }
+            fout << ' ' << std::setw(8) << std::setfill('0') << std::noshowbase << std::hex << last_word;
+        }
+    }
+
+    XYUV_ASSERT(fout && "IO ERROR occured.");
+}
