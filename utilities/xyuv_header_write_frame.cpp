@@ -30,6 +30,8 @@
 #include <iostream>
 #include "XYUVHeader.h"
 
+void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size);
+
 std::string get_suffix(const std::string & path) {
     return path.substr(path.rfind('.', std::string::npos), std::string::npos);
 }
@@ -59,8 +61,8 @@ static void write_frame_raw(const xyuv::frame & frame, const std::string & out_f
     xyuv::write_large_buffer(fout, reinterpret_cast<const char*>(frame.data.get()), frame.format.size);
 }
 
-static void write_frame_hex(const xyuv::frame &, const std::string & out_filename) {
-    throw std::runtime_error("Hex file support not yet implemented.");
+static void write_frame_hex(const xyuv::frame & frame, const std::string & out_filename) {
+    WriteHexFile(out_filename, frame.data.get(), frame.format.size);
 }
 
 void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_filename) {

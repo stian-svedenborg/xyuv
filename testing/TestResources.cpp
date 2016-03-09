@@ -58,6 +58,14 @@ std::vector<std::string> Resources::get_all_formats() {
     return ret_val;
 }
 
+std::vector<std::string> Resources::get_all_conversion_matrices() {
+    std::vector<std::string> ret_val;
+    for (auto & elem : config().get_conversion_matrices()) {
+        ret_val.push_back(elem.first);
+    }
+    return ret_val;
+}
+
 Resources::Resources()
     : config_(FORMATS_SEARCH_PATH)
     , Lena512("testing/integration_testing/test_data/lena512color.png")
@@ -65,3 +73,5 @@ Resources::Resources()
 {
     config_.load_configurations("testing/integration_testing/test_data/formats/");
 }
+
+

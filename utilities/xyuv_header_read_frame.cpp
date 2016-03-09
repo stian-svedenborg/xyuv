@@ -68,6 +68,22 @@ static xyuv::frame LoadConvertFrame_raw(const xyuv::format & format, const std::
     return frame;
 }
 
+std::vector<uint8_t> LoadHexFile(const std::string & filename);
+
+static xyuv::frame LoadConvertFrame_hex(const xyuv::format & format, const std::string & infile_name ) {
+
+    auto frame = xyuv::create_frame(format, nullptr, 0);
+
+    std::vector<uint8_t> buffer = LoadHexFile(infile_name);
+
+    if (buffer.size() < format.size) {
+        throw std::runtime_error("Error loading frame data, only " + std::to_string(buffer.size()) + " bytes read, expected " + std::to_string(format.size));
+    }
+
+    memcpy(frame.data.get(), buffer.data(), format.size );
+
+    return frame;
+}
 
 xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std::string & infile_name ) {
     static std::map<std::string, std::function<xyuv::frame(const xyuv::format &, const std::string &)>> map{
@@ -80,6 +96,8 @@ xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std
             {".gif", LoadConvertFrame_imagemagick},
             {".tga", LoadConvertFrame_imagemagick},
             {".bmp", LoadConvertFrame_imagemagick},
+            {".hex", LoadConvertFrame_hex},
+            {".dump", LoadConvertFrame_hex},
     };
 
     std::string suffix = get_suffix(infile_name);

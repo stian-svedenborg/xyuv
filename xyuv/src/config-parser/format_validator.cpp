@@ -26,8 +26,11 @@
 #include "format_validator.h"
 #include "xyuv/structures/format_template.h"
 #include "xyuv/structures/format.h"
+#include "../to_string.h"
+#include "../block_reorder.h"
 #include <vector>
 #include <map>
+#include <limits>
 
 namespace xyuv {
 
@@ -126,6 +129,43 @@ bool validate_format_template(const xyuv::format_template &format_template) {
             }
         }
         return true;
+    }
+
+    static void check_block_order(const xyuv::format & format) {
+        uint8_t i = 0;
+        for (auto & plane : format.planes ) {
+            uint64_t block_size = static_cast<uint64_t>(plane.block_order.mega_block_width)*plane.block_order.mega_block_height;
+            if (block_size > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
+                throw std::logic_error("Plane " + to_string(i) + ": block reorder size illegal, mega_block_width * mega_block_height must fit within an unsigned 32 bit integer.");
+            }
+
+            if (block_size == 1) {
+                return;
+            }
+
+            // The reordering is expected to be a bijection, thus the sum of all transformed blocks should be same as the sum of all
+            // on-transformed blocks.
+            uint64_t expected_sum = block_size*(block_size-1) / 2;
+            uint64_t observed_sum = 0;
+            for (uint32_t x = 0; x < plane.block_order.mega_block_width; x++) {
+                for (uint32_t y = 0; y < plane.block_order.mega_block_height; y++) {
+                    uint32_t offset = get_block_order_offset(x, y, plane.block_order);
+                    if (offset > block_size) {
+                        auto trans = get_block_order_coords(x, y, plane.block_order);
+                        throw std::logic_error("Plane " + to_string(i) + ": x=" + to_string(x) + ", y="
+                                               + to_string(y) + " gives transformed coordinates ("
+                                               + to_string(trans.first) + ", " + to_string(trans.second) + ") which is larger than the supplied mega_block dimensions. "
+                                               + "Remember that the offset must be given in units of blocks." );
+                    }
+                    observed_sum += offset;
+                }
+            }
+
+            if (expected_sum != observed_sum) {
+                throw std::logic_error("Plane " + to_string(i) + ": block_order is not a bijection. i.e. There are overlapping blocks. This is not supported." );
+            }
+            i++;
+        }
     }
 
     static bool check_illegal_plane_overlap(const xyuv::format &format) {
@@ -228,6 +268,8 @@ bool validate_format_template(const xyuv::format_template &format_template) {
                                            "the format_template to not use overlapping planes "
                                            "(not always possible).");
         }
+
+        check_block_order(format);
 
         return true;
     }

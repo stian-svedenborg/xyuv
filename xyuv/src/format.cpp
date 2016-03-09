@@ -74,7 +74,7 @@ xyuv::format create_format(
 
         // If the texel has mega_blocks, ensure we allocate enough padding
         uint32_t padded_width  = next_multiple(width, format_template.planes[i].block_order.mega_block_width);
-        uint32_t padded_height = next_multiple(width, format_template.planes[i].block_order.mega_block_width);
+        uint32_t padded_height = next_multiple(height, format_template.planes[i].block_order.mega_block_height);
 
         available_variables["image_w"] = padded_width;
         available_variables["image_h"] = padded_height;

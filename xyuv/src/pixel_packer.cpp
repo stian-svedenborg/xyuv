@@ -196,10 +196,11 @@ static void encode_channel(uint8_t *base_addr, const channel_block &block, const
 
     // We need to preprocess the sample array to support continuation samples.
     std::vector<sample> samples;
-    for (std::size_t i = 0; i < block.samples.size(); i++) {
+    for (std::size_t i = 0; i < block.samples.size();) {
         const xyuv::sample &sample = block.samples[i];
         if (!sample.has_continuation) {
             samples.push_back(sample);
+            ++i;
         }
         else {
             // Create a descriptor block containing all the bits of the samples.

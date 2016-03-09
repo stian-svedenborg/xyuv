@@ -18,6 +18,9 @@ namespace xyuv {
 
     struct format;
 
+    uint32_t get_block_order_offset(uint32_t block_x, uint32_t block_y, const ::block_order & block_order);
+    std::pair<uint32_t,uint32_t > get_block_order_coords(uint32_t block_x, uint32_t block_y, const ::block_order & block_order);
+
     bool needs_reorder(const xyuv::format & format );
     void reorder_transform(uint8_t *frame_base_ptr, const xyuv::plane &plane);
     void reorder_inverse(uint8_t *frame_base_ptr, const xyuv::plane &plane);

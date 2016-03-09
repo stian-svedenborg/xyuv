@@ -29,34 +29,43 @@
 #include "utility.h"
 #include "block_reorder.h"
 
-// Calculate the position of this block.
-inline std::pair<uint32_t,uint32_t > get_block_order_offset(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
-    uint32_t xval = 0;
-    uint32_t yval = 0;
-    for (uint32_t i = 0; i < 32; ++i) {
-        uint32_t x_mask = static_cast<uint32_t>(0x1ul << block_order.x_mask[i]);
-        bool x_bit_set = (x_mask & block_x) != 0u;
-        xval |= static_cast<uint32_t>(x_bit_set) << i;
 
-        uint32_t y_mask = static_cast<uint32_t>(0x1ul << block_order.y_mask[i]);
-        bool y_bit_set = (y_mask & block_y) != 0u;
-        yval |= static_cast<uint32_t>(y_bit_set) << i;
-
-    }
-
-    uint32_t offset = xval ^ yval;
-    auto p = std::make_pair(offset % block_order.mega_block_width, offset / block_order.mega_block_width);
-    return p;
-}
-
-inline void copy_bits(uint8_t * dst_base, uint32_t dst_bit_offset, const uint8_t * src_base, uint32_t src_bit_offset, uint32_t size_in_bits) {
+static inline void copy_bits(uint8_t * dst_base, uint32_t dst_bit_offset, const uint8_t * src_base, uint32_t src_bit_offset, uint32_t size_in_bits) {
     for (uint32_t i = 0; i < size_in_bits; i++) {
         xyuv::set_bit(dst_base, dst_bit_offset + i, xyuv::get_bit(src_base, src_bit_offset + i));
     }
 }
 
-
 namespace xyuv {
+
+    // Calculate the position of this block.
+    inline uint32_t get_block_order_offset(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
+        uint32_t xval = 0;
+        uint32_t yval = 0;
+        for (uint32_t i = 0; i < 32; ++i) {
+            uint32_t x_mask = static_cast<uint32_t>(0x1ul << block_order.x_mask[i]);
+            bool x_bit_set = (x_mask & block_x) != 0u;
+            xval |= static_cast<uint32_t>(x_bit_set) << i;
+
+            uint32_t y_mask = static_cast<uint32_t>(0x1ul << block_order.y_mask[i]);
+            bool y_bit_set = (y_mask & block_y) != 0u;
+            yval |= static_cast<uint32_t>(y_bit_set) << i;
+
+        }
+
+        uint32_t offset = xval ^ yval;
+        return offset;
+    }
+
+
+    inline std::pair<uint32_t,uint32_t > get_block_order_coords(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
+
+        uint32_t  offset = get_block_order_offset(block_x, block_y, block_order);
+
+        auto p = std::make_pair(offset % block_order.mega_block_width, offset / block_order.mega_block_width);
+        return p;
+    }
+
 
     bool needs_reorder(const xyuv::format & format ) {
         for (auto & plane : format.planes ) {
@@ -102,7 +111,7 @@ namespace xyuv {
                     const uint8_t * src_line = plane_base_ptr
                                                + (block_y*plane.block_order.mega_block_height + y)*plane.line_stride;
                     for (uint32_t x = 0; x < plane.block_order.mega_block_width; x++) {
-                        auto internal_coord = get_block_order_offset(x, y, plane.block_order);
+                        auto internal_coord = get_block_order_coords(x, y, plane.block_order);
                         // Get destination line of micro block.
                         uint8_t* dst_line = block_base + internal_coord.second * mega_block_line_stride;
                         copy_bits(dst_line, internal_coord.first*plane.block_stride, src_line , (block_x*plane.block_order.mega_block_width + x)*plane.block_stride, plane.block_stride );
@@ -149,7 +158,7 @@ namespace xyuv {
                     // Linear output line
                     uint8_t * dst_line = temp_plane.get() + (block_y*plane.block_order.mega_block_height + y)*plane.line_stride;
                     for (uint32_t x = 0; x < plane.block_order.mega_block_width; x++) {
-                        auto internal_coord = get_block_order_offset(x, y, plane.block_order);
+                        auto internal_coord = get_block_order_coords(x, y, plane.block_order);
                         // Get destination line of micro block.
                         const uint8_t* blocked_line = block_base + internal_coord.second * mega_block_line_stride;
                         copy_bits(dst_line, (block_x*plane.block_order.mega_block_width + x)*plane.block_stride, blocked_line , internal_coord.first*plane.block_stride, plane.block_stride );

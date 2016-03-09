@@ -41,7 +41,7 @@ to cmake.
 Requirements:
  - CMake 3.2
  - Rapidjson (submodule in source)
- - googletest (submodeule in source)
+ - googletest (submodule in source)
 
 For changing the minicalc internal expression parser
 you may also require the following tools:

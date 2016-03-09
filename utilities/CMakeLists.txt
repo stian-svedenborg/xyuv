@@ -1,14 +1,14 @@
 
 add_executable(xyuv-header
-    XYUVHeader.h
-    XYUVHeader.cpp
-    xyuv_header_parse_args.cpp
-    xyuv_header_run.cpp
-    xyuv_header_write_frame.cpp
-    xyuv_header_read_frame.cpp
-    console_width.h
-    console_width.cpp
-)
+        XYUVHeader.h
+        XYUVHeader.cpp
+        xyuv_header_parse_args.cpp
+        xyuv_header_run.cpp
+        xyuv_header_write_frame.cpp
+        xyuv_header_read_frame.cpp
+        console_width.h
+        console_width.cpp
+        hex_reader.cpp)
 
 target_include_directories(xyuv-header
     PUBLIC ${xyuv.PUBLIC}

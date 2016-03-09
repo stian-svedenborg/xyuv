@@ -30,8 +30,7 @@
 #include "TestResources.h"
 #include "../xyuv/src/utility.h"
 #include "../xyuv/src/to_string.h"
-
-std::pair<uint32_t,uint32_t > get_block_order_offset(uint32_t block_x, uint32_t block_y, const ::block_order & block_order);
+#include "../xyuv/src/block_reorder.h"
 
 static xyuv::format create_block_reordered_format() {
     xyuv::format format;
@@ -94,19 +93,19 @@ TEST(BlockReorder, BlockOffset) {
         bo.y_mask[i] = i;
     }
 
-    ASSERT_EQ(std::make_pair(0u,0u), get_block_order_offset(0xffffffffu, 0xffffffffu, bo));
+    ASSERT_EQ(std::make_pair(0u,0u), xyuv::get_block_order_coords(0xffffffffu, 0xffffffffu, bo));
 
     for (uint8_t i = 0; i < 32; i++) {
         bo.x_mask[i] = (i & 1) ? block_order::NOT_USED : i / 2u;
         bo.y_mask[i] = (i & 1) ? i / 2u : block_order::NOT_USED ;
     }
 
-    ASSERT_EQ(std::make_pair(0xffffu, 0xffffu), get_block_order_offset(0xffffffffu, 0xffffffffu, bo));
-    ASSERT_EQ(std::make_pair(0xffffu, 0xffffu), get_block_order_offset(    0xffffu,     0xffffu, bo));
-    ASSERT_EQ(std::make_pair(0xffffu, 0x0u   ), get_block_order_offset(      0xffu,       0xffu, bo));
-    ASSERT_EQ(std::make_pair(  0xffu, 0x0u   ), get_block_order_offset(       0xfu,        0xfu, bo));
-    ASSERT_EQ(std::make_pair(  0xfeu, 0x0u   ), get_block_order_offset(       0xeu,        0xfu, bo));
-    ASSERT_EQ(std::make_pair(  0xeeu, 0x0u   ), get_block_order_offset(0xeu - 0x4u,        0xfu, bo));
+    ASSERT_EQ(std::make_pair(0xffffu, 0xffffu), xyuv::get_block_order_coords(0xffffffffu, 0xffffffffu, bo));
+    ASSERT_EQ(std::make_pair(0xffffu, 0xffffu), xyuv::get_block_order_coords(    0xffffu,     0xffffu, bo));
+    ASSERT_EQ(std::make_pair(0xffffu, 0x0u   ), xyuv::get_block_order_coords(      0xffu,       0xffu, bo));
+    ASSERT_EQ(std::make_pair(  0xffu, 0x0u   ), xyuv::get_block_order_coords(       0xfu,        0xfu, bo));
+    ASSERT_EQ(std::make_pair(  0xfeu, 0x0u   ), xyuv::get_block_order_coords(       0xeu,        0xfu, bo));
+    ASSERT_EQ(std::make_pair(  0xeeu, 0x0u   ), xyuv::get_block_order_coords(0xeu - 0x4u,        0xfu, bo));
 }
 
 TEST(BlockReorder, ReorderTest) {
