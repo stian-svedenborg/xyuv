@@ -217,6 +217,20 @@ void XYUVHeader::Run(const ::options & options) {
 
         xyuv::frame frame = LoadConvertFrame(target_format, options.input_files[i]);
 
+        // If --flip-y is set then change the image origin to the inverse.
+        if (options.flip_y) {
+            switch (frame.format.origin) {
+                case xyuv::image_origin::UPPER_LEFT:
+                    frame.format.origin = xyuv::image_origin::LOWER_LEFT;
+                    break;
+                case xyuv::image_origin::LOWER_LEFT:
+                    frame.format.origin = xyuv::image_origin::UPPER_LEFT;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         if (options.writeout) {
             if (options.concatinate) {
                 // Append file at end of concatinated string.
