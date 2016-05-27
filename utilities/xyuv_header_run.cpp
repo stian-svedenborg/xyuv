@@ -41,8 +41,14 @@ void XYUVHeader::Run(const ::options & options) {
         PrintHelp();
         return;
     }
+
     // Otherwise do something useful.
-    // First Load all additional formats.
+#ifdef INSTALL_FORMATS_PATH
+    // Load base formats from installation path
+    config_manager_.load_configurations(INSTALL_FORMATS_PATH);
+#endif
+
+    // Load all additional formats supplied on the command line.
     for (const auto & path : options.additional_config_directories) {
         config_manager_.load_configurations(path);
     }

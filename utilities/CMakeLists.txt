@@ -17,6 +17,10 @@ target_link_libraries(xyuv-header xyuv)
 target_compile_options(xyuv-header
     PUBLIC -std=c++11
 )
+
+target_compile_definitions(xyuv-header
+    PRIVATE INSTALL_FORMATS_PATH="${CMAKE_INSTALL_PREFIX}/share/xyuv")
+
 add_dependencies(xyuv-header xyuv)
 
 # If we have compiled support for ImageMagick also include that.
