@@ -68,10 +68,19 @@ std::vector<std::string> Resources::get_all_conversion_matrices() {
 
 Resources::Resources()
     : config_(FORMATS_SEARCH_PATH)
-    , Lena512("testing/integration_testing/test_data/lena512color.png")
-    , Tiny("testing/integration_testing/test_data/tiny.png")
+    , lena_("testing/integration_testing/test_data/lena512color.png")
+    , tiny_("testing/integration_testing/test_data/tiny.png")
+    , Lena512(lena_)
+    , Tiny(tiny_)
 {
     config_.load_configurations("testing/integration_testing/test_data/formats/");
 }
 
 
+std::string Resources::get_lena512_pngpath() {
+    return get().lena_;
+}
+
+std::string Resources::get_tiny_pngpath() {
+    return get().tiny_;
+}

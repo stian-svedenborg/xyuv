@@ -4,6 +4,21 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 #      cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
 
+set(INTEGRATION_TESTING_SOURCES
+    integration_testing/main.cpp
+    integration_testing/regress_format_templates.cpp
+    integration_testing/file_format_testing.cpp
+
+    TestResources.cpp
+    TestResources.h
+    integration_testing/conversion_matrices.cpp
+)
+
+
+if (USE_EXTERNAL_LIBPNG)
+    list(APPEND INTEGRATION_TESTING_SOURCES integration_testing/libpng_test.cpp)
+endif(USE_EXTERNAL_LIBPNG)
+
 # Add targets
 add_executable(unit_tests
         main.cpp
@@ -22,11 +37,8 @@ add_executable(unit_tests
 
 
 add_executable(integration_testing
-        integration_testing/main.cpp
-        integration_testing/regress_format_templates.cpp
-        integration_testing/file_format_testing.cpp
-
-        TestResources.cpp TestResources.h integration_testing/conversion_matrices.cpp)
+        ${INTEGRATION_TESTING_SOURCES}
+)
 
 target_include_directories(unit_tests
     PRIVATE xyuv.PUBLIC
@@ -37,6 +49,17 @@ target_include_directories(integration_testing
     PRIVATE xyuv.PUBLIC
     PRIVATE gtest.PUBLIC
 )
+
+
+if (USE_EXTERNAL_LIBPNG)
+    target_include_directories(integration_testing
+            PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(integration_testing
+            PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(integration_testing
+            PUBLIC ${PNG_DEFINITIONS}
+            PUBLIC USE_LIBPNG=1)
+endif(USE_EXTERNAL_LIBPNG)
 
 if (USE_IMAGEMAGICK_INTEGRATION)
     target_include_directories(integration_testing
@@ -58,7 +81,9 @@ if (USE_IMAGEMAGICK_INTEGRATION)
 endif (USE_IMAGEMAGICK_INTEGRATION)
 
 target_link_libraries(unit_tests xyuv gtest)
-target_link_libraries(integration_testing xyuv gtest)
+target_link_libraries(integration_testing
+        PUBLIC xyuv
+        PUBLIC gtest )
 
 add_dependencies(unit_tests gtest xyuv)
 add_dependencies(integration_testing gtest xyuv)

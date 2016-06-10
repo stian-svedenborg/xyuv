@@ -32,6 +32,8 @@ class Resources {
 public:
     static const xyuv::config_manager & config();
     static const Magick::Image & get_lena512();
+    static std::string get_lena512_pngpath();
+    static std::string get_tiny_pngpath();
     static const Magick::Image & get_tiny();
     static const Magick::Image & get_default();
 
@@ -41,6 +43,8 @@ public:
 private:
     static const Resources & get();
     xyuv::config_manager config_;
+    std::string lena_, tiny_;
+
     Magick::Image Lena512, Tiny;
 
     Resources();

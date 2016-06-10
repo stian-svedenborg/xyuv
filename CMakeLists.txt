@@ -17,6 +17,9 @@ option(BUILD_SHARED_LIBS
 option(USE_IMAGEMAGICK_INTEGRATION
     "Include module to interact with ImageMagick++" ON)
 
+option(USE_EXTERNAL_LIBPNG
+    "Integrate libPNG into core library and utilities." ON)
+
 # Register further options.
 
 set(MAGICKCORE_QUANTUM_DEPTH 16 CACHE STRING
@@ -35,8 +38,10 @@ target_include_directories(xyuv
     PUBLIC $<INSTALL_INTERFACE:xyuv/include>
 )
 
+
+
 # Primary library
-add_library(xyuv_core STATIC
+set(XYUV_CORE_SOURCES
         xyuv/src/pixel_packer.cpp
         xyuv/src/rgb_conversion.cpp
         xyuv/src/utility.cpp
@@ -68,6 +73,7 @@ add_library(xyuv_core STATIC
         xyuv/src/io/versions/core_io_structs.h
         xyuv/src/io/versions/core_io_structs.cpp
         xyuv/src/io/versions/file_format_entry_point.h
+
         # File format versions
         xyuv/src/io/versions/0/entry_point.h
         xyuv/src/io/versions/0/entry_point.cpp
@@ -80,14 +86,37 @@ add_library(xyuv_core STATIC
         xyuv/src/io/versions/1/file_header.h
         xyuv/src/io/versions/1/io_structs.h
         xyuv/src/io/versions/1/io_structs.cpp
-
         )
+
+# Conditionally include wrappers for external libraries
+if (USE_EXTERNAL_LIBPNG)
+    find_package(PNG REQUIRED)
+    list(APPEND XYUV_CORE_SOURCES
+        xyuv/include/xyuv/external/libpng_wrapper.h
+        xyuv/src/external/libpng_wrapper.cpp)
+endif(USE_EXTERNAL_LIBPNG)
+
+add_library(xyuv_core STATIC ${XYUV_CORE_SOURCES} )
+
+######################
+# Flags and defines  #
+######################
 
 target_include_directories(xyuv_core
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
     PUBLIC $<INSTALL_INTERFACE:xyuv/include>
     PRIVATE thirdparty/rapidjson/include
 )
+
+if (USE_EXTERNAL_LIBPNG)
+    target_include_directories(xyuv_core
+        PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(xyuv_core
+        PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(xyuv_core
+        PUBLIC ${PNG_DEFINITIONS}
+        PUBLIC USE_LIBPNG=1)
+endif(USE_EXTERNAL_LIBPNG)
 
 add_dependencies(xyuv xyuv_core)
 target_link_libraries(xyuv xyuv_core)
