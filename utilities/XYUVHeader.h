@@ -84,11 +84,15 @@ struct options {
     // Display the resulting image.
     bool display = false;
 
+    // Inverts the Y dimension in the resulting image.
+    bool flip_y = false;
+
     // List all loaded formats and quit.
     bool list_all_formats = false;
 
     // Print help and quit. (Superseeds list_all_formats).
     bool print_help = false;
+
 };
 
 class XYUVHeader {

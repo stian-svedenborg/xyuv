@@ -146,37 +146,37 @@ TEST(BitPacking, GetBit) {
     uint8_t byte = 0x5a; // 0x01011010
 
     // Set a single byte.
-    ASSERT_EQ(false, xyuv::get_bit(&byte, 0));
-    ASSERT_EQ(true,  xyuv::get_bit(&byte, 1));
-    ASSERT_EQ(false, xyuv::get_bit(&byte, 2));
-    ASSERT_EQ(true,  xyuv::get_bit(&byte, 3));
-    ASSERT_EQ(true,  xyuv::get_bit(&byte, 4));
-    ASSERT_EQ(false, xyuv::get_bit(&byte, 5));
-    ASSERT_EQ(true,  xyuv::get_bit(&byte, 6));
-    ASSERT_EQ(false, xyuv::get_bit(&byte, 7));
+    ASSERT_FALSE(xyuv::get_bit(&byte, 0));
+    ASSERT_TRUE (xyuv::get_bit(&byte, 1));
+    ASSERT_FALSE(xyuv::get_bit(&byte, 2));
+    ASSERT_TRUE (xyuv::get_bit(&byte, 3));
+    ASSERT_TRUE (xyuv::get_bit(&byte, 4));
+    ASSERT_FALSE(xyuv::get_bit(&byte, 5));
+    ASSERT_TRUE (xyuv::get_bit(&byte, 6));
+    ASSERT_FALSE(xyuv::get_bit(&byte, 7));
 }
 
 TEST(BitPacking, GetBitMultibyte) {        // <-- Increasing Byte addr  <--
     const uint8_t bytes[2] = {0x5a, 0xdc}; // 0b 11011100 01011010
 
     // Set a single byte.
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 0));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 1));
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 2));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 3));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 4));
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 5));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 6));
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 7));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 0));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 1));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 2));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 3));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 4));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 5));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 6));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 7));
 
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 8 ));
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 9 ));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 10));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 11));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 12));
-    ASSERT_EQ(false, xyuv::get_bit(bytes, 13));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 14));
-    ASSERT_EQ(true,  xyuv::get_bit(bytes, 15));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 8 ));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 9 ));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 10));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 11));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 12));
+    ASSERT_FALSE(xyuv::get_bit(bytes, 13));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 14));
+    ASSERT_TRUE (xyuv::get_bit(bytes, 15));
 }
 
 TEST(BitPacking, ReadSinglebyte)
@@ -204,7 +204,7 @@ TEST(BitPacking, ReadSinglebyte)
 
 TEST(BitPacking, ReadMultibyte)
 {                                               // <-- Increasing Byte addr  <--
-    const uint8_t bytes[2] = { 0xdc, 0x5a };    // 0b 01011010 11011100 
+    const uint8_t bytes[2] = { 0xdc, 0x5a };    // 0b 01011010 11011100
     unorm_t result;
 
     // Read all 8 bits from the low byte

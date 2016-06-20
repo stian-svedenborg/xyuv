@@ -41,8 +41,14 @@ void XYUVHeader::Run(const ::options & options) {
         PrintHelp();
         return;
     }
+
     // Otherwise do something useful.
-    // First Load all additional formats.
+#ifdef INSTALL_FORMATS_PATH
+    // Load base formats from installation path
+    config_manager_.load_configurations(INSTALL_FORMATS_PATH);
+#endif
+
+    // Load all additional formats supplied on the command line.
     for (const auto & path : options.additional_config_directories) {
         config_manager_.load_configurations(path);
     }
@@ -216,6 +222,20 @@ void XYUVHeader::Run(const ::options & options) {
         );
 
         xyuv::frame frame = LoadConvertFrame(target_format, options.input_files[i]);
+
+        // If --flip-y is set then change the image origin to the inverse.
+        if (options.flip_y) {
+            switch (frame.format.origin) {
+                case xyuv::image_origin::UPPER_LEFT:
+                    frame.format.origin = xyuv::image_origin::LOWER_LEFT;
+                    break;
+                case xyuv::image_origin::LOWER_LEFT:
+                    frame.format.origin = xyuv::image_origin::UPPER_LEFT;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         if (options.writeout) {
             if (options.concatinate) {

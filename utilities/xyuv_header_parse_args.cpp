@@ -123,6 +123,10 @@ void XYUVHeader::PrintHelp() {
                        "\n                 converted back to RGB and saved."
     );
 
+    print_help_section("-y",
+                       "--flip-y",
+                       "Invert the Y dimension in the image, effectively flipping it upside-down."
+    );
 
     print_help_section("-c",
                        "--cat",
@@ -243,12 +247,13 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
             { "display", no_argument, 0, 'd'},
             { "no-writeout", no_argument, 0, 'n'},
             { "list", no_argument, 0, 'l'},
+            { "flip-y", no_argument, 0, 'y'},
             { "help", no_argument, 0, '?'},
             {}
     };
     int index = 0;
     int c = -1;
-    const char * const shortopts = "?lndcF:o:f:h:w:m:s:";
+    const char * const shortopts = "?lndcyF:o:f:h:w:m:s:";
 
     ::options options;
     while ( (c = getopt_long(argc, argv, shortopts, long_opts, &index )) != -1 ) {
@@ -273,6 +278,9 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
                 break;
             case 'h':
                 options.image_h = static_cast<uint32_t>(strtoul(optarg, nullptr, 0));
+                break;
+            case 'y':
+                options.flip_y = true;
                 break;
             case 'c':
                 options.concatinate = true;

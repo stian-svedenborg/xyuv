@@ -107,8 +107,11 @@ config_manager::config_manager(const std::string &format_search_root) {
     load_configurations(format_search_root);
 }
 
-void config_manager::load_configurations(const std::string &format_search_root) {
-    XYUV_ASSERT(format_search_root.back() == '/' || format_search_root.back() == '\\');
+void config_manager::load_configurations(std::string format_search_root) {
+    if(!(format_search_root.back() == '/' || format_search_root.back() == '\\')) {
+        format_search_root += '/';
+    }
+
     load_format_templates(format_search_root + PX_FMT_DIR);
     load_chroma_sitings(format_search_root + CHROMA_SITING_DIR);
     load_conversion_matrices(format_search_root + CONVERSION_MATRICES_DIR);

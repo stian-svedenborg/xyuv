@@ -84,7 +84,7 @@ public:
     //! format templates under \a format_search_root /<PX_FMT_DIR>
     //! and conversion matrices under \a format_search_root/<CONVERSION_MATRICES_DIR>. See the source for the default
     //! values for each of these definitions.
-    void load_configurations(const std::string &format_search_root);
+    void load_configurations(std::string format_search_root);
 
     //! \brief Add a configuration with the given key.
     //! \details This will manually add a new format_template/chroma_siting/conversion_matrix to the configuration
