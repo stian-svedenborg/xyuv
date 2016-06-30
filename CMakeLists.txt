@@ -14,34 +14,23 @@ add_compile_options(
 option(BUILD_SHARED_LIBS
     "Build top level libraries as shared." ON)
 
-option(USE_IMAGEMAGICK_INTEGRATION
-    "Include module to interact with ImageMagick++" ON)
+option(NO_EXTERNAL_IMAGEMAGICK
+    "Do not use imagemagick for xyuv_header and do not include the imagemagick wrapper class." OFF)
 
-option(USE_EXTERNAL_LIBPNG
-    "Integrate libPNG into core library and utilities." ON)
+option(NO_EXTERNAL_LIBPNG
+    "Do not use libpng in xyuv_header and do not include the imagemagick wrapper class." OFF)
 
 # Register further options.
 
-set(MAGICKCORE_QUANTUM_DEPTH 16 CACHE STRING
-    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
+#set(MAGICKCORE_QUANTUM_DEPTH 16 CACHE STRING
+#    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
 
 
-set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
-    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
+#set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
+#    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
 
-# Primary library.
-add_library(xyuv
-        xyuv/src/xyuv.cpp)
-
-target_include_directories(xyuv
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
-    PUBLIC $<INSTALL_INTERFACE:xyuv/include>
-)
-
-
-
-# Primary library
-set(XYUV_CORE_SOURCES
+# Set up Include primary XYUV sources
+set(XYUV_SOURCES
         xyuv/src/pixel_packer.cpp
         xyuv/src/rgb_conversion.cpp
         xyuv/src/utility.cpp
@@ -57,7 +46,6 @@ set(XYUV_CORE_SOURCES
         xyuv/src/format.cpp
         xyuv/src/yuv_image.cpp
         xyuv/src/subsampler.cpp
-        xyuv/src/coder.cpp
         xyuv/src/rgb_image.cpp
         xyuv/src/config-parser/config_manager.cpp
         xyuv/src/frame_manipulation.cpp
@@ -89,101 +77,81 @@ set(XYUV_CORE_SOURCES
         )
 
 # Conditionally include wrappers for external libraries
-if (USE_EXTERNAL_LIBPNG)
-    find_package(PNG REQUIRED)
-    list(APPEND XYUV_CORE_SOURCES
-        xyuv/include/xyuv/external/libpng_wrapper.h
-        xyuv/src/external/libpng_wrapper.cpp)
-endif(USE_EXTERNAL_LIBPNG)
+if(NOT NO_EXTERNAL_LIBPNG)
+    find_package(PNG)
+    if (PNG_FOUND)
+        list(APPEND XYUV_SOURCES
+            xyuv/include/xyuv/external/libpng_wrapper.h
+            xyuv/src/external/libpng_wrapper.cpp)
+    endif(PNG_FOUND)
+endif(NOT NO_EXTERNAL_LIBPNG)
 
-add_library(xyuv_core STATIC ${XYUV_CORE_SOURCES} )
+if(NOT NO_EXTERNAL_IMAGEMAGICK)
+    find_package(ImageMagick 6.7 COMPONENTS Magick++ MagickCore)
+    if(ImageMagick_FOUND)
+    list(APPEND XYUV_SOURCES
+            xyuv/include/xyuv/external/magick_wrapper.h
+            xyuv/src/external/magick_wrapper.cpp)
+    endif(ImageMagick_FOUND)
+endif(NOT NO_EXTERNAL_IMAGEMAGICK)
+
+add_library(xyuv ${XYUV_SOURCES} )
 
 ######################
 # Flags and defines  #
 ######################
 
-target_include_directories(xyuv_core
+SET_TARGET_PROPERTIES(xyuv PROPERTIES LINKER_LANGUAGE CXX)
+
+target_include_directories(xyuv
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include>
     PUBLIC $<INSTALL_INTERFACE:xyuv/include>
     PRIVATE thirdparty/rapidjson/include
 )
 
-if (USE_EXTERNAL_LIBPNG)
-    target_include_directories(xyuv_core
-        PUBLIC ${PNG_INCLUDE_DIRS})
-    target_link_libraries(xyuv_core
-        PUBLIC ${PNG_LIBRARIES})
-    target_compile_definitions(xyuv_core
-        PUBLIC ${PNG_DEFINITIONS}
-        PUBLIC USE_LIBPNG=1)
-endif(USE_EXTERNAL_LIBPNG)
+install(DIRECTORY xyuv/include/
+        DESTINATION include
+        FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
+        PATTERN xyuv/include/xyuv/external EXCLUDE)
+install(DIRECTORY xyuv/include/
+        DESTINATION include
+        FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+install(DIRECTORY formats/
+        DESTINATION share/xyuv
+        FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+install(TARGETS xyuv
+        EXPORT XYUV
+        DESTINATION lib)
+install(EXPORT XYUV
+        NAMESPACE XYUV_
+        DESTINATION lib/xyuv)
 
-add_dependencies(xyuv xyuv_core)
-target_link_libraries(xyuv xyuv_core)
+if(PNG_FOUND)
+    target_include_directories(xyuv
+            PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(xyuv
+            PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(xyuv
+            PUBLIC ${PNG_DEFINITIONS})
+    add_definitions(-DUSE_LIBPNG=1)
+    install(FILES xyuv/include/xyuv/external/libpng_wrapper.h
+            DESTINATION include/xyuv/external/libpng_wrapper.h
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+endif(PNG_FOUND)
 
-if (USE_IMAGEMAGICK_INTEGRATION)
 
-    # Resolve dependencies
-    find_package(ImageMagick REQUIRED COMPONENTS Magick++)
-    message("Found ImageMagick headers at ${ImageMagick_INCLUDE_DIRS}")
-
-    # Set up library
-    add_library(xyuv_magick STATIC
-        xyuv/src/imagemagick/magick_wrapper.cpp
-    )
-
-    target_include_directories(xyuv_magick
-        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/xyuv/include/xyuv/imagemagick>
-        PUBLIC $<INSTALL_INTERFACE:xyuv/include/xyuv/imagemagick>
-        PRIVATE xyuv/include
-        PUBLIC ${ImageMagick_INCLUDE_DIRS}
-    )
-
-    add_dependencies(xyuv_magick xyuv_core)
-    target_link_libraries(xyuv_magick ${ImageMagick_LIBRARIES} xyuv_core)
-
-    # Register dependencies to shared library.
-    add_dependencies(xyuv xyuv_magick)
-    target_link_libraries(xyuv xyuv_magick)
-
-    target_compile_options(xyuv_magick
-        PUBLIC -DMAGICKCORE_QUANTUM_DEPTH=${MAGICKCORE_QUANTUM_DEPTH}
-        PUBLIC -DMAGICKCORE_HDRI_ENABLE=${MAGICKCORE_HDRI_ENABLE}
-    )
-
-endif (USE_IMAGEMAGICK_INTEGRATION)
+if (ImageMagick_FOUND)
+    target_include_directories(xyuv
+        PUBLIC ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(xyuv
+            PUBLIC ${ImageMagick_LIBRARIES})
+    add_definitions(-DUSE_IMAGEMAGICK=1)
+    install(FILES xyuv/include/xyuv/external/magick_wrapper.h
+            DESTINATION include/xyuv/external/magick_wrapper.h
+            PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
+endif(ImageMagick_FOUND)
 
 #Add subdirectories for other targets.
 add_subdirectory(thirdparty)
 add_subdirectory(testing)
 add_subdirectory(utilities)
-
-# Installation section.
-install (
-    TARGETS xyuv_core xyuv_magick
-    DESTINATION lib/static
-    EXPORT lib
-)
-install (
-    TARGETS xyuv
-    DESTINATION lib
-    EXPORT lib
-)
-install (
-    DIRECTORY xyuv/include/
-    DESTINATION include
-    FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
-)
-install (
-    DIRECTORY formats/
-    DESTINATION share/xyuv
-    FILE_PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ
-)
-install (
-    EXPORT lib
-    NAMESPACE xyuv_
-    DESTINATION lib/xyuv
-)
-
-
-

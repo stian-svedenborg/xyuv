@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,17 @@
  * THE SOFTWARE.
  */
 
-#include <xyuv/structures/color.h>
-#include "TestResources.h"
-#include "../xyuv/src/rgb_conversion.h"
+#ifndef CROSSYUV_MAGICK_FORMAT_RW_H
+#define CROSSYUV_MAGICK_FORMAT_RW_H
 
-#include <gtest/gtest.h>
-
-using namespace xyuv;
-
-TEST(RGBTest, EncodeDecode) {
-
-    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
-
-    const rgb_color rgb_expected = { 0.333f, 1.0f, 0.0f, 0.5f};
-
-    yuv_color yuv;
-    to_yuv(&yuv, rgb_expected, conversion_matrix);
-
-    rgb_color rgb_observed;
-    to_rgb(&rgb_observed, yuv, conversion_matrix, true, true, true);
-
-    ASSERT_NEAR(rgb_expected.r, rgb_observed.r, 0.00001f);
-    ASSERT_NEAR(rgb_expected.g, rgb_observed.g, 0.00001f);
-    ASSERT_NEAR(rgb_expected.b, rgb_observed.b, 0.00001f);
-    ASSERT_NEAR(rgb_expected.a, rgb_observed.a, 0.00001f);
-
+#include <string>
+namespace xyuv {
+    struct frame;
+    struct format;
 }
+
+xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name );
+void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename);
+void Display_imagemagick(const xyuv::frame & frame);
+
+#endif //CROSSYUV_MAGICK_FORMAT_RW_H

@@ -1,5 +1,5 @@
 
-add_executable(xyuv-header
+set(XYUV_HEADER_SOURCES
         XYUVHeader.h
         XYUVHeader.cpp
         xyuv_header_parse_args.cpp
@@ -10,10 +10,26 @@ add_executable(xyuv-header
         console_width.cpp
         hex_reader.cpp)
 
+if(ImageMagick_FOUND)
+list(APPEND XYUV_HEADER_SOURCES
+        external/magick_format_rw.cpp
+        external/magick_format_rw.h
+        )
+endif(ImageMagick_FOUND)
+if(PNG_FOUND)
+list(APPEND XYUV_HEADER_SOURCES
+        external/libpng_format_rw.cpp
+        external/libpng_format_rw.h
+        )
+endif(PNG_FOUND)
+
+add_executable(xyuv-header ${XYUV_HEADER_SOURCES})
+
 target_include_directories(xyuv-header
     PUBLIC ${xyuv.PUBLIC}
 )
-target_link_libraries(xyuv-header xyuv)
+target_link_libraries(xyuv-header
+        PUBLIC xyuv)
 target_compile_options(xyuv-header
     PUBLIC -std=c++11
 )
@@ -23,25 +39,21 @@ target_compile_definitions(xyuv-header
 
 add_dependencies(xyuv-header xyuv)
 
-# If we have compiled support for ImageMagick also include that.
-if (USE_IMAGEMAGICK_INTEGRATION)
-    # Resolve dependencies
-    find_package(ImageMagick REQUIRED COMPONENTS Magick++)
-    message("Found ImageMagick headers at ${ImageMagick_INCLUDE_DIRS}")
-
+if(PNG_FOUND)
     target_include_directories(xyuv-header
-        PUBLIC ${ImageMagick_INCLUDE_DIRS}
-    )
+            PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(xyuv-header
+            PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(xyuv-header
+            PUBLIC ${PNG_DEFINITIONS})
+endif(PNG_FOUND)
 
-    target_link_libraries(xyuv-header ${ImageMagick_LIBRARIES})
-
-    target_compile_options(xyuv-header
-        PUBLIC -DMAGICKCORE_QUANTUM_DEPTH=${MAGICKCORE_QUANTUM_DEPTH}
-        PUBLIC -DMAGICKCORE_HDRI_ENABLE=${MAGICKCORE_HDRI_ENABLE}
-        PUBLIC -DXYUV_USE_IMAGEMAGICK_INTEGRATION
-    )
-
-endif (USE_IMAGEMAGICK_INTEGRATION)
+if (ImageMagick_FOUND)
+    target_include_directories(xyuv-header
+            PUBLIC ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(xyuv-header
+            PUBLIC ${ImageMagick_LIBRARIES})
+endif(ImageMagick_FOUND)
 
 #Installation section
-install (TARGETS xyuv-header DESTINATION bin)
+install(TARGETS xyuv-header DESTINATION bin)

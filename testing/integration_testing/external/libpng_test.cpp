@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
 #include <gtest/gtest.h>
 
 #include <xyuv/structures/conversion_matrix.h>
+#include <xyuv/structures/format.h>
+#include <xyuv/frame.h>
 #include <xyuv/external/libpng_wrapper.h>
 #include "../../xyuv/src/config_parser.h"
 #include <xyuv/yuv_image.h>
 #include <xyuv.h>
-#include "../TestResources.h"
+#include "../../TestResources.h"
 #include "../../xyuv/src/to_string.h"
-#include <xyuv/structures/format.h>
-#include <xyuv/frame.h>
 
 using namespace xyuv;
 
@@ -51,14 +51,13 @@ protected:
             }
         }
     }
-
 };
 
 
 TEST_F(LibPNGWrapperTest, RgbToYuvAndBack) {
-    xyuv::libpng_wrapper image_expected(Resources::get_tiny_pngpath());
+    xyuv::libpng_wrapper image_expected(Resources::get().get_png_path(Resources::TestImage::LENA));
 
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::yuv_image yuv_image = rgb_to_yuv_image( image_expected, conversion_matrix );
     xyuv::pixel_quantum abs_diff = (conversion_matrix.u_range.second - conversion_matrix.u_range.first)*255.0f;
 
@@ -70,7 +69,7 @@ TEST_F(LibPNGWrapperTest, RgbToYuvAndBack) {
 
 TEST_F(LibPNGWrapperTest, LoadStoreReload) {
     std::string out_file = "./testing/integration_testing/test_data/output/libpng_tmp.png";
-    xyuv::libpng_wrapper image_expected(Resources::get_tiny_pngpath());
+    xyuv::libpng_wrapper image_expected(Resources::get().get_png_path(Resources::TestImage::LENA));
     image_expected.save_png_to_file(out_file);
     xyuv::libpng_wrapper image_observed(out_file);
 
@@ -78,7 +77,7 @@ TEST_F(LibPNGWrapperTest, LoadStoreReload) {
 }
 
 TEST_F(LibPNGWrapperTest, AssignmentTest) {
-    xyuv::libpng_wrapper image_expected(Resources::get_tiny_pngpath());
+    xyuv::libpng_wrapper image_expected(Resources::get().get_png_path(Resources::TestImage::LENA));
 
     xyuv::libpng_wrapper copy_constructed{*static_cast<const xyuv::libpng_wrapper*>(&image_expected)};
     CompareImages(image_expected, copy_constructed, 0.0f);

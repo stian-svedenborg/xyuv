@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,18 @@
  * THE SOFTWARE.
  */
 
-#include "xyuv/yuv_image.h"
-#include "xyuv/frame.h"
+#include "magick_format_rw.h"
+#include <xyuv/external/libpng_wrapper.h>
+#include <xyuv.h>
+#include <xyuv/frame.h>
 
-
-namespace xyuv {
-
-xyuv::frame encode_frame(const yuv_image &sub_sampled_yuva, const xyuv::format &format) {
-    throw 0;
+xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::string & infile_name ) {
+    xyuv::libpng_wrapper wrapper(infile_name);
+    return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 
-} // namespace xyuv
+void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string & out_filename) {
+    xyuv::libpng_wrapper wrapper;
+    xyuv::write_frame_to_rgb_image(&wrapper, frame);
+    wrapper.save_png_to_file(out_filename);
+}

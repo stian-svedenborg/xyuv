@@ -39,7 +39,7 @@ public:
 
     static void test_encode_decode(const std::string & name) {
 
-        xyuv::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix(name);
+        xyuv::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix(name);
 
         xyuv::rgb_color colors[] = {
                 {1.0, 1.0, 1.0, 1.0},
@@ -75,4 +75,4 @@ TEST_P(ConversionMatrixRegression, Inversion) {
     test_encode_decode(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(, ConversionMatrixRegression, ::testing::ValuesIn(Resources::get_all_conversion_matrices()));
+INSTANTIATE_TEST_CASE_P(, ConversionMatrixRegression, ::testing::ValuesIn(Resources::get().get_all_conversion_matrices()));

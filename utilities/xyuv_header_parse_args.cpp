@@ -133,13 +133,13 @@ void XYUVHeader::PrintHelp() {
                        "Concatinate multiple frames into an .xyuv image. "
                                "\nNB! this tool currently does not support reading multi-frame .xyuv images."
     );
-
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
     print_help_section("-d",
                        "--display",
                        "Display the loaded image, (press ESC to close)."
                                "\nNB! This option may only be used for single input invocations."
     );
-
+#endif
     print_help_section("-n",
                        "--no-writeout",
                        "Supress writeout (no files will be created or overwritten): This is useful for testing trial testing "
@@ -215,25 +215,6 @@ void XYUVHeader::PrintHelp() {
 
 }
 
-static ::options::output_modes interpret_output_mode(const std::string &optarg) {
-    std::unordered_map<std::string, ::options::output_modes> map {
-            {"xyuv", ::options::output_modes::XYUV},
-            {"magick", ::options::output_modes::IMAGEMAGICK},
-    };
-
-    auto it = map.find(optarg);
-    if (it == map.end()) {
-        it = map.begin();
-        std::string error_message = "Invalid output mode: '" + optarg + "' must be one of { " + it->first;
-        while (++it != map.end()) {
-            error_message += ", " + it->first;
-        }
-        error_message += " }";
-        throw std::invalid_argument(error_message);
-    }
-    return it->second;
-}
-
 ::options XYUVHeader::ParseArgs(int argc, char ** argv) {
     struct option long_opts[] = {
             { "additional-format-dir", required_argument, 0, 'F'},
@@ -244,7 +225,9 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
             { "width", required_argument, 0, 'w'},
             { "height", required_argument, 0, 'h'},
             { "cat", no_argument, 0, 'c'},
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
             { "display", no_argument, 0, 'd'},
+#endif
             { "no-writeout", no_argument, 0, 'n'},
             { "list", no_argument, 0, 'l'},
             { "flip-y", no_argument, 0, 'y'},
@@ -255,7 +238,7 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
     int c = -1;
     const char * const shortopts = "?lndcyF:o:f:h:w:m:s:";
 
-    ::options options;
+    ::options options = {};
     while ( (c = getopt_long(argc, argv, shortopts, long_opts, &index )) != -1 ) {
         switch (c) {
             case 'F':
@@ -285,9 +268,11 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
             case 'c':
                 options.concatinate = true;
                 break;
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
             case 'd':
                 options.display = true;
                 break;
+#endif
             case 'n':
                 options.writeout = false;
                 break;
@@ -296,9 +281,6 @@ static ::options::output_modes interpret_output_mode(const std::string &optarg) 
                 break;
             case '?':
                 options.print_help = true;
-                break;
-            case 'p':
-                options.output_mode = interpret_output_mode(optarg);
                 break;
             default:
                 throw std::invalid_argument("Unknown argument :'" + std::string(optarg) + "'");

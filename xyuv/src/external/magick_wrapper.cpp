@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,12 @@
  */
 
 #include <xyuv/yuv_image.h>
-#include <magick_wrapper.h>
+#include <xyuv/external/magick_wrapper.h>
 #include "xyuv/structures/conversion_matrix.h"
 #include "xyuv/structures/color.h"
 #include "../rgb_conversion.h"
 #include "../assert.h"
+#include <magick/magick-config.h>
 #include <Magick++.h>
 #include <xyuv/structures/constants.h>
 

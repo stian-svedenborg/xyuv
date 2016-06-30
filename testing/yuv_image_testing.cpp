@@ -41,13 +41,13 @@ public:
 
 protected:
     virtual void SetUp() override {
-        fmt_444 = Resources::config().get_format_template("AYUV");
-        fmt_420 = Resources::config().get_format_template("IMC1");
+        fmt_444 = Resources::get().config().get_format_template("AYUV");
+        fmt_420 = Resources::get().config().get_format_template("IMC1");
 
-        siting_444 = Resources::config().get_chroma_siting("444");
-        siting_420 = Resources::config().get_chroma_siting("420");
+        siting_444 = Resources::get().config().get_chroma_siting("444");
+        siting_420 = Resources::get().config().get_chroma_siting("420");
 
-        rgb_matrix = Resources::config().get_conversion_matrix("bt601");
+        rgb_matrix = Resources::get().config().get_conversion_matrix("bt601");
     }
 };
 

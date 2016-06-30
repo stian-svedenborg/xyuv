@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,18 +31,8 @@
 
 using namespace xyuv;
 
-const config_manager & Resources::config() {
-    return get().config_;
-}
-
-const Magick::Image & Resources::get_lena512() {
-    return get().Lena512;
-}
-const Magick::Image & Resources::get_tiny() {
-    return get().Tiny;
-}
-const Magick::Image & Resources::get_default() {
-    return get_lena512();
+const config_manager & Resources::config() const {
+    return config_;
 }
 
 const Resources & Resources::get() {
@@ -50,7 +40,7 @@ const Resources & Resources::get() {
     return instance;
 }
 
-std::vector<std::string> Resources::get_all_formats() {
+std::vector<std::string> Resources::get_all_formats() const {
     std::vector<std::string> ret_val;
     for (auto & elem : config().get_format_templates()) {
         ret_val.push_back(elem.first);
@@ -58,7 +48,7 @@ std::vector<std::string> Resources::get_all_formats() {
     return ret_val;
 }
 
-std::vector<std::string> Resources::get_all_conversion_matrices() {
+std::vector<std::string> Resources::get_all_conversion_matrices() const {
     std::vector<std::string> ret_val;
     for (auto & elem : config().get_conversion_matrices()) {
         ret_val.push_back(elem.first);
@@ -68,19 +58,7 @@ std::vector<std::string> Resources::get_all_conversion_matrices() {
 
 Resources::Resources()
     : config_(FORMATS_SEARCH_PATH)
-    , lena_("testing/integration_testing/test_data/lena512color.png")
-    , tiny_("testing/integration_testing/test_data/tiny.png")
-    , Lena512(lena_)
-    , Tiny(tiny_)
 {
     config_.load_configurations("testing/integration_testing/test_data/formats/");
 }
 
-
-std::string Resources::get_lena512_pngpath() {
-    return get().lena_;
-}
-
-std::string Resources::get_tiny_pngpath() {
-    return get().tiny_;
-}

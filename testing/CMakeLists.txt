@@ -14,10 +14,15 @@ set(INTEGRATION_TESTING_SOURCES
     integration_testing/conversion_matrices.cpp
 )
 
+if (ImageMagick_FOUND)
+    list(APPEND INTEGRATION_TESTING_SOURCES
+            integration_testing/external/imagick_test.cpp)
+endif(ImageMagick_FOUND)
 
-if (USE_EXTERNAL_LIBPNG)
-    list(APPEND INTEGRATION_TESTING_SOURCES integration_testing/libpng_test.cpp)
-endif(USE_EXTERNAL_LIBPNG)
+if (PNG_FOUND)
+    list(APPEND INTEGRATION_TESTING_SOURCES
+            integration_testing/external/libpng_test.cpp)
+endif(PNG_FOUND)
 
 # Add targets
 add_executable(unit_tests
@@ -34,8 +39,6 @@ add_executable(unit_tests
         interleave_test.cpp
         bit_packing.cpp block_reorder.cpp)
 
-
-
 add_executable(integration_testing
         ${INTEGRATION_TESTING_SOURCES}
 )
@@ -50,37 +53,25 @@ target_include_directories(integration_testing
     PRIVATE gtest.PUBLIC
 )
 
-
-if (USE_EXTERNAL_LIBPNG)
+if(PNG_FOUND)
     target_include_directories(integration_testing
             PUBLIC ${PNG_INCLUDE_DIRS})
     target_link_libraries(integration_testing
             PUBLIC ${PNG_LIBRARIES})
     target_compile_definitions(integration_testing
-            PUBLIC ${PNG_DEFINITIONS}
-            PUBLIC USE_LIBPNG=1)
-endif(USE_EXTERNAL_LIBPNG)
+            PUBLIC ${PNG_DEFINITIONS})
+endif(PNG_FOUND)
 
-if (USE_IMAGEMAGICK_INTEGRATION)
+if (ImageMagick_FOUND)
     target_include_directories(integration_testing
-         PRIVATE xyuv_magick.PUBLIC
-    )
+            PUBLIC ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(integration_testing
+            PUBLIC ${ImageMagick_LIBRARIES})
+endif(ImageMagick_FOUND)
 
-    target_sources(integration_testing
-        PRIVATE integration_testing/imagick_test.cpp
-    )
-
-    add_dependencies(integration_testing gtest)
-    target_link_libraries(integration_testing ${ImageMagick_Magic++_LIBRARIES})
-
-    target_compile_options(integration_testing
-        PRIVATE -DMAGICKCORE_QUANTUM_DEPTH=${MAGICKCORE_QUANTUM_DEPTH}
-        PRIVATE -DMAGICKCORE_HDRI_ENABLE=${MAGICKCORE_HDRI_ENABLE}
-    )
-
-endif (USE_IMAGEMAGICK_INTEGRATION)
-
-target_link_libraries(unit_tests xyuv gtest)
+target_link_libraries(unit_tests
+        PUBLIC xyuv
+        PUBLIC gtest)
 target_link_libraries(integration_testing
         PUBLIC xyuv
         PUBLIC gtest )

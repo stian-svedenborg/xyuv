@@ -36,7 +36,7 @@ class FormatsBase : public ::testing::TestWithParam<std::string> {
 protected:
     static std::vector<std::string> list_all_format_templates() {
         std::vector<std::string> formats;
-        for (auto & fmt : Resources::config().get_format_templates()) {
+        for (auto & fmt : Resources::get().config().get_format_templates()) {
             formats.push_back(fmt.first);
         }
         return formats;
@@ -100,7 +100,7 @@ TEST_P(Formats, subsampling) {
     // - If the operation is expected_sub_sampled -> expected_444 -> observed_subsampled -> observed_444
     //   then expected should equal observed.
 
-    ::chroma_siting chroma_siting = Resources::config().get_chroma_siting(GetParam());
+    ::chroma_siting chroma_siting = Resources::get().config().get_chroma_siting(GetParam());
 
     yuv_image expected_sub = create_test_image(chroma_siting);
     yuv_image expected_444 = up_sample(expected_sub);
