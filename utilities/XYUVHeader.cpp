@@ -25,10 +25,7 @@
 #include <xyuv/structures/format.h>
 #include <xyuv/frame.h>
 #include <xyuv/large_buffer.h>
-#include <Magick++/Geometry.h>
-#include <Magick++/Image.h>
 #include <iostream>
-#include <xyuv/imagemagick/magick_wrapper.h>
 #include "XYUVHeader.h"
 
 
@@ -58,16 +55,6 @@ xyuv::frame XYUVHeader::AddHeader(const xyuv::format_template & fmt_template,
 
     return frame;
 }
-
-void XYUVHeader::Display(const xyuv::frame & frame) {
-    Magick::Image image(Magick::Geometry(1,1,0,0), Magick::ColorRGB(0.0,0.0,0.0));
-
-    xyuv::magick_wrapper wrapper(image);
-    xyuv::write_frame_to_rgb_image(&wrapper, frame);
-
-    image.display();
-}
-
 
 int main(int argc, char **argv) {
     try {

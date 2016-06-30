@@ -22,21 +22,22 @@
  * THE SOFTWARE.
  */
 
-#include <Magick++/Image.h>
-#include <xyuv/imagemagick/magick_wrapper.h>
+
 #include <fstream>
 #include <xyuv/frame.h>
 #include <xyuv/large_buffer.h>
 #include <iostream>
 #include "XYUVHeader.h"
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+#include "external/magick_format_rw.h"
+#endif
+
+#if defined(USE_LIBPNG) && USE_LIBPNG
+#include "external/libpng_format_rw.h"
+#endif
 
 std::string get_suffix(const std::string & path);
 
-static xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name ) {
-    Magick::Image image(infile_name);
-    xyuv::magick_wrapper wrapper(image);
-    return xyuv::read_frame_from_rgb_image(wrapper, format);
-}
 
 static xyuv::frame LoadConvertFrame_xyuv(const xyuv::format & format, const std::string & infile_name ) {
     std::ifstream fin(infile_name, std::ios::binary);
@@ -91,11 +92,17 @@ xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std
             {".bin", LoadConvertFrame_raw},
             {".raw", LoadConvertFrame_raw},
             {".yuv", LoadConvertFrame_raw},
+#if defined(USE_LIBPNG) && USE_LIBPNG
+            {".png", LoadConvertFrame_libpng },
+#elif defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
             {".png", LoadConvertFrame_imagemagick},
+#endif
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
             {".jpg", LoadConvertFrame_imagemagick},
             {".gif", LoadConvertFrame_imagemagick},
             {".tga", LoadConvertFrame_imagemagick},
             {".bmp", LoadConvertFrame_imagemagick},
+#endif
             {".hex", LoadConvertFrame_hex},
             {".dump", LoadConvertFrame_hex},
     };
@@ -113,7 +120,11 @@ xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std
         return (it->second)(format, infile_name);
     }
     else {
-        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' for input file '" + infile_name + "' trying to pass it to imagemagick." << std::endl;
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' for input file '" + infile_name + "' trying to pass it to ImageMagick." << std::endl;
         return LoadConvertFrame_imagemagick(format, infile_name);
+#else
+        throw std::runtime_error("[Error]: Unrecognized file suffix '\" + suffix + \"' aborting.");
+#endif
     }
 }

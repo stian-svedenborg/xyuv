@@ -65,7 +65,7 @@ public:
 // Enable a more directed test with more predictable values.
 static void test_encode_decode(const ::format_template &format_template, const yuv_image & base_image) {
 
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
 
     chroma_siting.subsampling = format_template.subsampling;
@@ -132,14 +132,14 @@ TEST_P(FormatRegression, FromYUVAndBackAgain) {
 
     std::cout << "[ FORMAT   ] " <<  GetParam() << std::endl;
 
-    ::format_template     format_template = Resources::config().get_format_template(GetParam());
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    ::format_template     format_template = Resources::get().config().get_format_template(GetParam());
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
 
     try {
-        auto sitings = Resources::config().get_chroma_sitings(format_template.subsampling);
+        auto sitings = Resources::get().config().get_chroma_sitings(format_template.subsampling);
         std::string siting_string = *sitings.begin();
-        chroma_siting = Resources::config().get_chroma_siting(siting_string);
+        chroma_siting = Resources::get().config().get_chroma_siting(siting_string);
     } catch (std::exception & e) {
         FAIL() << e.what();
         return;
@@ -189,14 +189,14 @@ TEST_P(FormatRegression, FromYUVAndBackAgain) {
 
 TEST_P(FormatRegression, ToFileAndBackAgain) {
     SCOPED_TRACE(GetParam());
-    ::format_template     format_template = Resources::config().get_format_template(GetParam());
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    ::format_template     format_template = Resources::get().config().get_format_template(GetParam());
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
 
     try {
-        auto sitings = Resources::config().get_chroma_sitings(format_template.subsampling);
+        auto sitings = Resources::get().config().get_chroma_sitings(format_template.subsampling);
         std::string siting_string = *sitings.begin();
-        chroma_siting = Resources::config().get_chroma_siting(siting_string);
+        chroma_siting = Resources::get().config().get_chroma_siting(siting_string);
     } catch (std::exception & e) {
         FAIL() << e.what();
         return;
@@ -253,8 +253,7 @@ TEST_P(FormatRegression, ToFileAndBackAgain) {
     }
 }
 
-
-INSTANTIATE_TEST_CASE_P(, FormatRegression, ::testing::ValuesIn(Resources::get_all_formats()));
+INSTANTIATE_TEST_CASE_P(, FormatRegression, ::testing::ValuesIn(Resources::get().get_all_formats()));
 
 
 

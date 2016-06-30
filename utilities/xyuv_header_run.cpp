@@ -28,7 +28,9 @@
 #include <memory>
 #include <unordered_set>
 #include <iostream>
-
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+#include "external/magick_format_rw.h"
+#endif
 
 static std::string strip_suffix(const std::string & path) {
     return path.substr(0, path.rfind('.', std::string::npos));
@@ -191,9 +193,11 @@ void XYUVHeader::Run(const ::options & options) {
         }
     }
 
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
     if (options.display && options.input_files.size() != 1 ) {
         throw std::invalid_argument("--display only supported for a single input.");
     }
+#endif
 
     if (options.input_files.size() == 0) {
         throw std::logic_error("Missing input files.");
@@ -253,9 +257,11 @@ void XYUVHeader::Run(const ::options & options) {
             }
         }
 
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
         if (options.display) {
-            Display(frame);
+            Display_imagemagick(frame);
         }
+#endif
     }
 }
 

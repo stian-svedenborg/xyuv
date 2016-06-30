@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,23 +25,55 @@
 #pragma once
 #include <gtest/gtest.h>
 #include <xyuv/config_manager.h>
-#include <Magick++/Image.h>
+#include <xyuv/frame.h>
+#include <xyuv.h>
+#include <fstream>
 
 // Useful global constants
 class Resources {
 public:
-    static const xyuv::config_manager & config();
-    static const Magick::Image & get_lena512();
-    static const Magick::Image & get_tiny();
-    static const Magick::Image & get_default();
+    enum class TestImage {
+        LENA,
+        ODDS,
+        TINY
+    };
 
-    static std::vector<std::string> get_all_formats();
-    static std::vector<std::string> get_all_conversion_matrices();
+    const std::string get_data_dir() const {
+        return "testing/integration_testing/test_data/";
+    }
 
-private:
+    const std::string get_file_basepath(TestImage image) const {
+        switch (image) {
+            case TestImage::LENA:
+                return get_data_dir() + "lena512color";
+            case TestImage::ODDS:
+                return get_data_dir() + "odds";
+            case TestImage::TINY:
+                return get_data_dir() + "tiny";
+            default:
+                throw std::runtime_error("Unsupported value.");
+        }
+    }
+
+    const std::string get_png_path(TestImage image) const {
+        return get_file_basepath(image) + ".png";
+    }
+
+    xyuv::frame get_test_frame(TestImage image) {
+        std::ifstream fin(get_file_basepath(image) + ".xyuv");
+        xyuv::frame frame;
+        xyuv::read_frame(&frame, fin);
+        return frame;
+    }
+
+    const xyuv::config_manager & config() const;
+
+    std::vector<std::string> get_all_formats() const;
+    std::vector<std::string> get_all_conversion_matrices() const;
+
     static const Resources & get();
+private:
     xyuv::config_manager config_;
-    Magick::Image Lena512, Tiny;
 
     Resources();
 };

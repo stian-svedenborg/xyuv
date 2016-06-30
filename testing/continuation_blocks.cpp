@@ -61,8 +61,8 @@ protected:
     }
 
     virtual void SetUp() override {
-        fmt.chroma_siting = Resources::config().get_chroma_siting("444");
-        fmt.conversion_matrix = Resources::config().get_conversion_matrix("identity");
+        fmt.chroma_siting = Resources::get().config().get_chroma_siting("444");
+        fmt.conversion_matrix = Resources::get().config().get_conversion_matrix("identity");
 
         fmt.image_w = 1;
         fmt.image_h = 1;

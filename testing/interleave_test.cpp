@@ -36,8 +36,8 @@ using namespace xyuv;
 static xyuv::format create_interleaved_format () {
     xyuv::format format;
 
-    format.chroma_siting = Resources::config().get_chroma_siting("444");
-    format.conversion_matrix = Resources::config().get_conversion_matrix("identity");
+    format.chroma_siting = Resources::get().config().get_chroma_siting("444");
+    format.conversion_matrix = Resources::get().config().get_conversion_matrix("identity");
 
     format.image_w = 1;
     format.image_h = 5;
