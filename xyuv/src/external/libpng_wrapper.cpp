@@ -42,8 +42,8 @@ namespace xyuv {
 
         png_uint_32 width = 0;
         png_uint_32 height = 0;
-        int bit_depth = 0;
-        int channels = 0;
+        png_uint_32 bit_depth = 0;
+        png_uint_32 channels = 0;
     };
 
     static libpng_wrapper_internal_data_struct *create_internal_data() {
@@ -73,7 +73,7 @@ namespace xyuv {
             this->data->row_pointers = new png_bytep[this->data->height]();
             png_uint_32 row_bytes = this->data->channels * this->data->width * this->data->bit_depth / 8;
             this->data->image_data = new png_byte[row_bytes * this->data->height]();
-            for (int y = 0; y < this->data->height; y++) {
+            for (png_uint_32 y = 0; y < this->data->height; y++) {
                 this->data->row_pointers[y] = this->data->image_data + y * row_bytes;
             }
         } catch(...) {
@@ -207,7 +207,7 @@ namespace xyuv {
             const png_uint_32 row_bytes = png_get_rowbytes(png_ptr, info_ptr);
             internal_data->image_data = new png_byte[internal_data->height * row_bytes];
 
-            for (int y = 0; y < internal_data->height; y++) {
+            for (png_uint_32 y = 0; y < internal_data->height; y++) {
                 internal_data->row_pointers[y] = internal_data->image_data + y * row_bytes;
             }
 

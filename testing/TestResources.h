@@ -50,6 +50,8 @@ public:
                 return get_data_dir() + "odds";
             case TestImage::TINY:
                 return get_data_dir() + "tiny";
+            default:
+                throw std::runtime_error("Unsupported value.");
         }
     }
 
