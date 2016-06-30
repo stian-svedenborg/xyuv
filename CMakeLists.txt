@@ -20,15 +20,6 @@ option(NO_EXTERNAL_IMAGEMAGICK
 option(NO_EXTERNAL_LIBPNG
     "Do not use libpng in xyuv_header and do not include the imagemagick wrapper class." OFF)
 
-# Register further options.
-
-#set(MAGICKCORE_QUANTUM_DEPTH 16 CACHE STRING
-#    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
-
-
-#set(MAGICKCORE_HDRI_ENABLE 0 CACHE STRING
-#    "If USE_IMAGEMAGICK_INTEGRATION is on, then this constant is passed on to the imagemagick headers. See ImageMagick Docs for more info." FORCE)
-
 # Set up Include primary XYUV sources
 set(XYUV_SOURCES
         xyuv/src/pixel_packer.cpp
@@ -135,7 +126,7 @@ if(PNG_FOUND)
             PUBLIC ${PNG_DEFINITIONS})
     add_definitions(-DUSE_LIBPNG=1)
     install(FILES xyuv/include/xyuv/external/libpng_wrapper.h
-            DESTINATION include/xyuv/external/libpng_wrapper.h
+            DESTINATION include/xyuv/external/
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 endif(PNG_FOUND)
 
@@ -147,7 +138,7 @@ if (ImageMagick_FOUND)
             PUBLIC ${ImageMagick_LIBRARIES})
     add_definitions(-DUSE_IMAGEMAGICK=1)
     install(FILES xyuv/include/xyuv/external/magick_wrapper.h
-            DESTINATION include/xyuv/external/magick_wrapper.h
+            DESTINATION include/xyuv/external/
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 endif(ImageMagick_FOUND)
 

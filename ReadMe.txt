@@ -31,6 +31,9 @@ $ cmake ../xyuv
 $ make
 # make install
 
+You may also need to run ldconfig to update the shared library cache.
+# ldconfig
+
 The default installation directory can be overridden
 by passing -DCMAKE_INSTALL_PREFIX:PATH=/path/to/somewhere
 to cmake.
