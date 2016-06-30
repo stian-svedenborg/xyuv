@@ -32,7 +32,7 @@ option(NO_EXTERNAL_LIBPNG
 # Set up Include primary XYUV sources
 set(XYUV_SOURCES
         xyuv/src/pixel_packer.cpp
-        xyuv/src/rgb_conversion.cpp
+        xyuv/src/color_conversion.cpp
         xyuv/src/utility.cpp
         xyuv/src/config-parser/chroma_siting_parser.cpp
         xyuv/src/config-parser/pixel_format_parser.cpp

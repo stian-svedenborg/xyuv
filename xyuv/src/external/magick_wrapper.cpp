@@ -26,7 +26,7 @@
 #include <xyuv/external/magick_wrapper.h>
 #include "xyuv/structures/conversion_matrix.h"
 #include "xyuv/structures/color.h"
-#include "../rgb_conversion.h"
+#include "xyuv/color_conversion.h"
 #include "../assert.h"
 #include <magick/magick-config.h>
 #include <Magick++.h>

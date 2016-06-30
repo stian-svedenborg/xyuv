@@ -24,7 +24,7 @@
 
 #include <xyuv/structures/color.h>
 #include "TestResources.h"
-#include "../xyuv/src/rgb_conversion.h"
+#include "xyuv/color_conversion.h"
 
 #include <gtest/gtest.h>
 

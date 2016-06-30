@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,21 @@ struct rgb_color;
 struct yuv_color;
 struct conversion_matrix;
 
+/** \brief Convert a single yuv_color point to rgb.
+ * \par rgb[out] output color.
+ * \par yuv[in] input color.
+ * \par matrix[in] conversion matrix to use for the conversion.
+ * \par has_y[in]  true if the source color uses the y component.
+ * \par has_u[in]  true if the source color uses the u component.
+ * \par has_v[in]  true if the source color uses the v component.
+ */
 void to_rgb(rgb_color *rgb, const yuv_color &yuv, const conversion_matrix &matrix, bool has_y, bool has_u, bool has_v);
 
+/** \brief Convert a single rgb_color point to yuv.
+ * \par yuv[out] output color.
+ * \par rgb[in] input color.
+ * \par matrix[in] conversion matrix to use for the conversion.
+ */
 void to_yuv(yuv_color *yuv, const rgb_color &rgb, const conversion_matrix &matrix);
 
 } // namespace xyuv

@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <xyuv/structures/color.h>
-#include "../rgb_conversion.h"
+#include "xyuv/color_conversion.h"
 #include "../assert.h"
 #include "../utility.h"
 
