@@ -78,7 +78,7 @@ set(XYUV_SOURCES
 
 # Conditionally include wrappers for external libraries
 if(NOT NO_EXTERNAL_LIBPNG)
-    find_package(PNG)
+    find_package(PNG 1.2)
     if (PNG_FOUND)
         list(APPEND XYUV_SOURCES
             xyuv/include/xyuv/external/libpng_wrapper.h
