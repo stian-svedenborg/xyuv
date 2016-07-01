@@ -166,7 +166,7 @@ void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t s
     }
 
 
-    uint64_t bytes_written = uint32_rounds * words_per_line * sizeof(uint32_t);
+    uint64_t bytes_written = (uint32_rounds/words_per_line) * words_per_line * sizeof(uint32_t);
     if (bytes_written < size) {
         // Write last line.
         fout << std::setw(16) << std::setfill('0') << std::noshowbase << std::hex << bytes_written << ": ";
