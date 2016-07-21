@@ -71,7 +71,7 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
             {".raw", write_frame_raw },
             {".yuv", write_frame_raw },
 #if defined(USE_LIBPNG) && USE_LIBPNG
-            {".png", WriteConvertFrame_imagemagick },
+            {".png", WriteConvertFrame_libpng },
 #elif defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
             {".png", WriteConvertFrame_imagemagick },
 #endif

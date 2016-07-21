@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -187,17 +187,17 @@ TEST(BitPacking, ReadSinglebyte)
     // Read all 8 bits from the byte
     result = 0;
     xyuv::read_bits(result, &byte, 0, 8);
-    ASSERT_EQ(0xdc, result);
+    ASSERT_EQ(0xdcu, result);
 
     // Read low 4 bits from low nibble
     result = 0;
     xyuv::read_bits(result, &byte, 0, 4);
-    ASSERT_EQ(0x0c, result);
+    ASSERT_EQ(0x0cu, result);
 
     // Read low 4 bits from high nibble
     result = 0;
     xyuv::read_bits(result, &byte, 4, 4);
-    ASSERT_EQ(0x0d, result);
+    ASSERT_EQ(0x0du, result);
 
 }
 
@@ -210,30 +210,30 @@ TEST(BitPacking, ReadMultibyte)
     // Read all 8 bits from the low byte
     result = 0;
     xyuv::read_bits(result, bytes, 0, 8);
-    ASSERT_EQ(0xdc, result);
+    ASSERT_EQ(0xdcu, result);
 
     // Read low 4 bits from low nibble low byte
     result = 0;
     xyuv::read_bits(result, bytes, 0, 4);
-    ASSERT_EQ(0x0c, result);
+    ASSERT_EQ(0x0cu, result);
 
     // Read low 4 bits from high nibble low byte
     result = 0;
     xyuv::read_bits(result, bytes, 4, 4);
-    ASSERT_EQ(0x0d, result);
+    ASSERT_EQ(0x0du, result);
 
     // Read all 8 bits from the high byte
     result = 0;
     xyuv::read_bits(result, bytes, 8, 8);
-    ASSERT_EQ(0x5a, result);
+    ASSERT_EQ(0x5au, result);
 
     // Read low 4 bits from low nibble
     result = 0;
     xyuv::read_bits(result, bytes, 6, 5);
-    ASSERT_EQ(0x0b, result);
+    ASSERT_EQ(0x0bu, result);
 
     // Read low 12 bits crossing the byte-boundary
     result = 0;
     xyuv::read_bits(result, bytes, 3, 12);
-    ASSERT_EQ(0xb5b, result);
+    ASSERT_EQ(0xb5bu, result);
 }
