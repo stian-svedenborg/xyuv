@@ -100,7 +100,7 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
         std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' trying to pass it to ImageMagick." << std::endl;
         WriteConvertFrame_imagemagick(frame, out_filename);
 #else
-        throw std::runtime_error("[Error]: Unrecognized file suffix '\" + suffix + \"' aborting.");
+        throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
 #endif
     }
 }
