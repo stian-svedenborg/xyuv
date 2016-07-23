@@ -94,7 +94,7 @@ target_link_libraries(xyuv xyuv_core)
 if (USE_IMAGEMAGICK_INTEGRATION)
 
     # Resolve dependencies
-    find_package(ImageMagick REQUIRED COMPONENTS Magick++)
+    find_package(ImageMagick 6 REQUIRED COMPONENTS Magick++)
     message("Found ImageMagick headers at ${ImageMagick_INCLUDE_DIRS}")
 
     # Set up library
