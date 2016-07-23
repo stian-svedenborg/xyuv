@@ -31,11 +31,6 @@
 #include <vector>
 
 struct options {
-    enum class output_modes {
-        DEFAULT,
-        XYUV,
-        IMAGEMAGICK,
-    };
 
     // Paths to additional format files. Will try to load them as format first, then
     // chroma siting, then rgb_matrix.
@@ -48,10 +43,6 @@ struct options {
     // if no output file name has been specified the resulting filename is
     // the same as the input - suffix + ".xyuv"
     std::vector<std::string> input_files;
-
-    // Output mode of the program.
-    // Whether to interpret the output as xyuv or a standard format.
-    output_modes output_mode = output_modes::DEFAULT;
 
     // Strings to format templates to be used in the output.
     // Must be either exactly one or one per input file.
@@ -81,8 +72,10 @@ struct options {
     // Write image to file
     bool writeout = true;
 
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
     // Display the resulting image.
     bool display = false;
+#endif
 
     // Inverts the Y dimension in the resulting image.
     bool flip_y = false;
@@ -116,8 +109,6 @@ protected:
     void WriteFrame(const xyuv::frame& frame, const std::string & out_filename);
 
     xyuv::frame LoadConvertFrame( const xyuv::format &, const std::string & infile_name );
-
-    void Display(const xyuv::frame & frm);
 
     void PrintHelp();
 

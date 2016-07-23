@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,33 @@
  * THE SOFTWARE.
  */
 
-#include <xyuv/structures/color.h>
-#include "TestResources.h"
-#include "xyuv/color_conversion.h"
+#include "magick_format_rw.h"
+#include <xyuv.h>
+#include <xyuv/frame.h>
+#include <Magick++/Geometry.h>
+#include <Magick++/Image.h>
+#include <xyuv/external/magick_wrapper.h>
 
-#include <gtest/gtest.h>
+xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name ) {
+    Magick::Image image(infile_name);
+    xyuv::magick_wrapper wrapper(image);
+    return xyuv::read_frame_from_rgb_image(wrapper, format);
+}
 
-using namespace xyuv;
+void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename) {
+    Magick::Image image(Magick::Geometry(frame.format.image_w,frame.format.image_h,0,0), Magick::ColorRGB(0.0,0.0,0.0));
 
-TEST(RGBTest, EncodeDecode) {
+    xyuv::magick_wrapper wrapper(image);
+    xyuv::write_frame_to_rgb_image(&wrapper, frame);
 
-    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
+    image.write(out_filename);
+}
 
-    const rgb_color rgb_expected = { 0.333f, 1.0f, 0.0f, 0.5f};
+void Display_imagemagick(const xyuv::frame & frame) {
+    Magick::Image image(Magick::Geometry(1,1,0,0), Magick::ColorRGB(0.0,0.0,0.0));
 
-    yuv_color yuv;
-    to_yuv(&yuv, rgb_expected, conversion_matrix);
+    xyuv::magick_wrapper wrapper(image);
+    xyuv::write_frame_to_rgb_image(&wrapper, frame);
 
-    rgb_color rgb_observed;
-    to_rgb(&rgb_observed, yuv, conversion_matrix, true, true, true);
-
-    ASSERT_NEAR(rgb_expected.r, rgb_observed.r, 0.00001f);
-    ASSERT_NEAR(rgb_expected.g, rgb_observed.g, 0.00001f);
-    ASSERT_NEAR(rgb_expected.b, rgb_observed.b, 0.00001f);
-    ASSERT_NEAR(rgb_expected.a, rgb_observed.a, 0.00001f);
-
+    image.display();
 }

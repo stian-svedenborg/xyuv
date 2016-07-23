@@ -4,6 +4,26 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 #      cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
 
+set(INTEGRATION_TESTING_SOURCES
+    integration_testing/main.cpp
+    integration_testing/regress_format_templates.cpp
+    integration_testing/file_format_testing.cpp
+
+    TestResources.cpp
+    TestResources.h
+    integration_testing/conversion_matrices.cpp
+)
+
+if (ImageMagick_FOUND)
+    list(APPEND INTEGRATION_TESTING_SOURCES
+            integration_testing/external/imagick_test.cpp)
+endif(ImageMagick_FOUND)
+
+if (PNG_FOUND)
+    list(APPEND INTEGRATION_TESTING_SOURCES
+            integration_testing/external/libpng_test.cpp)
+endif(PNG_FOUND)
+
 # Add targets
 add_executable(unit_tests
         main.cpp
@@ -19,14 +39,9 @@ add_executable(unit_tests
         interleave_test.cpp
         bit_packing.cpp block_reorder.cpp)
 
-
-
 add_executable(integration_testing
-        integration_testing/main.cpp
-        integration_testing/regress_format_templates.cpp
-        integration_testing/file_format_testing.cpp
-
-        TestResources.cpp TestResources.h integration_testing/conversion_matrices.cpp)
+        ${INTEGRATION_TESTING_SOURCES}
+)
 
 target_include_directories(unit_tests
     PRIVATE xyuv.PUBLIC
@@ -38,27 +53,28 @@ target_include_directories(integration_testing
     PRIVATE gtest.PUBLIC
 )
 
-if (USE_IMAGEMAGICK_INTEGRATION)
+if(PNG_FOUND)
     target_include_directories(integration_testing
-         PRIVATE xyuv_magick.PUBLIC
-    )
+            PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(integration_testing
+            PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(integration_testing
+            PUBLIC ${PNG_DEFINITIONS})
+endif(PNG_FOUND)
 
-    target_sources(integration_testing
-        PRIVATE integration_testing/imagick_test.cpp
-    )
+if (ImageMagick_FOUND)
+    target_include_directories(integration_testing
+            PUBLIC ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(integration_testing
+            PUBLIC ${ImageMagick_LIBRARIES})
+endif(ImageMagick_FOUND)
 
-    add_dependencies(integration_testing gtest)
-    target_link_libraries(integration_testing ${ImageMagick_Magic++_LIBRARIES})
-
-    target_compile_options(integration_testing
-        PRIVATE -DMAGICKCORE_QUANTUM_DEPTH=${MAGICKCORE_QUANTUM_DEPTH}
-        PRIVATE -DMAGICKCORE_HDRI_ENABLE=${MAGICKCORE_HDRI_ENABLE}
-    )
-
-endif (USE_IMAGEMAGICK_INTEGRATION)
-
-target_link_libraries(unit_tests xyuv gtest)
-target_link_libraries(integration_testing xyuv gtest)
+target_link_libraries(unit_tests
+        PUBLIC xyuv
+        PUBLIC gtest)
+target_link_libraries(integration_testing
+        PUBLIC xyuv
+        PUBLIC gtest )
 
 add_dependencies(unit_tests gtest xyuv)
 add_dependencies(integration_testing gtest xyuv)

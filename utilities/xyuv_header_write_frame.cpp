@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,25 @@
  * THE SOFTWARE.
  */
 
-#include <Magick++/Image.h>
 #include <fstream>
-#include <xyuv/imagemagick/magick_wrapper.h>
 #include <xyuv/large_buffer.h>
 #include <xyuv/frame.h>
 #include <iostream>
 #include "XYUVHeader.h"
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+#include "external/magick_format_rw.h"
+#endif
+
+#if defined(USE_LIBPNG) && USE_LIBPNG
+#include "external/libpng_format_rw.h"
+#endif
+
+
 
 void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size);
 
 std::string get_suffix(const std::string & path) {
     return path.substr(path.rfind('.', std::string::npos), std::string::npos);
-}
-
-static void write_frame_using_image_magick(const xyuv::frame &frame, const std::string & out_filename) {
-    Magick::Image image(Magick::Geometry(frame.format.image_w,frame.format.image_h,0,0), Magick::ColorRGB(0.0,0.0,0.0));
-
-    xyuv::magick_wrapper wrapper(image);
-    xyuv::write_frame_to_rgb_image(&wrapper, frame);
-
-    image.write(out_filename);
 }
 
 static void write_frame_using_xyuv(const xyuv::frame & frame, const std::string & out_filename) {
@@ -72,11 +70,17 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
             {".bin", write_frame_raw },
             {".raw", write_frame_raw },
             {".yuv", write_frame_raw },
-            {".png", write_frame_using_image_magick },
-            {".jpg", write_frame_using_image_magick },
-            {".gif", write_frame_using_image_magick },
-            {".tga", write_frame_using_image_magick },
-            {".bmp", write_frame_using_image_magick },
+#if defined(USE_LIBPNG) && USE_LIBPNG
+            {".png", WriteConvertFrame_libpng },
+#elif defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+            {".png", WriteConvertFrame_imagemagick },
+#endif
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+            {".jpg", WriteConvertFrame_imagemagick },
+            {".gif", WriteConvertFrame_imagemagick },
+            {".tga", WriteConvertFrame_imagemagick },
+            {".bmp", WriteConvertFrame_imagemagick },
+#endif
     };
 
     std::string suffix = get_suffix(out_filename);
@@ -92,7 +96,11 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
         (it->second)(frame, out_filename);
     }
     else {
-        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' trying to pass it to imagemagick." << std::endl;
-        write_frame_using_image_magick(frame, out_filename);
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' trying to pass it to ImageMagick." << std::endl;
+        WriteConvertFrame_imagemagick(frame, out_filename);
+#else
+        throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
+#endif
     }
 }

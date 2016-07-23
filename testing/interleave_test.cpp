@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,13 +36,14 @@ using namespace xyuv;
 static xyuv::format create_interleaved_format () {
     xyuv::format format;
 
-    format.chroma_siting = Resources::config().get_chroma_siting("444");
-    format.conversion_matrix = Resources::config().get_conversion_matrix("identity");
+    format.chroma_siting = Resources::get().config().get_chroma_siting("444");
+    format.conversion_matrix = Resources::get().config().get_conversion_matrix("identity");
 
     format.image_w = 1;
     format.image_h = 5;
 
     format.size = 5;
+    format.origin = xyuv::image_origin::UPPER_LEFT;
 
     xyuv::plane plane;
     plane.size = 5;
@@ -50,6 +51,8 @@ static xyuv::format create_interleaved_format () {
     plane.interleave_mode = xyuv::interleave_pattern::INTERLEAVE_0_2_4__1_3_5;
     plane.block_stride = 8;
     plane.line_stride = 1;
+    plane.block_order.mega_block_height = 1;
+    plane.block_order.mega_block_width = 1;
 
     format.planes.push_back(plane);
 

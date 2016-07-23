@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
 #include <gtest/gtest.h>
 
 #include <xyuv/structures/conversion_matrix.h>
-#include "magick_wrapper.h"
+#include <xyuv/structures/format.h>
+#include <xyuv/frame.h>
+#include <xyuv/external/magick_wrapper.h>
 #include "../../xyuv/src/config_parser.h"
 #include <xyuv/yuv_image.h>
 #include <xyuv.h>
 #include <Magick++.h>
-#include "../TestResources.h"
-#include <xyuv/structures/format.h>
-#include <xyuv/frame.h>
+#include "../../TestResources.h"
 
 using namespace xyuv;
 
@@ -55,8 +55,8 @@ static void compare_colors(const Magick::ColorRGB & expected, const Magick::Colo
 
 
 TEST_F(ImageMagickWrapperTest, RGB_to_and_from_YUV) {
-    Magick::Image image_expected = Resources::get_lena512();
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    Magick::Image image_expected(Resources::get().get_png_path(Resources::TestImage::LENA));
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
 
     const magick_wrapper img(image_expected);
 
@@ -89,14 +89,14 @@ TEST_F(ImageMagickWrapperTest, RGB_to_and_from_YUV) {
 void ImageMagickWrapperTest::read_write_store_image(const std::string & fmt_name) {
 
     std::cout << "[ FORMAT   ] " <<  GetParam() << std::endl;
-    Magick::Image image_expected = Resources::get_default();
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
-    ::format_template fmt_template = Resources::config().get_format_template(fmt_name);
+    Magick::Image image_expected = Resources::get().get_png_path(Resources::TestImage::LENA);
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
+    ::format_template fmt_template = Resources::get().config().get_format_template(fmt_name);
     ::chroma_siting chroma_siting; // Pick a valid chroma siting.
     try {
-        auto sitings = Resources::config().get_chroma_sitings(fmt_template.subsampling);
+        auto sitings = Resources::get().config().get_chroma_sitings(fmt_template.subsampling);
         std::string siting_string = *sitings.begin();
-        chroma_siting = Resources::config().get_chroma_siting(siting_string);
+        chroma_siting = Resources::get().config().get_chroma_siting(siting_string);
     } catch (std::exception & e) {
         FAIL() << e.what();
         return;
@@ -146,13 +146,10 @@ TEST_P(ImageMagickWrapperTest, ReadWriteStoreImage) {
     read_write_store_image(GetParam());
 }
 
-INSTANTIATE_TEST_CASE_P(, ImageMagickWrapperTest, ::testing::ValuesIn(Resources::get_all_formats()));
-
-#include <iostream>
-
+INSTANTIATE_TEST_CASE_P(, ImageMagickWrapperTest, ::testing::ValuesIn(Resources::get().get_all_formats()));
 
 TEST_F(ImageMagickWrapperTest, MinimalTest) {
-    ::conversion_matrix conversion_matrix = Resources::config().get_conversion_matrix("bt601");
+    ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
 
     // Prepare a single pixel value.
     Magick::ColorRGB expected_color;

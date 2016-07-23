@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-#include "rgb_conversion.h"
+#include "xyuv/color_conversion.h"
 #include "xyuv/structures/conversion_matrix.h"
 #include "xyuv/structures/color.h"
 #include "xyuv/rgb_image.h"
