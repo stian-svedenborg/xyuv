@@ -78,7 +78,25 @@ endif(NOT NO_EXTERNAL_LIBPNG)
 if(NOT NO_EXTERNAL_IMAGEMAGICK)
     find_package(ImageMagick 6.7 COMPONENTS Magick++ MagickCore)
     if(ImageMagick_FOUND)
-    list(APPEND XYUV_SOURCES
+        # Find Imagemagick Library directory
+        get_filename_component(MAGICK_LIB_DIR ${ImageMagick_MagickCore_LIBRARY} DIRECTORY)
+        # Find where Magick++-config lives
+        file(GLOB_RECURSE MAGICK_CONFIG FOLLOW_SYMLINKS ${MAGICK_LIB_DIR}/Magick++-config)
+        # Ask about CXX and lib flags/locations
+        set(MAGICK_CONFIG ${MAGICK_CONFIG} CACHE string "Path to Magick++-config utility")
+        execute_process(COMMAND "${MAGICK_CONFIG}" "--cxxflags" OUTPUT_VARIABLE MAGICK_CXX_FLAGS)
+        execute_process(COMMAND "${MAGICK_CONFIG}" "--libs" OUTPUT_VARIABLE MAGICK_LD_FLAGS)
+        # Add these to cache
+        set(MAGICK_CXX_FLAGS "${MAGICK_CXX_FLAGS}" CACHE string "ImageMagick configuration specific compilation flags." )
+        set(MAGICK_LD_FLAGS  "${MAGICK_LD_FLAGS}" CACHE string "ImageMagick configuration specific linking flags.")
+        # Split into list:
+        string(REGEX MATCHALL "([^\ ]+)" MAGICK_CXX_FLAGS "${MAGICK_CXX_FLAGS}")
+        string(REGEX MATCHALL "([^\ ]+)" MAGICK_LD_FLAGS "${MAGICK_LD_FLAGS}")
+        # Remove trailing whitespace (CMAKE warns about this)
+        string(STRIP "${MAGICK_CXX_FLAGS}" MAGICK_CXX_FLAGS)
+        string(STRIP "${MAGICK_LD_FLAGS}" MAGICK_LD_FLAGS)
+        # Add Sources to list.
+        list(APPEND XYUV_SOURCES
             xyuv/include/xyuv/external/magick_wrapper.h
             xyuv/src/external/magick_wrapper.cpp)
     endif(ImageMagick_FOUND)
@@ -133,8 +151,10 @@ if (ImageMagick_FOUND)
     target_include_directories(xyuv
         PUBLIC ${ImageMagick_INCLUDE_DIRS})
     target_link_libraries(xyuv
-            PUBLIC ${ImageMagick_LIBRARIES})
+            PUBLIC ${ImageMagick_LIBRARIES}
+            PUBLIC ${MAGICK_LD_FLAGS})
     add_definitions(-DUSE_IMAGEMAGICK=1)
+    target_compile_options(xyuv PUBLIC ${MAGICK_CXX_FLAGS})
     install(FILES xyuv/include/xyuv/external/magick_wrapper.h
             DESTINATION include/xyuv/external/
             PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
