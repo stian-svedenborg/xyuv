@@ -72,6 +72,9 @@ struct options {
     // Write image to file
     bool writeout = true;
 
+    // Write metadata on in addition to raw buffers.
+    bool write_meta = false;
+
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
     // Display the resulting image.
     bool display = false;
@@ -107,6 +110,8 @@ protected:
 
     // Write a frame to file, infering the mode from the file suffix.
     void WriteFrame(const xyuv::frame& frame, const std::string & out_filename);
+
+    void WriteMetadata(const xyuv::frame & frame, const std::string & raw_out_filename);
 
     xyuv::frame LoadConvertFrame( const xyuv::format &, const std::string & infile_name );
 

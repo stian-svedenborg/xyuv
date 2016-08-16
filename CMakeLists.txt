@@ -63,7 +63,7 @@ set(XYUV_SOURCES
         xyuv/src/io/versions/1/file_header.h
         xyuv/src/io/versions/1/io_structs.h
         xyuv/src/io/versions/1/io_structs.cpp
-        )
+        xyuv/src/config-parser/format_json.cpp xyuv/include/xyuv/format_json.h)
 
 # Conditionally include wrappers for external libraries
 if(NOT NO_EXTERNAL_LIBPNG)

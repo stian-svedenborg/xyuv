@@ -109,6 +109,12 @@ void XYUVHeader::PrintHelp() {
 
     );
 
+    print_help_section("-D",
+                       "--dump-metadata",
+                       "When outputting to .raw, .bin, .yuv or .hex additionally output the metadata to a json file."
+    );
+
+
     print_help_section("-o OUTPUT_PATH",
                        "--output OUTPUT_PATH",
                        "Optionally override the output path for an input file, the first OUTPUT_PATH maps to the first INPUT_PATH, "
@@ -118,9 +124,15 @@ void XYUVHeader::PrintHelp() {
                        "must exactly match the number of INPUT_PATHs or zero. "
                        "\nThe suffix of OUTPUT_PATH determines the operation performed on the encoded frame on writeout:"
                        "\n- xyuv           The raw data is written to an xyuv image."
-                       "\n- bin, raw, yuv  The raw data directly, with no header."
+                       "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump_metadata)"
+                       "\n- hex            The raw data converted to hex, with no header. (See also --dump_metadata)"
+#if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
                        "\n- *              If supported by imagemagick, the frame is "
                        "\n                 converted back to RGB and saved."
+#elseif defined(USE_LIBPNG) && USE_LIBPNG
+                       "\n- png            The frame is converted back to RGB and saved to a png file."
+#endif
+
     );
 
     print_help_section("-y",
@@ -145,7 +157,6 @@ void XYUVHeader::PrintHelp() {
                        "Supress writeout (no files will be created or overwritten): This is useful for testing trial testing "
                                "new formats and for simple visualisation."
     );
-
 
     print_help_section("-l",
                        "--list",
@@ -218,6 +229,7 @@ void XYUVHeader::PrintHelp() {
 ::options XYUVHeader::ParseArgs(int argc, char ** argv) {
     struct option long_opts[] = {
             { "additional-format-dir", required_argument, 0, 'F'},
+            { "dump-metadata", no_argument, 0, 'D'},
             { "output", required_argument, 0, 'o'},
             { "format-template", required_argument, 0, 'f'},
             { "chroma-siting", required_argument, 0, 's'},
@@ -236,7 +248,7 @@ void XYUVHeader::PrintHelp() {
     };
     int index = 0;
     int c = -1;
-    const char * const shortopts = "?lndcyF:o:f:h:w:m:s:";
+    const char * const shortopts = "?lDndcyF:o:f:h:w:m:s:";
 
     ::options options = {};
     while ( (c = getopt_long(argc, argv, shortopts, long_opts, &index )) != -1 ) {
@@ -273,6 +285,9 @@ void XYUVHeader::PrintHelp() {
                 options.display = true;
                 break;
 #endif
+            case 'D':
+                options.write_meta = true;
+                break;
             case 'n':
                 options.writeout = false;
                 break;
