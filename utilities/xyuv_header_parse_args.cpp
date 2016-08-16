@@ -129,7 +129,7 @@ void XYUVHeader::PrintHelp() {
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
                        "\n- *              If supported by imagemagick, the frame is "
                        "\n                 converted back to RGB and saved."
-#elseif defined(USE_LIBPNG) && USE_LIBPNG
+#elif defined(USE_LIBPNG) && USE_LIBPNG
                        "\n- png            The frame is converted back to RGB and saved to a png file."
 #endif
 
