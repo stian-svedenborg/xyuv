@@ -38,6 +38,19 @@ const static std::vector<std::pair<std::string, uint64_t>> expressions {
         {"-56", -56},
         {"2 + -43", -41},
         {"abs(-54)", 54 },
+
+        {"gcd(2,1)", 1},
+        {"gcd(10,5)", 5},
+        {"gcd(9,15)", 3},
+        {"gcd(1,1)", 1},
+        {"gcd(13,7)", 1},
+
+        {"lcm(2,1)", 2},
+        {"lcm(10,5)", 10},
+        {"lcm(9,15)", 15*3},
+        {"lcm(1,1)", 1},
+        {"lcm(13,7)", 13*7},
+
 };
 
 TEST(MiniCalc, Expressions) {
