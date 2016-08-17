@@ -9,7 +9,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,12 +41,14 @@
 static const std::unordered_map<std::string, std::function<int(int, int)>> binary_functions{
         {"pow", minicalc_pow},
         {"next_multiple", minicalc_next_multiple},
+        {"gcd", minicalc_gcd},
+        {"lcm", minicalc_lcm}
 };
 
 static const std::unordered_map<std::string, std::function<int(int)>> unary_functions{
         {"abs", minicalc_abs},
 };
-#line 50 "parser.c"
+#line 52 "parser.c"
 #include "parser.h"
 /* Next is all token values, in a form suitable for use by makeheaders.
 ** This section will be null unless lemon is run with the -m switch.
@@ -449,21 +451,21 @@ static void yy_destructor(
     case 11: /* COMMA */
     case 12: /* RPAREN */
 {
-#line 58 "parser.ypp"
+#line 60 "parser.ypp"
 
     (void) owner;
     delete (yypminor->yy0);
 
-#line 458 "parser.c"
+#line 460 "parser.c"
 }
       break;
     case 14: /* expr */
 {
-#line 65 "parser.ypp"
+#line 67 "parser.ypp"
 
     delete (yypminor->yy29);
 
-#line 467 "parser.c"
+#line 469 "parser.c"
 }
       break;
     default:  break;   /* If no destructor action specified: do nothing */
@@ -770,70 +772,70 @@ static void yy_reduce(
   **     break;
   */
       case 1: /* result ::= expr */
-#line 72 "parser.ypp"
+#line 74 "parser.ypp"
 {
     owner->set_root(yymsp[0].minor.yy29);
 }
-#line 778 "parser.c"
+#line 780 "parser.c"
         break;
       case 2: /* expr ::= INT */
-#line 76 "parser.ypp"
+#line 78 "parser.ypp"
 {
     yygotominor.yy29 = create_node(yymsp[0].minor.yy0->value);
 }
-#line 785 "parser.c"
+#line 787 "parser.c"
         break;
       case 3: /* expr ::= expr PLUS expr */
-#line 80 "parser.ypp"
+#line 82 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_add);   yy_destructor(yypParser,1,&yymsp[-1].minor);
 }
-#line 791 "parser.c"
+#line 793 "parser.c"
         break;
       case 4: /* expr ::= expr DIV expr */
-#line 81 "parser.ypp"
+#line 83 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_div);   yy_destructor(yypParser,3,&yymsp[-1].minor);
 }
-#line 797 "parser.c"
+#line 799 "parser.c"
         break;
       case 5: /* expr ::= expr MUL expr */
-#line 82 "parser.ypp"
+#line 84 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_mul);   yy_destructor(yypParser,4,&yymsp[-1].minor);
 }
-#line 803 "parser.c"
+#line 805 "parser.c"
         break;
       case 6: /* expr ::= expr MINUS expr */
-#line 83 "parser.ypp"
+#line 85 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_sub);   yy_destructor(yypParser,2,&yymsp[-1].minor);
 }
-#line 809 "parser.c"
+#line 811 "parser.c"
         break;
       case 7: /* expr ::= expr MOD expr */
-#line 84 "parser.ypp"
+#line 86 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_mod);   yy_destructor(yypParser,5,&yymsp[-1].minor);
 }
-#line 815 "parser.c"
+#line 817 "parser.c"
         break;
       case 8: /* expr ::= expr POW expr */
-#line 85 "parser.ypp"
+#line 87 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_pow);   yy_destructor(yypParser,7,&yymsp[-1].minor);
 }
-#line 821 "parser.c"
+#line 823 "parser.c"
         break;
       case 9: /* expr ::= MINUS expr */
-#line 87 "parser.ypp"
+#line 89 "parser.ypp"
 {
     yygotominor.yy29 = create_node(yymsp[0].minor.yy29, minicalc_negate);
   yy_destructor(yypParser,2,&yymsp[-1].minor);
 }
-#line 829 "parser.c"
+#line 831 "parser.c"
         break;
       case 10: /* expr ::= IDENTIFIER */
-#line 90 "parser.ypp"
+#line 92 "parser.ypp"
 { yygotominor.yy29 = create_node(yymsp[0].minor.yy0->identifier, *owner); }
-#line 834 "parser.c"
+#line 836 "parser.c"
         break;
       case 11: /* expr ::= IDENTIFIER LPAREN expr COMMA expr RPAREN */
-#line 92 "parser.ypp"
+#line 94 "parser.ypp"
 {
         auto it = binary_functions.find(yymsp[-5].minor.yy0->identifier);
         if (it != binary_functions.end()) {
@@ -847,10 +849,10 @@ static void yy_reduce(
   yy_destructor(yypParser,11,&yymsp[-2].minor);
   yy_destructor(yypParser,12,&yymsp[0].minor);
 }
-#line 851 "parser.c"
+#line 853 "parser.c"
         break;
       case 12: /* expr ::= IDENTIFIER LPAREN expr RPAREN */
-#line 104 "parser.ypp"
+#line 106 "parser.ypp"
 {
     auto it = unary_functions.find(yymsp[-3].minor.yy0->identifier);
         if (it != unary_functions.end()) {
@@ -863,14 +865,14 @@ static void yy_reduce(
   yy_destructor(yypParser,10,&yymsp[-2].minor);
   yy_destructor(yypParser,12,&yymsp[0].minor);
 }
-#line 867 "parser.c"
+#line 869 "parser.c"
         break;
       case 13: /* expr ::= LPAREN expr RPAREN */
-#line 115 "parser.ypp"
+#line 117 "parser.ypp"
 { yygotominor.yy29 = yymsp[-1].minor.yy29;   yy_destructor(yypParser,10,&yymsp[-2].minor);
   yy_destructor(yypParser,12,&yymsp[0].minor);
 }
-#line 874 "parser.c"
+#line 876 "parser.c"
         break;
       default:
       /* (0) start ::= result */ yytestcase(yyruleno==0);
@@ -933,11 +935,11 @@ static void yy_syntax_error(
 ){
   ParseARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 51 "parser.ypp"
+#line 53 "parser.ypp"
 
    owner->parse_error("Syntax error!");
 
-#line 941 "parser.c"
+#line 943 "parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 
