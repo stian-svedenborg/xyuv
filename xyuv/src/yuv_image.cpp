@@ -55,7 +55,7 @@ yuv_image create_yuv_image(
         result.a_plane.fill(1.0f);
     }
 
-    return std::move(result);
+    return result;
 }
 
 yuv_image create_yuv_image_444(

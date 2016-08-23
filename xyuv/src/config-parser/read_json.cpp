@@ -56,7 +56,7 @@ std::string read_json(const std::string &filename) {
 
     }
 
-    return std::move(result);
+    return result;
 }
 
 } // namespace xyuv

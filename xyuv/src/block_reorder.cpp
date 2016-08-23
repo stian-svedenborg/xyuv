@@ -58,13 +58,17 @@ namespace xyuv {
     }
 
 
-    inline std::pair<uint32_t,uint32_t > get_block_order_coords(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
+    inline std::pair<uint32_t,uint32_t> _get_block_order_coords(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
 
         uint32_t  offset = get_block_order_offset(block_x, block_y, block_order);
 
         auto p = std::make_pair(offset % block_order.mega_block_width, offset / block_order.mega_block_width);
         return p;
     }
+
+    std::pair<uint32_t,uint32_t> get_block_order_coords(uint32_t block_x, uint32_t block_y, const ::block_order & block_order) {
+        return _get_block_order_coords(block_x, block_y, block_order);
+    };
 
 
     bool needs_reorder(const xyuv::format & format ) {
@@ -111,7 +115,7 @@ namespace xyuv {
                     const uint8_t * src_line = plane_base_ptr
                                                + (block_y*plane.block_order.mega_block_height + y)*plane.line_stride;
                     for (uint32_t x = 0; x < plane.block_order.mega_block_width; x++) {
-                        auto internal_coord = get_block_order_coords(x, y, plane.block_order);
+                        auto internal_coord = _get_block_order_coords(x, y, plane.block_order);
                         // Get destination line of micro block.
                         uint8_t* dst_line = block_base + internal_coord.second * mega_block_line_stride;
                         copy_bits(dst_line, internal_coord.first*plane.block_stride, src_line , (block_x*plane.block_order.mega_block_width + x)*plane.block_stride, plane.block_stride );
@@ -158,7 +162,7 @@ namespace xyuv {
                     // Linear output line
                     uint8_t * dst_line = temp_plane.get() + (block_y*plane.block_order.mega_block_height + y)*plane.line_stride;
                     for (uint32_t x = 0; x < plane.block_order.mega_block_width; x++) {
-                        auto internal_coord = get_block_order_coords(x, y, plane.block_order);
+                        auto internal_coord = _get_block_order_coords(x, y, plane.block_order);
                         // Get destination line of micro block.
                         const uint8_t* blocked_line = block_base + internal_coord.second * mega_block_line_stride;
                         copy_bits(dst_line, (block_x*plane.block_order.mega_block_width + x)*plane.block_stride, blocked_line , internal_coord.first*plane.block_stride, plane.block_stride );

@@ -51,7 +51,7 @@ void rgb_image::from_yuv_image(const xyuv::yuv_image & image_in, const xyuv::con
 }
 
 yuv_image rgb_image::to_yuv_image(const xyuv::conversion_matrix & conversion_matrix) const {
-    return std::move(xyuv_to_yuv_image_444(conversion_matrix));
+    return xyuv_to_yuv_image_444(conversion_matrix);
 }
 
 } // namespace xyuv

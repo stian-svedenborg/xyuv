@@ -144,7 +144,7 @@ xyuv::frame create_frame(
     frame.format = format;
     frame.data = std::move(data);
 
-    return std::move(frame);
+    return frame;
 };
 
 } // namespace xyuv
