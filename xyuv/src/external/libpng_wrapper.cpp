@@ -500,11 +500,11 @@ namespace xyuv {
 
 
     uint32_t libpng_wrapper::rows() const {
-        return data ? 0 : static_cast<uint32_t >(this->data->height);
+        return data ? static_cast<uint32_t >(this->data->height) : 0;
     }
 
     uint32_t libpng_wrapper::columns() const {
-        return data ? 0 : static_cast<uint32_t >(this->data->width);
+        return data ? static_cast<uint32_t >(this->data->width) : 0;
     }
 
 
