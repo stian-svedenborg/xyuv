@@ -292,7 +292,7 @@ namespace xyuv {
                                                  const xyuv::conversion_matrix &conversion_matrix) {
         // Check if we need to reallocate image.
         if (this->data == nullptr || !(yuv_image_444.image_h <= this->data->height && yuv_image_444.image_w <= this->data->width)) {
-            *this = std::move(libpng_wrapper(yuv_image_444.image_w, yuv_image_444.image_h, (this->data && this->data->bit_depth == 16) ? BITS_16 : BITS_8));
+            *this = libpng_wrapper(yuv_image_444.image_w, yuv_image_444.image_h, (this->data && this->data->bit_depth == 16) ? BITS_16 : BITS_8);
         } else {
             // Overwrite width + height for the case where we have not reallocated.
             this->data->width = yuv_image_444.image_w;
