@@ -105,7 +105,7 @@ namespace xyuv {
         uint32_t height_in_possible_blocks_lines = static_cast<uint32_t>(plane.size / plane.line_stride);
         uint32_t height_in_macro_blocks = height_in_possible_blocks_lines / plane.block_order.mega_block_height;
 
-        std::unique_ptr<uint8_t> temp_plane {new uint8_t[plane.size]};
+        std::unique_ptr<uint8_t[]> temp_plane {new uint8_t[plane.size]};
 
         for (uint32_t block_y = 0; block_y < height_in_macro_blocks; block_y++) {
             for (uint32_t block_x = 0; block_x < width_in_macro_blocks; block_x++) {
@@ -151,7 +151,7 @@ namespace xyuv {
         uint32_t height_in_possible_blocks_lines = static_cast<uint32_t>(plane.size / plane.line_stride);
         uint32_t height_in_macro_blocks = height_in_possible_blocks_lines / plane.block_order.mega_block_height;
 
-        std::unique_ptr<uint8_t> temp_plane { new uint8_t[plane.size] };
+        std::unique_ptr<uint8_t[]> temp_plane { new uint8_t[plane.size] };
 
         for (uint32_t block_y = 0; block_y < height_in_macro_blocks; block_y++) {
             for (uint32_t block_x = 0; block_x < width_in_macro_blocks; block_x++) {
