@@ -82,6 +82,13 @@ if(NOT NO_EXTERNAL_IMAGEMAGICK)
         get_filename_component(MAGICK_LIB_DIR ${ImageMagick_MagickCore_LIBRARY} DIRECTORY)
         # Find where Magick++-config lives
         file(GLOB_RECURSE MAGICK_CONFIG FOLLOW_SYMLINKS ${MAGICK_LIB_DIR}/Magick++-config)
+        list(LENGTH MAGICK_CONFIG TEMP)
+        if (${TEMP} EQUAL 0)
+            # We failed to find Magick++-config in the same folder as the library,
+            # MacPorts puts the library in /opt/local/lib, and the binaries directly into
+            # /opt/local/bin
+            file(GLOB_RECURSE MAGICK_CONFIG FOLLOW_SYMLINKS ${MAGICK_LIB_DIR}/../bin/Magick++-config)
+        endif (${TEMP} EQUAL 0)
         # Ask about CXX and lib flags/locations
         set(MAGICK_CONFIG ${MAGICK_CONFIG} CACHE string "Path to Magick++-config utility")
         execute_process(COMMAND "${MAGICK_CONFIG}" "--cxxflags" OUTPUT_VARIABLE MAGICK_CXX_FLAGS)
