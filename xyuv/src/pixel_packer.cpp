@@ -463,7 +463,7 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
 
     const uint8_t * raw_data = frame_in.data.get();
 
-    std::unique_ptr<uint8_t> tmp_buffer;
+    std::unique_ptr<uint8_t[]> tmp_buffer;
     if (needs_reorder(frame_in.format)) {
         // Todo: If needed optimize this for memory.
         // At some point we will have allocated 2x frame + 1 plane.

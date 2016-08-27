@@ -24,6 +24,7 @@
 
 #include "../assert.h"
 #include "parsing_helpers.h"
+#include <string>
 
 namespace xyuv {
 
