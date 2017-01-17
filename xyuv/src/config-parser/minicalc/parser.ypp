@@ -2,7 +2,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
 static const std::unordered_map<std::string, std::function<int(int, int)>> binary_functions{
         {"pow", minicalc_pow},
         {"next_multiple", minicalc_next_multiple},
+        {"gcd", minicalc_gcd},
+        {"lcm", minicalc_lcm}
 };
 
 static const std::unordered_map<std::string, std::function<int(int)>> unary_functions{

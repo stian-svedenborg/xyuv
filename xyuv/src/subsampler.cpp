@@ -93,7 +93,7 @@ yuv_image up_sample(const yuv_image &yuva_in) {
     result.y_plane = yuva_in.y_plane;
     result.a_plane = yuva_in.a_plane;
 
-    return std::move(result);
+    return result;
 }
 
 yuv_image down_sample(const yuv_image &yuva_in, const chroma_siting &siting) {

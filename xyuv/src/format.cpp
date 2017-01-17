@@ -131,20 +131,18 @@ xyuv::frame create_frame(
         const uint8_t *raw_data,
         uint64_t raw_data_size
 ) {
-    // First, allocate the buffer.
-    std::unique_ptr<uint8_t[]> data(new uint8_t[format.size]);
+    xyuv::frame frame;
+    frame.format = format;
+
+	// First, allocate the buffer.
+	frame.data.reset(new uint8_t[format.size]);
 
     // If raw_data has been supplied. Copy it.
     if (raw_data != nullptr) {
-        memmove(data.get(), raw_data, std::min(format.size, raw_data_size));
+        memmove(frame.data.get(), raw_data, std::min(format.size, raw_data_size));
     }
 
-    // Assign and return.
-    xyuv::frame frame;
-    frame.format = format;
-    frame.data = std::move(data);
-
-    return std::move(frame);
+    return frame;
 };
 
 } // namespace xyuv

@@ -48,7 +48,7 @@ static xyuv::frame LoadConvertFrame_xyuv(const xyuv::format & format, const std:
 
     xyuv::frame frame;
     xyuv::read_frame(&frame, fin);
-    return std::move(frame);
+    return frame;
 }
 
 static xyuv::frame LoadConvertFrame_raw(const xyuv::format & format, const std::string & infile_name ) {

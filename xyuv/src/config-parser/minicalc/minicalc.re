@@ -153,7 +153,6 @@ int MiniCalc::parse_expression(const std::string & expression)
     ","         {   Parse(parser, TOK_COMMA, nullptr, this); continue; }
 
 
-    // Special rules.
     WS          {   continue; }
     "\000"		{
                     Parse(parser, 0, nullptr, this);

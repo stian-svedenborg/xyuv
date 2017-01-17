@@ -133,7 +133,7 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
             current_offset += word.size()/2;
         }
     }
-    return std::move(data);
+    return data;
 }
 
 

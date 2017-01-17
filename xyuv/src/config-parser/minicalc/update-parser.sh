@@ -3,13 +3,16 @@
 # This script regenerates the minicalc scanner and parser.
 # --------------------------------------------------------
 
+LEMON=${LEMON:-lemon}
+MAKEHEADERS=${MAKEHEADERS:-makeheaders}
+
 set -e
 # Generate Parser
-lemon -m parser.ypp
+${LEMON} -m parser.ypp
 # Rename resulting file to C++.
 mv parser.c parser.cpp
 # Auto generate headerfile
-makeheaders parser.cpp
+${MAKEHEADERS} parser.cpp
 # Rename header file to the convention of the remaining code.
 mv parser.hpp parser.h
 # Generate scanner.

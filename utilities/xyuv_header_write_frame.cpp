@@ -27,6 +27,7 @@
 #include <xyuv/frame.h>
 #include <iostream>
 #include "XYUVHeader.h"
+#include <xyuv/format_json.h>
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
 #include "external/magick_format_rw.h"
 #endif
@@ -103,4 +104,24 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
         throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
 #endif
     }
+}
+
+void XYUVHeader::WriteMetadata(const xyuv::frame & frame, const std::string & raw_out_filename) {
+    std::string metadata_filename = raw_out_filename + ".json";
+
+    std::ofstream fout(metadata_filename);
+
+    if (!fout) {
+        throw std::runtime_error("Could not open file '" + metadata_filename + "'.");
+    }
+
+    std::string json_metadata = xyuv::format_to_json(frame.format);
+
+    fout << json_metadata << std::endl;
+
+    if (!fout) {
+        throw std::runtime_error("Error occured while writing '" + metadata_filename + "'.");
+    }
+
+    fout.close();
 }

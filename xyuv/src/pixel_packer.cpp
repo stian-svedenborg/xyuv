@@ -285,6 +285,8 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
     bool has_a = !format.channel_blocks[channel::A].samples.empty();
 
     std::unique_ptr<uint8_t[]> buffer = std::unique_ptr<uint8_t[]>(new uint8_t[format.size]);
+    // Fill buffer with poison values to make padding "undefined" yet deterministic.
+    poison_buffer(buffer.get(), format.size);
 
     bool has_negative_line_stride = (format.origin == image_origin::LOWER_LEFT);
 
@@ -463,7 +465,7 @@ yuv_image decode_frame(const xyuv::frame &frame_in) {
 
     const uint8_t * raw_data = frame_in.data.get();
 
-    std::unique_ptr<uint8_t> tmp_buffer;
+    std::unique_ptr<uint8_t[]> tmp_buffer;
     if (needs_reorder(frame_in.format)) {
         // Todo: If needed optimize this for memory.
         // At some point we will have allocated 2x frame + 1 plane.

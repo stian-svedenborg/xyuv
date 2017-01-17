@@ -248,6 +248,9 @@ void XYUVHeader::Run(const ::options & options) {
             }
             else {
                 try {
+                    if (options.write_meta) {
+                        WriteMetadata(frame, output_names[i]);
+                    }
                     WriteFrame(frame, output_names[i]);
                 } catch (std::exception & e) {
                     std::cout << "[Warning] Error occured while writing file '" <<

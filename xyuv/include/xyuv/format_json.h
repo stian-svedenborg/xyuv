@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2016 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,42 +22,18 @@
  * THE SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#pragma once
 
-#include "../src/config-parser/minicalc/minicalc.h"
-#include <vector>
+#include <string>
 
-const static std::vector<std::pair<std::string, uint64_t>> expressions {
-        {"7", 7},
-        {"1+2", 3},
-        {"3-5", -2},
-        {"2*3", 6},
-        {"12/3", 4},
-        {"3**3", 27 },
-        {"(8)", 8},
-        {"-56", -56},
-        {"2 + -43", -41},
-        {"abs(-54)", 54 },
+namespace xyuv {
+    struct format;
 
-        {"gcd(2,1)", 1},
-        {"gcd(10,5)", 5},
-        {"gcd(9,15)", 3},
-        {"gcd(1,1)", 1},
-        {"gcd(13,7)", 1},
+    /** Jsonify a format instance.
+     *
+     * @param format format instance to jsonify.
+     * @return json-string representing the format.
+     */
+    std::string format_to_json(const xyuv::format & format);
 
-        {"lcm(2,1)", 2},
-        {"lcm(10,5)", 10},
-        {"lcm(9,15)", 15*3},
-        {"lcm(1,1)", 1},
-        {"lcm(13,7)", 13*7},
-
-};
-
-TEST(MiniCalc, Expressions) {
-
-    for (auto expr : expressions) {
-        SCOPED_TRACE(expr.first);
-        MiniCalc expression(expr.first);
-        ASSERT_EQ(expr.second, expression.evaluate(nullptr));
-    }
 }

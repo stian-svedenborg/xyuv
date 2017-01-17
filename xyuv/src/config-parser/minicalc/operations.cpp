@@ -74,3 +74,24 @@ int minicalc_next_multiple(int base, int multiplier) {
 int minicalc_abs(int v) {
     return v < 0 ? -v : v;
 }
+
+int minicalc_gcd(int lhs, int rhs) {
+    if (lhs <= 0 || rhs <=0 ) {
+        throw std::runtime_error("gcd() must have positive, non-zero operands");
+    }
+    if (lhs > rhs) {
+        return minicalc_gcd(lhs-rhs, rhs);
+    } else if (lhs < rhs) {
+        return minicalc_gcd(lhs, rhs-lhs);
+    }
+    else {
+        return lhs;
+    }
+}
+
+int minicalc_lcm(int lhs, int rhs) {
+    if (lhs <= 0 || rhs <=0 ) {
+        throw std::runtime_error("lcm() must have positive, non-zero operands");
+    }
+    return lhs * rhs / minicalc_gcd(lhs, rhs);
+}
