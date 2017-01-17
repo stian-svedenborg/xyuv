@@ -285,6 +285,8 @@ static xyuv::frame internal_encode_frame(const yuv_image &yuva_in, const xyuv::f
     bool has_a = !format.channel_blocks[channel::A].samples.empty();
 
     std::unique_ptr<uint8_t[]> buffer = std::unique_ptr<uint8_t[]>(new uint8_t[format.size]);
+    // Fill buffer with poison values to make padding "undefined" yet deterministic.
+    poison_buffer(buffer.get(), format.size);
 
     bool has_negative_line_stride = (format.origin == image_origin::LOWER_LEFT);
 

@@ -23,7 +23,7 @@
  */
 
 #include "utility.h"
-
+#include "assert.h"
 
 
 #ifdef _MSVC
@@ -147,6 +147,21 @@ namespace xyuv {
         uint32_t quotient_ceil = (base + (multiplier-1)) / multiplier;
         return quotient_ceil*multiplier;
 
+    }
+
+    void poison_buffer(void *buffer, uint64_t buffersize) {
+        const uint32_t poison_value = 0xDEADBEEF;
+
+        uint64_t i = 0;
+        for (; i + sizeof(poison_value) <= buffersize; i+= sizeof(poison_value)) {
+            memcpy(static_cast<uint8_t *>(buffer) + i, &poison_value, sizeof(poison_value));
+        }
+
+        uint64_t remaining = buffersize - i;
+        XYUV_ASSERT(remaining < sizeof(poison_value));
+        if (remaining) {
+            memcpy(static_cast<uint8_t *>(buffer) + i, &poison_value, remaining);
+        }
     }
 } // namespace xyuv
 #endif
