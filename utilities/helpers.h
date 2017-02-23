@@ -25,6 +25,9 @@
 #pragma once
 
 #include <xyuv.h>
+#include <xyuv/structures/chroma_siting.h>
+#include <xyuv/structures/conversion_matrix.h>
+#include <xyuv/config_manager.h>
 
 class Helpers {
 public:
@@ -39,8 +42,25 @@ public:
     // Write a frame to file, infering the mode from the file suffix.
     static void WriteFrame(const xyuv::frame &frame, const std::string &out_filename);
 
+    static xyuv::frame LoadXYUVFile(const std::string &infile_name);
+
+    static xyuv::frame LoadConvertRGBImage(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
+
     static void WriteMetadata(const xyuv::frame &frame, const std::string &raw_out_filename);
 
     static xyuv::frame LoadConvertFrame(const xyuv::format &, const std::string &infile_name);
+
+    static int GetAdaptedConsoleWidth();
+
+    static std::string FormatString(uint32_t indent, uint32_t max_width, const std::string &str);
+
+    static void PrintHelpSection(const std::string &short_arg, const std::string &long_arg,
+                                 const std::string &helpstring);
+
+    static std::string GetSuffix(const std::string &filename);
+
+    static std::string ToLower(const std::string& str);
+
+    static void PrintAllFormats(const xyuv::config_manager &manager);
 };
 

@@ -58,7 +58,7 @@ void XYUVHeader::Run(const ::options & options) {
 
     // If a list of all formats has been requested, print it and quit.
     if (options.list_all_formats) {
-        PrintAllFormats();
+        Helpers::PrintAllFormats(this->config_manager_);
         return;
     }
 

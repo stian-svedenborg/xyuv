@@ -102,8 +102,6 @@ public:
 protected:
     void PrintHelp();
 
-    void PrintAllFormats();
-
 private:
     xyuv::config_manager config_manager_;
 };

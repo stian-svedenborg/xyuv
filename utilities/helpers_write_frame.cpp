@@ -42,7 +42,7 @@
 
 void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size);
 
-std::string get_suffix(const std::string & path) {
+std::string Helpers::GetSuffix(const std::string & path) {
     return path.substr(path.rfind('.', std::string::npos), std::string::npos);
 }
 
@@ -86,7 +86,7 @@ void Helpers::WriteFrame(const xyuv::frame & frame, const std::string & out_file
 #endif
     };
 
-    std::string suffix = get_suffix(out_filename);
+    std::string suffix = Helpers::GetSuffix(out_filename);
 
     // Make it lowercase.
     for (char & c : suffix ) {
