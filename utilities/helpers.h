@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,25 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
-#include "XYUVHeader.h"
+#pragma once
 
+#include <xyuv.h>
 
-XYUVHeader::XYUVHeader() {
-    #ifdef DEFAULT_FORMATS_PATH
-        config_manager_.load_configurations(DEFAULT_FORMATS_PATH);
-    #endif
-}
+class Helpers {
+public:
+    static xyuv::frame AddHeader(const xyuv::format_template &fmt_template,
+                                 const xyuv::chroma_siting &siting,
+                                 const xyuv::conversion_matrix &matrix,
+                                 uint32_t image_w,
+                                 uint32_t image_h,
+                                 std::istream &input_stream
+    );
 
-int main(int argc, char **argv) {
-    try {
-        XYUVHeader prog;
-        auto options = prog.ParseArgs(argc, argv);
-        prog.Run(options);
-    } catch (std::exception & e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        std::cerr << "Use --help for help." << std::endl;
-        return -1;
-    }
-    return 0;
-}
+    // Write a frame to file, infering the mode from the file suffix.
+    static void WriteFrame(const xyuv::frame &frame, const std::string &out_filename);
+
+    static void WriteMetadata(const xyuv::frame &frame, const std::string &raw_out_filename);
+
+    static xyuv::frame LoadConvertFrame(const xyuv::format &, const std::string &infile_name);
+};
 

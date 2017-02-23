@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2016 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,10 @@
 #include <xyuv/large_buffer.h>
 #include <xyuv/frame.h>
 #include <iostream>
-#include "XYUVHeader.h"
+#include "helpers.h"
 #include <xyuv/format_json.h>
+#include <map>
+
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
 #include "external/magick_format_rw.h"
 #endif
@@ -64,7 +66,7 @@ static void write_frame_hex(const xyuv::frame & frame, const std::string & out_f
     WriteHexFile(out_filename, frame.data.get(), frame.format.size);
 }
 
-void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_filename) {
+void Helpers::WriteFrame(const xyuv::frame & frame, const std::string & out_filename) {
     static std::map<std::string, std::function<void(const xyuv::frame &, const std::string &)>> map {
             {".xyuv", write_frame_using_xyuv },
             {".hex", write_frame_hex },
@@ -106,7 +108,7 @@ void XYUVHeader::WriteFrame(const xyuv::frame & frame, const std::string & out_f
     }
 }
 
-void XYUVHeader::WriteMetadata(const xyuv::frame & frame, const std::string & raw_out_filename) {
+void Helpers::WriteMetadata(const xyuv::frame & frame, const std::string & raw_out_filename) {
     std::string metadata_filename = raw_out_filename + ".json";
 
     std::ofstream fout(metadata_filename);

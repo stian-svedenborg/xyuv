@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,8 @@
 #include <xyuv/frame.h>
 #include <xyuv/large_buffer.h>
 #include <iostream>
-#include "XYUVHeader.h"
+#include <map>
+#include "helpers.h"
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
 #include "external/magick_format_rw.h"
 #endif
@@ -86,7 +87,7 @@ static xyuv::frame LoadConvertFrame_hex(const xyuv::format & format, const std::
     return frame;
 }
 
-xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std::string & infile_name ) {
+xyuv::frame Helpers::LoadConvertFrame( const xyuv::format & format, const std::string & infile_name ) {
     static std::map<std::string, std::function<xyuv::frame(const xyuv::format &, const std::string &)>> map{
             {".xyuv", LoadConvertFrame_xyuv},
             {".bin", LoadConvertFrame_raw},
@@ -124,7 +125,7 @@ xyuv::frame XYUVHeader::LoadConvertFrame( const xyuv::format & format, const std
         std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' for input file '" + infile_name + "' trying to pass it to ImageMagick." << std::endl;
         return LoadConvertFrame_imagemagick(format, infile_name);
 #else
-        throw std::runtime_error("[Error]: Unrecognized file suffix '\" + suffix + \"' aborting.");
+        throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
 #endif
     }
 }

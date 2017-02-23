@@ -1,14 +1,19 @@
 
-set(XYUV_HEADER_SOURCES
-        XYUVHeader.h
-        XYUVHeader.cpp
-        xyuv_header_parse_args.cpp
-        xyuv_header_run.cpp
-        xyuv_header_write_frame.cpp
-        xyuv_header_read_frame.cpp
+set(XYUV_UTILS_COMMON_SOURCES
+        helpers.h
+        helpers_read_frame.cpp
+        helpers_add_header.cpp
+        helpers_write_frame.cpp
         console_width.h
         console_width.cpp
         hex_reader.cpp)
+
+set(XYUV_HEADER_SOURCES
+        ${XYUV_UTILS_COMMON_SOURCES}
+        xyuv_header_parse_args.cpp
+        xyuv_header_run.cpp
+        XYUVHeader.h
+        XYUVHeader.cpp)
 
 if(ImageMagick_FOUND)
 list(APPEND XYUV_HEADER_SOURCES

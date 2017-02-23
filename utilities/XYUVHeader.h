@@ -100,21 +100,6 @@ public:
     options ParseArgs(int argc, char ** argv);
 
 protected:
-    xyuv::frame AddHeader(const xyuv::format_template & fmt_template,
-                   const xyuv::chroma_siting & siting,
-                   const xyuv::conversion_matrix & matrix,
-                   uint32_t image_w,
-                   uint32_t image_h,
-                   std::istream & input_stream
-    );
-
-    // Write a frame to file, infering the mode from the file suffix.
-    void WriteFrame(const xyuv::frame& frame, const std::string & out_filename);
-
-    void WriteMetadata(const xyuv::frame & frame, const std::string & raw_out_filename);
-
-    xyuv::frame LoadConvertFrame( const xyuv::format &, const std::string & infile_name );
-
     void PrintHelp();
 
     void PrintAllFormats();

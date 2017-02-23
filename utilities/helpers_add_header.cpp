@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,26 +22,27 @@
  * THE SOFTWARE.
  */
 
-#include <iostream>
-#include "XYUVHeader.h"
+#include "helpers.h"
+#include <xyuv/structures/format.h>
+#include <xyuv/frame.h>
+#include <xyuv/large_buffer.h>
 
+xyuv::frame Helpers::AddHeader(const xyuv::format_template & fmt_template,
+                                  const xyuv::chroma_siting & siting,
+                                  const xyuv::conversion_matrix & matrix,
+                                  uint32_t image_w,
+                                  uint32_t image_h,
+                                  std::istream & input_stream
+)
+{
+    auto format = xyuv::create_format(image_w, image_h, fmt_template, matrix, siting);
+    auto frame = xyuv::create_frame(format, nullptr, 0);
 
-XYUVHeader::XYUVHeader() {
-    #ifdef DEFAULT_FORMATS_PATH
-        config_manager_.load_configurations(DEFAULT_FORMATS_PATH);
-    #endif
-}
+    uint64_t bytes_read = xyuv::read_large_buffer(input_stream, reinterpret_cast<char*>(frame.data.get()), format.size);
 
-int main(int argc, char **argv) {
-    try {
-        XYUVHeader prog;
-        auto options = prog.ParseArgs(argc, argv);
-        prog.Run(options);
-    } catch (std::exception & e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        std::cerr << "Use --help for help." << std::endl;
-        return -1;
+    if (bytes_read != format.size) {
+        throw std::runtime_error("Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " + std::to_string(format.size));
     }
-    return 0;
-}
 
+    return frame;
+}
