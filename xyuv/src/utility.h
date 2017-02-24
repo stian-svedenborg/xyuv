@@ -31,6 +31,9 @@
 
 namespace xyuv {
 
+#define _XYUV_STRINGIFY(x) # x
+#define XYUV_STRINGIFY(x) _XYUV_STRINGIFY(x)
+
 std::vector<std::string> list_files_in_folder(const std::string &dir_path);
 
 static inline pixel_quantum clamp( pixel_quantum min_, pixel_quantum max_, pixel_quantum val)

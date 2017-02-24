@@ -29,9 +29,13 @@
 namespace xyuv {
     struct frame;
     struct format;
+    struct format_template;
+    struct chroma_siting;
+    struct conversion_matrix;
 }
 
 xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name );
+xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
 void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename);
 void Display_imagemagick(const xyuv::frame & frame);
 

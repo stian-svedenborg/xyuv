@@ -1,6 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
-project(crossyuv)
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0048 NEW)
+project(crossyuv
+        VERSION 1.1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+add_definitions(
+        -DXYUV_VERSION=${PROJECT_VERSION}
+        -DXYUV_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+        -DXYUV_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+)
 
 # Make errors visible.
 add_compile_options(

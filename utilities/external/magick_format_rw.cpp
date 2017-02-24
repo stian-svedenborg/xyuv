@@ -35,6 +35,13 @@ xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std:
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 
+xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
+    Magick::Image image(infile_name);
+    xyuv::magick_wrapper wrapper(image);
+    xyuv::format format = xyuv::create_format(wrapper.columns(), wrapper.rows(), fmt_template, matrix, siting);
+    return xyuv::read_frame_from_rgb_image(wrapper, format);
+}
+
 void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename) {
     Magick::Image image(Magick::Geometry(frame.format.image_w,frame.format.image_h,0,0), Magick::ColorRGB(0.0,0.0,0.0));
 

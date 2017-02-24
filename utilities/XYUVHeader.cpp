@@ -22,9 +22,6 @@
  * THE SOFTWARE.
  */
 
-#include <xyuv/structures/format.h>
-#include <xyuv/frame.h>
-#include <xyuv/large_buffer.h>
 #include <iostream>
 #include "XYUVHeader.h"
 
@@ -33,27 +30,6 @@ XYUVHeader::XYUVHeader() {
     #ifdef DEFAULT_FORMATS_PATH
         config_manager_.load_configurations(DEFAULT_FORMATS_PATH);
     #endif
-}
-
-
-xyuv::frame XYUVHeader::AddHeader(const xyuv::format_template & fmt_template,
-                      const xyuv::chroma_siting & siting,
-                      const xyuv::conversion_matrix & matrix,
-                      uint32_t image_w,
-                      uint32_t image_h,
-                      std::istream & input_stream
-)
-{
-    auto format = xyuv::create_format(image_w, image_h, fmt_template, matrix, siting);
-    auto frame = xyuv::create_frame(format, nullptr, 0);
-
-    uint64_t bytes_read = xyuv::read_large_buffer(input_stream, reinterpret_cast<char*>(frame.data.get()), format.size);
-
-    if (bytes_read != format.size) {
-        throw std::runtime_error("Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " + std::to_string(format.size));
-    }
-
-    return frame;
 }
 
 int main(int argc, char **argv) {

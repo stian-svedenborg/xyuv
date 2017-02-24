@@ -23,6 +23,7 @@
  */
 
 #include "XYUVHeader.h"
+#include "helpers.h"
 #include <xyuv/frame.h>
 #include <fstream>
 #include <memory>
@@ -57,7 +58,7 @@ void XYUVHeader::Run(const ::options & options) {
 
     // If a list of all formats has been requested, print it and quit.
     if (options.list_all_formats) {
-        PrintAllFormats();
+        Helpers::PrintAllFormats(this->config_manager_);
         return;
     }
 
@@ -225,7 +226,7 @@ void XYUVHeader::Run(const ::options & options) {
                 sitings.size() == 1 ? sitings[0] : sitings[i]
         );
 
-        xyuv::frame frame = LoadConvertFrame(target_format, options.input_files[i]);
+        xyuv::frame frame = Helpers::LoadConvertFrame(target_format, options.input_files[i]);
 
         // If --flip-y is set then change the image origin to the inverse.
         if (options.flip_y) {
@@ -249,9 +250,9 @@ void XYUVHeader::Run(const ::options & options) {
             else {
                 try {
                     if (options.write_meta) {
-                        WriteMetadata(frame, output_names[i]);
+                        Helpers::WriteMetadata(frame, output_names[i]);
                     }
-                    WriteFrame(frame, output_names[i]);
+                    Helpers::WriteFrame(frame, output_names[i]);
                 } catch (std::exception & e) {
                     std::cout << "[Warning] Error occured while writing file '" <<
                                  output_names[i] << "'\n   " <<
