@@ -33,9 +33,14 @@ set(XYUV_ENCODE_SOURCES
         xyuv-encode.cpp
         )
 
+set(XYUV_DECODE_SOURCES
+        ${XYUV_UTILS_COMMON_SOURCES}
+        xyuv-decode.cpp
+        )
 
 add_executable(xyuv-header ${XYUV_HEADER_SOURCES})
 add_executable(xyuv-encode ${XYUV_ENCODE_SOURCES})
+add_executable(xyuv-decode ${XYUV_DECODE_SOURCES})
 
 target_include_directories(xyuv-header
     PUBLIC ${xyuv.PUBLIC}
@@ -43,27 +48,35 @@ target_include_directories(xyuv-header
 target_include_directories(xyuv-encode
     PUBLIC ${xyuv.PUBLIC}
 )
+target_include_directories(xyuv-decode
+    PUBLIC ${xyuv.PUBLIC}
+)
 
 target_link_libraries(xyuv-header
     PUBLIC xyuv)
 target_link_libraries(xyuv-encode
     PUBLIC xyuv)
+target_link_libraries(xyuv-decode
+    PUBLIC xyuv)
 
 target_compile_options(xyuv-header
-    PUBLIC -std=c++11
-)
+    PUBLIC -std=c++11)
 target_compile_options(xyuv-encode
-    PUBLIC -std=c++11
-)
+    PUBLIC -std=c++11)
+target_compile_options(xyuv-decode
+    PUBLIC -std=c++11)
 
 target_compile_definitions(xyuv-header
     PRIVATE INSTALL_FORMATS_PATH="${CMAKE_INSTALL_PREFIX}/share/xyuv")
 target_compile_definitions(xyuv-encode
     PRIVATE INSTALL_FORMATS_PATH="${CMAKE_INSTALL_PREFIX}/share/xyuv")
+target_compile_definitions(xyuv-decode
+    PRIVATE INSTALL_FORMATS_PATH="${CMAKE_INSTALL_PREFIX}/share/xyuv")
 
 
 add_dependencies(xyuv-header xyuv)
 add_dependencies(xyuv-encode xyuv)
+add_dependencies(xyuv-decode xyuv)
 
 if(PNG_FOUND)
 
@@ -81,6 +94,14 @@ if(PNG_FOUND)
     target_compile_definitions(xyuv-encode
             PUBLIC ${PNG_DEFINITIONS})
 
+
+    target_include_directories(xyuv-decode
+            PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(xyuv-decode
+            PUBLIC ${PNG_LIBRARIES})
+    target_compile_definitions(xyuv-decode
+            PUBLIC ${PNG_DEFINITIONS})
+
 endif(PNG_FOUND)
 
 if (ImageMagick_FOUND)
@@ -93,8 +114,14 @@ if (ImageMagick_FOUND)
             PUBLIC ${ImageMagick_INCLUDE_DIRS})
     target_link_libraries(xyuv-encode
             PUBLIC ${ImageMagick_LIBRARIES})
+
+    target_include_directories(xyuv-decode
+            PUBLIC ${ImageMagick_INCLUDE_DIRS})
+    target_link_libraries(xyuv-decode
+            PUBLIC ${ImageMagick_LIBRARIES})
 endif(ImageMagick_FOUND)
 
 #Installation section
 install(TARGETS xyuv-header DESTINATION bin)
 install(TARGETS xyuv-encode DESTINATION bin)
+install(TARGETS xyuv-decode DESTINATION bin)

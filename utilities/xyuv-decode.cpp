@@ -37,7 +37,7 @@
 #include "../xyuv/src/utility.h"
 #include "../xyuv/src/paths.h"
 
-struct EncoderOptions {
+struct DecoderOptions {
     std::string input_file;
     std::string output_file;
 
@@ -45,14 +45,16 @@ struct EncoderOptions {
     std::vector<std::string> additional_format_template_locations;
     std::string chroma_siting;
     std::string conversion_matrix;
+    uint32_t width;
+    uint32_t height;
 
-    bool dump_metadata = false;
+    bool flip_y = false;
     bool list_all_formats = false;
 };
 
-class XYUVEncode {
+class XYUVDecode {
 public:
-    void Run(EncoderOptions & options) {
+    void Run(DecoderOptions & options) {
         // Setup configuration manager
         xyuv::config_manager config_manager;
 #ifdef INSTALL_FORMATS_PATH
@@ -69,49 +71,65 @@ public:
             return;
         }
 
-        // Load target format templates:
-        xyuv::format_template target_fmt_template = config_manager.get_format_template(options.format_template);
-        xyuv::chroma_siting target_chroma_siting = config_manager.get_chroma_siting(options.chroma_siting);
-        xyuv::conversion_matrix target_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
-
-        // Two modes are supported: Loading an xyuv-file and loading a rgb-image file.
-        auto suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_file));
-
+        // Now we add some intelligence:
+        // - If the input-file is a xyuv file. Forbid passing in  -f, -s, -m, -w and -h
+        // - Otherwise use the format the user specified.
         xyuv::frame frame;
+
+        auto suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_file));
         if (suffix == ".xyuv") {
+            if (options.format_template != "" || options.conversion_matrix != "" || options.chroma_siting != "" || options.width || options.height) {
+                throw std::runtime_error("Using the arguments  -f, -s, -m, -w and -h are forbidden when loading .xyuv files. "
+                                                 "This is because the format information is already encoded in the "
+                                                 "file.");
+            }
             frame = Helpers::LoadXYUVFile(options.input_file);
-            auto fmt = xyuv::create_format(frame.format.image_w, frame.format.image_h, target_fmt_template, target_conversion_matrix, target_chroma_siting);
-            frame = xyuv::convert_frame(frame, fmt);
+        } else {
+            if (options.format_template != "" || options.conversion_matrix != "" || options.chroma_siting != "" || options.width || options.height) {
+                if ( !(options.format_template != "" && options.conversion_matrix != "" && options.chroma_siting != "" && options.width && options.height)) {
+                    throw std::runtime_error("When specifying the format from the command line, all of "
+                                                     "-f, -s, -m, -w and -h are required.");
+                }
+                xyuv::format_template source_fmt_template = config_manager.get_format_template(options.format_template);
+                xyuv::chroma_siting source_chroma_siting = config_manager.get_chroma_siting(options.chroma_siting);
+                xyuv::conversion_matrix source_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
+
+                xyuv::format format = xyuv::create_format(options.width, options.height, source_fmt_template, source_conversion_matrix, source_chroma_siting);
+
+                frame = Helpers::LoadConvertFrame(format, options.input_file);
+            }
+            else {
+                // TODO: Add support for loading json full formats.
+                throw std::runtime_error("Unable to determine format, use -f, -s, -m, -w and -h.");
+            }
         }
-        else {
-            frame = Helpers::LoadConvertRGBImage(target_fmt_template, target_conversion_matrix, target_chroma_siting, options.input_file);
+
+        if (options.flip_y) {
+            frame.format.origin = (frame.format.origin == xyuv::image_origin::LOWER_LEFT ? xyuv::image_origin::UPPER_LEFT : xyuv::image_origin::LOWER_LEFT );
         }
 
         // Finally write the frame back.
         Helpers::WriteFrame(frame, options.output_file);
-
-        if (options.dump_metadata) {
-            Helpers::WriteMetadata(frame, options.output_file);
-        }
-
     }
 
-    EncoderOptions ParseArgs(int argc, char * argv[]) {
+    DecoderOptions ParseArgs(int argc, char * argv[]) {
         struct option long_opts[] = {
                 {"additional-format-dir", required_argument, 0, 'F'},
-                {"dump-metadata",         no_argument,       0, 'D'},
+                {"flip-y",                no_argument,       0, 'y'},
                 {"format-template",       required_argument, 0, 'f'},
                 {"chroma-siting",         required_argument, 0, 's'},
                 {"conversion-matrix",     required_argument, 0, 'm'},
+                {"width",                 required_argument, 0, 'w'},
+                {"height",                required_argument, 0, 'h'},
                 {"list",                  no_argument,       0, 'l'},
                 {"help",                  no_argument,       0, '?'},
                 {}
         };
         int index = 0;
         int c = -1;
-        const char *const shortopts = "?lDF:o:f:m:s:";
+        const char *const shortopts = "?lw:h:yF:o:f:m:s:";
 
-        EncoderOptions options = {};
+        DecoderOptions options = {};
         while ((c = getopt_long(argc, argv, shortopts, long_opts, &index)) != -1) {
             switch (c) {
                 case 'F':
@@ -126,11 +144,17 @@ public:
                 case 'm':
                     options.conversion_matrix = optarg;
                     break;
-                case 'D':
-                    options.dump_metadata = true;
+                case 'y':
+                    options.flip_y = true;
                     break;
                 case 'l':
                     options.list_all_formats = true;
+                    break;
+                case 'w':
+                    options.width = static_cast<uint32_t>(strtoul(optarg, nullptr, 0));
+                    break;
+                case 'h':
+                    options.height = static_cast<uint32_t>(strtoul(optarg, nullptr, 0));
                     break;
                 case '?':
                     this->PrintHelp();
@@ -177,10 +201,11 @@ public:
     }
 
     void PrintHelp() {
-        std::cout << "xyuv-encode, version " XYUV_STRINGIFY(XYUV_VERSION) "\n";
+        std::cout << "xyuv-decode, version " XYUV_STRINGIFY(XYUV_VERSION) "\n";
         std::cout << Helpers::FormatString(0, Helpers::GetAdaptedConsoleWidth(),
-                                           "Encode a single image to a .hex, .bin, .yuv or .xyuv file.\n"
-                                                   "USAGE: xyuv-encode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-D] [-l] input_file output_file\n")
+                                           "Decode a single .hex, .bin, .yuv or .xyuv file to a standard image.\n"
+                                                   "USAGE: xyuv-decode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-y] [-l] input_file output_file\n"
+                                                   "USAGE: xyuv-decode [-y] [-l] input_file.xyuv output_file\n")
                   << std::endl;
 
 
@@ -219,22 +244,24 @@ public:
 
         Helpers::PrintHelpSection("",
                                   "input_path",
-                                  "Path to image to load, can be "
-                                #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
-                                  "any image file supported by ImageMagick or "
-                                #elif defined(USE_LIBPNG) && USE_LIBPNG
-                                  "a png image or "
-                                #endif
-                                  "an .xyuv image."
-        );
-
-        Helpers::PrintHelpSection("",
-                                  "output_path",
                                   "Path to encoded image, the supported file suffixes are:"
                                           "\n- xyuv           The raw data is written to an xyuv image."
                                           "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump_metadata)"
                                           "\n- hex            The raw data converted to hex, with no header. (See also --dump_metadata)"
         );
+
+        Helpers::PrintHelpSection("",
+                                  "output_path",
+                                  "Path to image to store, can be "
+                                #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
+                                  "any image file suffix supported by ImageMagick or "
+                                #elif defined(USE_LIBPNG) && USE_LIBPNG
+                                  "a .png image or "
+                                #endif
+                                  "an .xyuv image."
+        );
+
+
 
         Helpers::PrintHelpSection("-D",
                                   "--dump-metadata",
@@ -256,7 +283,7 @@ public:
 
 int main(int argc, char *argv[]) {
     try {
-        auto prog = XYUVEncode();
+        auto prog = XYUVDecode();
         auto options = prog.ParseArgs(argc, argv);
         prog.Run(options);
     }
