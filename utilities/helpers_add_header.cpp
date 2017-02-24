@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,27 @@
  * THE SOFTWARE.
  */
 
-#include "magick_format_rw.h"
-#include <xyuv/external/libpng_wrapper.h>
-#include <xyuv.h>
+#include "helpers.h"
+#include <xyuv/structures/format.h>
 #include <xyuv/frame.h>
+#include <xyuv/large_buffer.h>
 
-xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::string & infile_name ) {
-    xyuv::libpng_wrapper wrapper(infile_name);
-    return xyuv::read_frame_from_rgb_image(wrapper, format);
-}
+xyuv::frame Helpers::AddHeader(const xyuv::format_template & fmt_template,
+                                  const xyuv::chroma_siting & siting,
+                                  const xyuv::conversion_matrix & matrix,
+                                  uint32_t image_w,
+                                  uint32_t image_h,
+                                  std::istream & input_stream
+)
+{
+    auto format = xyuv::create_format(image_w, image_h, fmt_template, matrix, siting);
+    auto frame = xyuv::create_frame(format, nullptr, 0);
 
-xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
-    xyuv::libpng_wrapper wrapper(infile_name);
-    xyuv::format format = xyuv::create_format(wrapper.columns(), wrapper.rows(), fmt_template, matrix, siting);
-    return xyuv::read_frame_from_rgb_image(wrapper, format);
-}
+    uint64_t bytes_read = xyuv::read_large_buffer(input_stream, reinterpret_cast<char*>(frame.data.get()), format.size);
 
-void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string & out_filename) {
-    xyuv::libpng_wrapper wrapper;
-    xyuv::write_frame_to_rgb_image(&wrapper, frame);
-    wrapper.save_png_to_file(out_filename);
+    if (bytes_read != format.size) {
+        throw std::runtime_error("Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " + std::to_string(format.size));
+    }
+
+    return frame;
 }
