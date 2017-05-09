@@ -43,10 +43,14 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
 };
 }
 
+// Operator precendence
+%nonassoc LOGIC_AND LOGIC_OR.
+%nonassoc LOGIC_EQ LOGIC_NE LOGIC_LT LOGIC_GT LOGIC_LE LOGIC_GE.
 %left PLUS MINUS.
 %left DIV MUL MOD.
-%nonassoc UNARY_MINUS.
-%nonassoc POW.
+%right UNARY_MINUS LOGIC_NEG.
+%left POW.
+%nonassoc LPARENS RPARENS.
 
 %extra_argument { MiniCalc *owner }
 
@@ -64,7 +68,12 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
 
 
 %type expr  {node*}
+%type bool_expr  {node*}
+
 %destructor expr {
+    delete $$;
+}
+%destructor bool_expr {
     delete $$;
 }
 %start_symbol start
@@ -91,22 +100,10 @@ expr(A) ::= MINUS expr(B). [UNARY_MINUS]
 }
 expr(A) ::= IDENTIFIER(I).           { A = create_node(I->identifier, *owner); }
 expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) COMMA expr(A1) RPAREN.
-    {
-        auto it = binary_functions.find(F->identifier);
-        if (it != binary_functions.end()) {
-            A = create_node(A0, A1, it->second);
-        }
-        else {
-            owner->parse_error("Undeclared function '" + F->identifier + "'");
-            A = nullptr;
-        }
-    }
-
-expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) RPAREN.
 {
-    auto it = unary_functions.find(F->identifier);
-        if (it != unary_functions.end()) {
-            A = create_node(A0, it->second);
+    auto it = binary_functions.find(F->identifier);
+    if (it != binary_functions.end()) {
+        A = create_node(A0, A1, it->second);
     }
     else {
         owner->parse_error("Undeclared function '" + F->identifier + "'");
@@ -114,4 +111,48 @@ expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) RPAREN.
     }
 }
 
-expr(A) ::= LPAREN expr(B) RPAREN.   { A = B; }
+expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) RPAREN.
+{
+    auto it = unary_functions.find(F->identifier);
+    if (it != unary_functions.end()) {
+        A = create_node(A0, it->second);
+    }
+    else {
+        owner->parse_error("Undeclared function '" + F->identifier + "'");
+        A = nullptr;
+    }
+}
+
+expr(A) ::= LPAREN expr(B) RPAREN.  { A = B; }
+
+bool_expr(A) ::= TRUE.    { A = create_node(1); }
+bool_expr(A) ::= FALSE.   { A = create_node(0); }
+
+bool_expr(A) ::= LPAREN bool_expr(B) RPAREN. { A = B; }
+
+bool_expr(A) ::= expr(B) LOGIC_EQ expr(C). { A = create_node(B, C, minicalc_logic_eq);}
+bool_expr(A) ::= expr(B) LOGIC_NE expr(C). { A = create_node(B, C, minicalc_logic_ne);}
+bool_expr(A) ::= expr(B) LOGIC_LT expr(C). { A = create_node(B, C, minicalc_logic_lt);}
+bool_expr(A) ::= expr(B) LOGIC_GT expr(C). { A = create_node(B, C, minicalc_logic_gt);}
+bool_expr(A) ::= expr(B) LOGIC_LE expr(C). { A = create_node(B, C, minicalc_logic_le);}
+bool_expr(A) ::= expr(B) LOGIC_GE expr(C). { A = create_node(B, C, minicalc_logic_ge);}
+bool_expr(A) ::= LOGIC_NEG bool_expr(B).   { A = create_node(B, minicalc_logic_neg);}
+
+bool_expr(A) ::= bool_expr(B) LOGIC_AND bool_expr(C). { A = create_node(B, C, minicalc_logic_and);}
+bool_expr(A) ::= bool_expr(B) LOGIC_OR bool_expr(C).  { A = create_node(B, C, minicalc_logic_or);}
+
+expr(A) ::= IF LPAREN bool_expr(C) COMMA expr(T) COMMA  expr(F) RPAREN. 
+{
+    A = create_if_node(C, T, F);
+}
+
+expr(A) ::= INT LPAREN bool_expr(B) RPAREN. 
+{
+    A = B;
+}
+
+bool_expr(A) ::= BOOL LPAREN expr(B) RPAREN. 
+{
+    A = B;
+}
+

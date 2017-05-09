@@ -95,3 +95,32 @@ int minicalc_lcm(int lhs, int rhs) {
     }
     return lhs * rhs / minicalc_gcd(lhs, rhs);
 }
+
+
+int minicalc_logic_eq(int lhs, int rhs) {
+    return int(lhs == rhs);
+}
+int minicalc_logic_ne(int lhs, int rhs) {
+    return int(lhs != rhs);
+}
+int minicalc_logic_lt(int lhs, int rhs) {
+    return int(lhs < rhs);
+}
+int minicalc_logic_gt(int lhs, int rhs) {
+    return int(lhs > rhs);
+}
+int minicalc_logic_le(int lhs, int rhs) {
+    return int(lhs <= rhs);
+}
+int minicalc_logic_ge(int lhs, int rhs) {
+    return int(lhs >= rhs);
+}
+int minicalc_logic_and(int lhs, int rhs){
+    return int(lhs && rhs);
+}
+int minicalc_logic_or(int lhs, int rhs) {
+    return int(lhs || rhs);
+}
+int minicalc_logic_neg(int bool_expr) {
+    return int(!bool_expr);
+}
