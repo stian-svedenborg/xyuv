@@ -51,6 +51,52 @@ const static std::vector<std::pair<std::string, uint64_t>> expressions {
         {"lcm(1,1)", 1},
         {"lcm(13,7)", 13*7},
 
+        // Boolean
+        {"int(true)",  uint64_t(true)},
+        {"int(false)", uint64_t(false)},
+
+        {"int(!true)",  uint64_t(!true)},
+        {"int(!false)", uint64_t(!false)},
+
+        {"int(!(1==2))",  1},
+        {"int(! 1 == 2)", 1},
+
+        {"int(1==1)", 1},
+        {"int(1==2)", 0},
+
+        {"int(1!=1)", 0},
+        {"int(1!=2)", 1},
+
+        {"int(1 + 1 == 2)", 1},
+
+        {"int(1 < 2)", 1},
+        {"int(1 < 1)", 0},
+        {"int(2 < 1)", 0},
+
+        {"int(1 > 2)", 0},
+        {"int(1 > 1)", 0},
+        {"int(2 > 1)", 1},
+
+        {"int(1 <= 2)", 1},
+        {"int(1 <= 1)", 1},
+        {"int(2 <= 1)", 0},
+
+        {"int(1 >= 2)", 0},
+        {"int(1 >= 1)", 1},
+        {"int(2 >= 1)", 1},
+
+        {"if(true,  40 + 2, 20 + 4)", 42},
+        {"if(false, 40 + 2, 20 + 4)", 24},
+
+        {"int(true && true)", 1},
+        {"int(true && false)", 0},
+        {"int(false && true)", 0},
+        {"int(false && false)", 0},
+
+        {"int(true || true)", 1},
+        {"int(true || false)", 1},
+        {"int(false || true)", 1},
+        {"int(false || false)", 0},
 };
 
 TEST(MiniCalc, Expressions) {

@@ -1,27 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2015 Stian Valentin Svedenborg
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 /* This file was automatically generated.  Do not edit! */
 #define ParseTOKENTYPE MiniCalc::Token*
 #define ParseARG_PDECL , MiniCalc *owner 
@@ -37,16 +13,31 @@ void ParseTrace(FILE *TraceFILE,char *zTracePrompt);
 #define ParseARG_STORE yypParser->owner  = owner 
 #define ParseARG_FETCH  MiniCalc *owner  = yypParser->owner 
 #define ParseARG_SDECL  MiniCalc *owner ;
-#define TOK_RPAREN                         12
-#define TOK_COMMA                          11
-#define TOK_LPAREN                         10
-#define TOK_IDENTIFIER                      9
-#define TOK_INT                             8
-#define TOK_POW                             7
-#define TOK_UNARY_MINUS                     6
-#define TOK_MOD                             5
-#define TOK_MUL                             4
-#define TOK_DIV                             3
-#define TOK_MINUS                           2
-#define TOK_PLUS                            1
+#define TOK_BOOL                           27
+#define TOK_IF                             26
+#define TOK_FALSE                          25
+#define TOK_TRUE                           24
+#define TOK_RPAREN                         23
+#define TOK_COMMA                          22
+#define TOK_LPAREN                         21
+#define TOK_IDENTIFIER                     20
+#define TOK_INT                            19
+#define TOK_RPARENS                        18
+#define TOK_LPARENS                        17
+#define TOK_POW                            16
+#define TOK_LOGIC_NEG                      15
+#define TOK_UNARY_MINUS                    14
+#define TOK_MOD                            13
+#define TOK_MUL                            12
+#define TOK_DIV                            11
+#define TOK_MINUS                          10
+#define TOK_PLUS                            9
+#define TOK_LOGIC_GE                        8
+#define TOK_LOGIC_LE                        7
+#define TOK_LOGIC_GT                        6
+#define TOK_LOGIC_LT                        5
+#define TOK_LOGIC_NE                        4
+#define TOK_LOGIC_EQ                        3
+#define TOK_LOGIC_OR                        2
+#define TOK_LOGIC_AND                       1
 #define INTERFACE 0

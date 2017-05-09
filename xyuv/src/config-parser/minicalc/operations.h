@@ -26,19 +26,29 @@
 
 //! \file Defines function wrappers around common operations.
 
-// Operations
+// Integer Operations
 extern int minicalc_add(int lhs, int rhs);
 extern int minicalc_sub(int lhs, int rhs);
 extern int minicalc_mul(int lhs, int rhs);
 extern int minicalc_div(int lhs, int rhs);
 extern int minicalc_mod(int lhs, int rhs);
 extern int minicalc_pow(int base, int exponent);
-int minicalc_gcd(int lhs, int rhs);
-int minicalc_lcm(int lhs, int rhs);
-
+extern int minicalc_gcd(int lhs, int rhs);
+extern int minicalc_lcm(int lhs, int rhs);
 extern int minicalc_negate(int v);
 
 //! \brief returns the smallest value >= \a base that is divisible by \a multiplier.
 extern int minicalc_next_multiple(int base, int multiplier);
 extern int minicalc_abs(int v);
+
+// Logical Operations
+extern int minicalc_logic_eq(int lhs, int rhs);
+extern int minicalc_logic_ne(int lhs, int rhs);
+extern int minicalc_logic_lt(int lhs, int rhs);
+extern int minicalc_logic_gt(int lhs, int rhs);
+extern int minicalc_logic_le(int lhs, int rhs);
+extern int minicalc_logic_ge(int lhs, int rhs);
+extern int minicalc_logic_and(int lhs, int rhs);
+extern int minicalc_logic_or(int lhs, int rhs);
+extern int minicalc_logic_neg(int bool_expr);
 

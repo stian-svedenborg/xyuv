@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -124,6 +124,11 @@ int MiniCalc::parse_expression(const std::string & expression)
     IDENTIFIER  = ALPHA (ALPHA|DIGIT|[_]|[.\]\[])* ;
     WS		    = [ \t]+ ;
 
+    "if"        {   Parse(parser, TOK_IF, nullptr, this);continue;}
+    "true"      {   Parse(parser, TOK_TRUE, nullptr, this);continue;}
+    "false"     {   Parse(parser, TOK_FALSE, nullptr, this);continue;}
+    "int"       {   Parse(parser, TOK_INT, nullptr, this);continue;}
+    "bool"      {   Parse(parser, TOK_BOOL, nullptr, this);continue;}
 
 	INTEGER	    {
 	                char * lend = NULL;
@@ -151,6 +156,16 @@ int MiniCalc::parse_expression(const std::string & expression)
     "("         {   Parse(parser, TOK_LPAREN, nullptr, this); continue; }
     ")"         {   Parse(parser, TOK_RPAREN, nullptr, this); continue; }
     ","         {   Parse(parser, TOK_COMMA, nullptr, this); continue; }
+
+    "=="        {   Parse(parser, TOK_LOGIC_EQ, nullptr, this); continue; }
+    "!="        {   Parse(parser, TOK_LOGIC_NE, nullptr, this); continue; }
+    "<"         {   Parse(parser, TOK_LOGIC_LT, nullptr, this); continue; }
+    ">"         {   Parse(parser, TOK_LOGIC_GT, nullptr, this); continue; }
+    "<="        {   Parse(parser, TOK_LOGIC_LE, nullptr, this); continue; }
+    ">="        {   Parse(parser, TOK_LOGIC_GE, nullptr, this); continue; }
+    "!"         {   Parse(parser, TOK_LOGIC_NEG, nullptr, this); continue; }
+    "&&"        {   Parse(parser, TOK_LOGIC_AND, nullptr, this); continue; }
+    "||"        {   Parse(parser, TOK_LOGIC_OR, nullptr, this); continue; }
 
 
     WS          {   continue; }
