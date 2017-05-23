@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,78 +25,78 @@
 #include <gtest/gtest.h>
 
 #include "../src/config-parser/minicalc/minicalc.h"
+#include "../xyuv/src/config-parser/minicalc/ast.h"
 #include <vector>
 
-const static std::vector<std::pair<std::string, uint64_t>> expressions {
-        {"7", 7},
-        {"1+2", 3},
-        {"3-5", -2},
-        {"2*3", 6},
-        {"12/3", 4},
-        {"3**3", 27 },
-        {"(8)", 8},
-        {"-56", -56},
-        {"2 + -43", -41},
-        {"abs(-54)", 54 },
+const static std::vector<std::pair<std::string, AST::value>> expressions {
+        {"7", AST::value::integer(7)},
+        {"1+2",  AST::value::integer(3)},
+        {"3-5",  AST::value::integer(-2)},
+        {"2*3",  AST::value::integer(6)},
+        {"12/3",  AST::value::integer(4)},
+        {"3**3",  AST::value::integer(27)},
+        {"(8)",  AST::value::integer(8)},
+        {"-56",  AST::value::integer(-56)},
+        {"2 + -43",  AST::value::integer(-41)},
+        {"abs(-54)",  AST::value::integer(54)},
 
-        {"gcd(2,1)", 1},
-        {"gcd(10,5)", 5},
-        {"gcd(9,15)", 3},
-        {"gcd(1,1)", 1},
-        {"gcd(13,7)", 1},
+        {"gcd(2,1)",  AST::value::integer(1)},
+        {"gcd(10,5)",  AST::value::integer(5)},
+        {"gcd(9,15)",  AST::value::integer(3)},
+        {"gcd(1,1)",  AST::value::integer(1)},
+        {"gcd(13,7)",  AST::value::integer(1)},
 
-        {"lcm(2,1)", 2},
-        {"lcm(10,5)", 10},
-        {"lcm(9,15)", 15*3},
-        {"lcm(1,1)", 1},
-        {"lcm(13,7)", 13*7},
+        {"lcm(2,1)",  AST::value::integer(2)},
+        {"lcm(10,5)",  AST::value::integer(10)},
+        {"lcm(9,15)", AST::value::integer(3*3*5)},
+        {"lcm(1,1)",  AST::value::integer(1)},
+        {"lcm(13,7)", AST::value::integer(13*7)},
 
         // Boolean
-        {"int(true)",  uint64_t(true)},
-        {"int(false)", uint64_t(false)},
+        {"true",  AST::value::boolean(true)},
+        {"false", AST::value::boolean(false)},
 
-        {"int(!true)",  uint64_t(!true)},
-        {"int(!false)", uint64_t(!false)},
+        {"!true",  AST::value::boolean(!true)},
+        {"!false", AST::value::boolean(!false)},
 
-        {"int(!(1==2))",  1},
-        {"int(! 1 == 2)", 1},
+        {"!(1==2)",  AST::value::boolean(true)},
 
-        {"int(1==1)", 1},
-        {"int(1==2)", 0},
+        {"1==1", AST::value::boolean(true)},
+        {"1==2", AST::value::boolean(false)},
 
-        {"int(1!=1)", 0},
-        {"int(1!=2)", 1},
 
-        {"int(1 + 1 == 2)", 1},
 
-        {"int(1 < 2)", 1},
-        {"int(1 < 1)", 0},
-        {"int(2 < 1)", 0},
+        {"1 + 1 == 2", AST::value::boolean(true)},
 
-        {"int(1 > 2)", 0},
-        {"int(1 > 1)", 0},
-        {"int(2 > 1)", 1},
+        {"1 < 2", AST::value::boolean(true)},
+        {"1 < 1", AST::value::boolean(false)},
+        {"2 < 1", AST::value::boolean(false)},
 
-        {"int(1 <= 2)", 1},
-        {"int(1 <= 1)", 1},
-        {"int(2 <= 1)", 0},
+        {"1 > 2", AST::value::boolean(false)},
+        {"1 > 1", AST::value::boolean(false)},
+        {"2 > 1", AST::value::boolean(true)},
+        {"1 <= 2", AST::value::boolean(true)},
+        {"1 <= 1", AST::value::boolean(true)},
+        {"2 <= 1", AST::value::boolean(false)},
+        {"1 >= 2", AST::value::boolean(false)},
+        {"1 >= 1", AST::value::boolean(true)},
+        {"2 >= 1", AST::value::boolean(true)},
 
-        {"int(1 >= 2)", 0},
-        {"int(1 >= 1)", 1},
-        {"int(2 >= 1)", 1},
+        {"1 != 1", AST::value::boolean(false)},
+        {"1!=2", AST::value::boolean(true)},
 
-        {"if(true,  40 + 2, 20 + 4)", 42},
-        {"if(false, 40 + 2, 20 + 4)", 24},
+        {"if(true,  40 + 2, 20 + 4)",  AST::value::integer(42)},
+        {"if(false, 40 + 2, 20 + 4)",  AST::value::integer(24)},
 
-        {"int(true && true)", 1},
-        {"int(true && false)", 0},
-        {"int(false && true)", 0},
-        {"int(false && false)", 0},
+        {"true && true", AST::value::boolean(true)},
+        {"true && false", AST::value::boolean(false)},
+        {"false && true", AST::value::boolean(false)},
+        {"false && false", AST::value::boolean(false)},
 
-        {"int(true || true)", 1},
-        {"int(true || false)", 1},
-        {"int(false || true)", 1},
-        {"int(false || false)", 0},
+        {"true || true", AST::value::boolean(true)},
+        {"true || false", AST::value::boolean(true)},
+        {"false || true", AST::value::boolean(true)},
+        {"false || false", AST::value::boolean(false)},
 };
 
 TEST(MiniCalc, Expressions) {

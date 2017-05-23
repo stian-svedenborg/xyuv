@@ -23,12 +23,13 @@
  */
 
 #include "minicalc/minicalc.h"
+#include "minicalc/ast.h"
 
 namespace xyuv {
 
-uint64_t minicalc_evaluate(const std::string &expression, const std::unordered_map<std::string, uint64_t> *variables) {
+AST::value minicalc_evaluate(const std::string &expression, const std::unordered_map<std::string, AST::value> *variables) {
     MiniCalc expr{expression};
-    uint64_t result = expr.evaluate(variables);
+    AST::value result = expr.evaluate(variables);
     return result;
 };
 

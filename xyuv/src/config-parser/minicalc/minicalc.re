@@ -28,6 +28,7 @@
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 MiniCalc::MiniCalc(const std::string & expression)
 : expression(expression)
@@ -37,7 +38,7 @@ MiniCalc::MiniCalc(const std::string & expression)
 
 MiniCalc::~MiniCalc() = default;
 
-const uint64_t * MiniCalc::get_variable( const std::string & variable_name ) const {
+const AST::value * MiniCalc::get_variable( const std::string & variable_name ) const {
     if (!variables) {
         return nullptr;
     }
@@ -52,22 +53,22 @@ const uint64_t * MiniCalc::get_variable( const std::string & variable_name ) con
     }
 }
 
-
-uint64_t MiniCalc::evaluate(const std::unordered_map<std::string, uint64_t> * variables) const {
+AST::value MiniCalc::evaluate(const std::unordered_map<std::string, AST::value> * variables) const {
 
     this->variables = variables;
 
     if (!parse_errors.empty()) {
-        std::cout << "Parse error in expression: '" << expression << "'" << std::endl;
+        std::ostringstream sout;
+        sout << "Parse error in expression: '" << expression << "'" << std::endl;
         for (auto & msg : parse_errors ) {
-            std::cout << "  " << msg << std::endl;
+            sout << "  " << msg << std::endl;
         }
-        return -1;
+        throw MiniCalcParseError(sout.str());
     }
 
     // Clear old runtime_errors
     runtime_errors.clear();
-    int result = -1;
+    AST::value result;
     try {
         result = root->evaluate();
     } catch( std::runtime_error & e ) {
@@ -76,18 +77,19 @@ uint64_t MiniCalc::evaluate(const std::unordered_map<std::string, uint64_t> * va
 
     // If the evaluation encountered run-time errors they are recorded here.
     if (!runtime_errors.empty()) {
-        std::cout << "Could not evaluate expression: '" << expression << "'" << std::endl;
+        std::ostringstream sout;
+        sout << "Could not evaluate expression: '" << expression << "'" << std::endl;
         for (auto & msg : runtime_errors ) {
-            std::cout << "  " << msg << std::endl;
+            sout << "  " << msg << std::endl;
         }
-        return -1;
+        throw MiniCalcParseError(sout.str());
     }
 
     return result;
 }
 
-void MiniCalc::set_root(node *node) {
-    root.reset(node);
+void MiniCalc::set_root(std::shared_ptr<AST::node> node) {
+    root = node;
 }
 
 void MiniCalc::parse_error(const std::string & msg) const {
@@ -124,11 +126,8 @@ int MiniCalc::parse_expression(const std::string & expression)
     IDENTIFIER  = ALPHA (ALPHA|DIGIT|[_]|[.\]\[])* ;
     WS		    = [ \t]+ ;
 
-    "if"        {   Parse(parser, TOK_IF, nullptr, this);continue;}
-    "true"      {   Parse(parser, TOK_TRUE, nullptr, this);continue;}
-    "false"     {   Parse(parser, TOK_FALSE, nullptr, this);continue;}
-    "int"       {   Parse(parser, TOK_INT, nullptr, this);continue;}
-    "bool"      {   Parse(parser, TOK_BOOL, nullptr, this);continue;}
+    "true"      {   Parse(parser, TOK_TRUE, nullptr, this); continue;}
+    "false"     {   Parse(parser, TOK_FALSE, nullptr, this); continue;}
 
 	INTEGER	    {
 	                char * lend = NULL;
@@ -147,9 +146,9 @@ int MiniCalc::parse_expression(const std::string & expression)
         continue;
     }
 
-	"+"			{   Parse(parser, TOK_PLUS, nullptr, this);continue;}
-    "-"			{   Parse(parser, TOK_MINUS, nullptr, this);continue;}
-    "*"			{   Parse(parser, TOK_MUL, nullptr, this);continue;}
+	"+"			{   Parse(parser, TOK_PLUS, nullptr, this); continue;}
+    "-"			{   Parse(parser, TOK_MINUS, nullptr, this); continue;}
+    "*"			{   Parse(parser, TOK_MUL, nullptr, this); continue;}
     "/"			{   Parse(parser, TOK_DIV, nullptr, this); continue;}
     "%"			{   Parse(parser, TOK_MOD, nullptr, this); continue;}
     "**"        {   Parse(parser, TOK_POW, nullptr, this); continue; }

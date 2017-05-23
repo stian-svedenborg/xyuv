@@ -27,11 +27,20 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <set>
 
-struct node;
+namespace AST {
+    struct node;
+    struct value;
+};
 
 //! Evaluate \a expression given the set of variable values \a variables.
-extern uint64_t minicalc_evaluate(const std::string & expression, std::unordered_map<std::string, uint64_t> variables);
+extern AST::value minicalc_evaluate(const std::string & expression, std::unordered_map<std::string, AST::value> variables);
+
+class MiniCalcParseError : public std::runtime_error {
+public:
+    MiniCalcParseError(const std::string & msg) : std::runtime_error(msg) {}
+};
 
 //! Class containing the MiniCalc (great name isn't it) expression parser.
 class MiniCalc {
@@ -44,7 +53,7 @@ public:
 
     //! Evaluate the expression given the defined \a variables. If variables = nullptr,
     //! then it assumed that no variables are defined.
-    uint64_t evaluate(const std::unordered_map<std::string, uint64_t> * variables) const;
+    AST::value evaluate(const std::unordered_map<std::string, AST::value> * variables) const;
 
     //! Type declarations private to MiniCalc and parser
     struct Token {
@@ -54,10 +63,10 @@ public:
 
     // The following functions dictate the interface to the parser.
     //! Set the root of the parse tree in *this.
-    void set_root(node* node);
+    void set_root(std::shared_ptr<AST::node> node);
     //! Get the value of a variable as owned by *this.
     //! \return nullptr if the value does not exist, otherwise a valid pointer to the value of \a variable
-    const uint64_t * get_variable( const std::string & variable ) const;
+    const AST::value * get_variable( const std::string & variable ) const;
 
     //! Push a parsing error message.
     void parse_error( const std::string & msg ) const;
@@ -65,19 +74,30 @@ public:
     //! Push a run-time error message. (This message stack is cleared each time xyuv::evaluate() is called.
     void runtime_error( const std::string & msg ) const;
 
+    void register_dependency(const std::string var_name) {
+        this->dependencies.insert(var_name);
+    }
+
+    const std::set<std::string> & get_dependencies() const {
+        return dependencies;
+    }
+
 private:
     //! Parse \a expression and assign the result to root.
     int parse_expression(const std::string & expression);
 
     // Private variables.
     //! Symbol table of all variables in the expression.
-    mutable const std::unordered_map<std::string, uint64_t > *variables = nullptr;
+    mutable const std::unordered_map<std::string, AST::value > *variables = nullptr;
+
+    //! Variable names this expression depend on.
+    std::set<std::string> dependencies;
 
     //! Vectors temporarily holding parse and runtime_errors.
     mutable std::vector<std::string> parse_errors, runtime_errors;
 
     //! Root of the AST.
-    std::unique_ptr<node> root;
+    std::shared_ptr<AST::node> root;
 
     //! Copy of the expression for logging/debugging purposes.
     std::string expression;

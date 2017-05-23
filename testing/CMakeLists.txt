@@ -4,6 +4,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 #      cmake_policy(SET CMP0003 NEW)
 #endif(COMMAND cmake_policy)
 
+set(MINICALC_TESTING_SOURCES
+        ../xyuv/src/config-parser/minicalc/minicalc.cpp
+        ../xyuv/src/config-parser/minicalc/parser.cpp
+        ../xyuv/src/config-parser/minicalc/ast.cpp
+        ../xyuv/src/config-parser/minicalc/operations.cpp
+        )
+
+
 set(INTEGRATION_TESTING_SOURCES
     integration_testing/main.cpp
     integration_testing/regress_format_templates.cpp
@@ -25,6 +33,10 @@ if (PNG_FOUND)
 endif(PNG_FOUND)
 
 # Add targets
+add_executable(minicalc
+        ${MINICALC_TESTING_SOURCES}
+)
+
 add_executable(unit_tests
         main.cpp
         parsing_test.cpp
@@ -76,5 +88,6 @@ target_link_libraries(integration_testing
         PUBLIC xyuv
         PUBLIC gtest )
 
+target_compile_definitions(minicalc PRIVATE "-DCOMPILE_TEST_PROGRAM")
 add_dependencies(unit_tests gtest xyuv)
 add_dependencies(integration_testing gtest xyuv)

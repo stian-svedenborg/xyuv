@@ -57,6 +57,14 @@
         throw parse_error("Wrong type for field '" # field "' expected " # type);\
     }
 
+#define VALIDATE_VALUE_RANGE(min, max, value) do { \
+    if ((value) < (min) || (max) < (value)) { \
+        throw parse_error("Value out of range'" \
+            "' expected value in [" + to_string(min) + ", " + to_string(max) + "] was " \
+            + to_string(value));\
+    } \
+} while (0)
+
 #define VALIDATE_RANGE(min, max, field, type) do { \
     if (field->Get##type() < (min) || (max) < field->Get##type()) { \
         throw parse_error("Value out of range for field '" # field \

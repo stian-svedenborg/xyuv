@@ -13,15 +13,13 @@ void ParseTrace(FILE *TraceFILE,char *zTracePrompt);
 #define ParseARG_STORE yypParser->owner  = owner 
 #define ParseARG_FETCH  MiniCalc *owner  = yypParser->owner 
 #define ParseARG_SDECL  MiniCalc *owner ;
-#define TOK_BOOL                           27
-#define TOK_IF                             26
 #define TOK_FALSE                          25
 #define TOK_TRUE                           24
-#define TOK_RPAREN                         23
-#define TOK_COMMA                          22
+#define TOK_INT                            23
+#define TOK_RPAREN                         22
 #define TOK_LPAREN                         21
 #define TOK_IDENTIFIER                     20
-#define TOK_INT                            19
+#define TOK_COMMA                          19
 #define TOK_RPARENS                        18
 #define TOK_LPARENS                        17
 #define TOK_POW                            16
