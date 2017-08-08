@@ -28,6 +28,32 @@ option(NO_EXTERNAL_LIBPNG
 
 # Set up Include primary XYUV sources
 set(XYUV_SOURCES
+        # Public Include files.
+        xyuv/include/xyuv/structures/block_order.h
+        xyuv/include/xyuv/structures/channel_block.h
+        xyuv/include/xyuv/structures/chroma_siting.h
+        xyuv/include/xyuv/structures/color.h
+        xyuv/include/xyuv/structures/constants.h
+        xyuv/include/xyuv/structures/conversion_matrix.h
+        xyuv/include/xyuv/structures/format.h
+        xyuv/include/xyuv/structures/format_template_old.h
+        xyuv/include/xyuv/structures/plane.h
+        xyuv/include/xyuv/structures/sample.h
+        xyuv/include/xyuv/structures/subsampling.h
+        xyuv/include/xyuv/color_conversion.h
+        xyuv/include/xyuv/config_manager.h
+        xyuv/include/xyuv/format_json.h
+        xyuv/include/xyuv/frame.h
+        xyuv/include/xyuv/large_buffer.h
+        xyuv/include/xyuv/minicalc.h
+        xyuv/include/xyuv/quantum.h
+        xyuv/include/xyuv/rgb_image.h
+        xyuv/include/xyuv/surface.h
+        xyuv/include/xyuv/yuv_image.h
+        xyuv/include/xyuv.h
+
+        # Private source files.
+
         xyuv/src/pixel_packer.cpp
         xyuv/src/color_conversion.cpp
         xyuv/src/utility.cpp
@@ -71,7 +97,7 @@ set(XYUV_SOURCES
         xyuv/src/io/versions/1/file_header.h
         xyuv/src/io/versions/1/io_structs.h
         xyuv/src/io/versions/1/io_structs.cpp
-        xyuv/src/config-parser/format_json.cpp xyuv/include/xyuv/format_json.h)
+        xyuv/src/config-parser/format_json.cpp xyuv/include/xyuv/format_json.h xyuv/include/xyuv/format_template.h xyuv/src/config-parser/format_template.cpp)
 
 # Conditionally include wrappers for external libraries
 if(NOT NO_EXTERNAL_LIBPNG)

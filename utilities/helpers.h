@@ -31,7 +31,7 @@
 
 class Helpers {
 public:
-    static xyuv::frame AddHeader(const xyuv::format_template &fmt_template,
+    static xyuv::frame AddHeader(const xyuv::format_template_old &fmt_template,
                                  const xyuv::chroma_siting &siting,
                                  const xyuv::conversion_matrix &matrix,
                                  uint32_t image_w,
@@ -44,7 +44,7 @@ public:
 
     static xyuv::frame LoadXYUVFile(const std::string &infile_name);
 
-    static xyuv::frame LoadConvertRGBImage(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
+    static xyuv::frame LoadConvertRGBImage(const xyuv::format_template_old &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
 
     static void WriteMetadata(const xyuv::frame &frame, const std::string &raw_out_filename);
 

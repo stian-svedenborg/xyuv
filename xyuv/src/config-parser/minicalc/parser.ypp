@@ -102,8 +102,15 @@ expr(A) ::= LPAREN expr(B) RPAREN.  { A = B; }
 
 // Variables
 expr(A) ::= IDENTIFIER(F).  {
-	A = AST::create_node(F->identifier, owner);
-	owner->register_dependency(F->identifier);  
+	// If the identifier is one of the named constants, parse it as a string constant.
+	if (owner->get_constants() != nullptr && owner->get_constants()->find(F->identifier) != owner->get_constants()->end()) {
+		A = AST::create_node(AST::value::string(F->identifier));
+	}
+	else {
+		// Otherwise assume it is a variable
+		A = AST::create_node(F->identifier, owner);
+		owner->register_dependency(static_cast<AST::variable_node*>(A));  
+	}
 }
 
 // Literals

@@ -26,6 +26,7 @@
 #include <string>
 #include <cstdint>
 #include <unordered_map>
+#include <set>
 
 namespace AST {
     struct value;
@@ -35,9 +36,7 @@ namespace xyuv {
 
 //! Evaluate a single \a expression using the minicalc parser.
 //! \TODO: Throw exceptions
-extern AST::value minicalc_evaluate(
-        const std::string &expression,
-        const std::unordered_map <std::string, AST::value> *variables
-);
+extern AST::value minicalc_evaluate(const std::string & expression, std::unordered_map<std::string, AST::value> * variables, const std::set<std::string> * constants = nullptr);
+
 
 } // namespace xyuv

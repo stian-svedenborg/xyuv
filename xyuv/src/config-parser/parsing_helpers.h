@@ -57,6 +57,21 @@
         throw parse_error("Wrong type for field '" # field "' expected " # type);\
     }
 
+//! \brief Declare a variable that is required to be present in a yaml-block.
+#define DECLARE_REQUIRED_MINICALC(root, field) \
+    if (!(root).HasMember(# field)) {\
+        throw parse_error("Missing required field '" # field "'"); \
+    } \
+    rapidjson::Value *field = &((root)[# field]);
+
+
+//! \brief Declare a variable that is optional in a yaml-block.
+#define DECLARE_OPTIONAL_MINICALC(root, field) \
+    rapidjson::Value * field = nullptr; \
+    if ((root).HasMember(# field)) { \
+        field = &((root)[# field]);\
+    }
+
 #define VALIDATE_VALUE_RANGE(min, max, value) do { \
     if ((value) < (min) || (max) < (value)) { \
         throw parse_error("Value out of range'" \

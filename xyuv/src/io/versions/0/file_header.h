@@ -25,7 +25,7 @@
 #pragma once
 
 #include <cstdint>
-#include "xyuv/structures/format_template.h"
+#include "xyuv/structures/format_template_old.h"
 
 namespace xyuv {
 

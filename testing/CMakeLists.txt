@@ -16,6 +16,7 @@ set(INTEGRATION_TESTING_SOURCES
     integration_testing/main.cpp
     integration_testing/regress_format_templates.cpp
     integration_testing/file_format_testing.cpp
+    integration_testing/format_template_parsing_testing.cpp
 
     TestResources.cpp
     TestResources.h
@@ -49,7 +50,10 @@ add_executable(unit_tests
         TestResources.h
         continuation_blocks.cpp
         interleave_test.cpp
-        bit_packing.cpp block_reorder.cpp)
+        bit_packing.cpp
+        block_reorder.cpp
+        format_template_parsing_testing.cpp
+        )
 
 add_executable(integration_testing
         ${INTEGRATION_TESTING_SOURCES}

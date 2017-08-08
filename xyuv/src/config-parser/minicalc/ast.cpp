@@ -114,6 +114,7 @@ namespace AST {
     class value_node : public node {
     public:
         value_node(value val) :
+                node(true),
                 val(val) {}
 
         value_type type_check(bool unbound_ok) const override {
@@ -131,37 +132,25 @@ namespace AST {
         value val;
     };
 
-    //! \brief Class representing a named variable in the ast.
-    class variable_node : public node {
-    public:
-        variable_node(const std::string &name, const MiniCalc &owner) :
-                owner(owner),
-                name(name) {}
-
-        value_type type_check(bool unbound_ok) const override {
-            const value *variable = owner.get_variable(name);
-            if (!variable) {
-                if (unbound_ok) {
-                    return value_type::UNBOUND;
-                } else {
-                    throw MiniCalcEvaluationError("Unknown identifier '" + name + "'. No such constant or variable.");
-                }
-            }
-            return variable->type;
-        }
-
-        value evaluate() const override {
-            const value *variable = owner.get_variable(name);
-            if (!variable) {
+    value_type variable_node::type_check(bool unbound_ok) const {
+        const value *variable = owner.get_variable(name);
+        if (!variable) {
+            if (unbound_ok) {
+                return value_type::UNBOUND;
+            } else {
                 throw MiniCalcEvaluationError("Unknown identifier '" + name + "'. No such constant or variable.");
             }
-            return *variable;
         }
+        return variable->type;
+    }
 
-    private:
-        const MiniCalc &owner;
-        const std::string name;
-    };
+    value variable_node::evaluate() const {
+        const value *variable = owner.get_variable(name);
+        if (!variable) {
+            throw MiniCalcEvaluationError("Unknown identifier '" + name + "'. No such constant or variable.");
+        }
+        return *variable;
+    }
 
     node* create_node(const std::string & variable_name, MiniCalc * owner) {
         XYUV_ASSERT(owner != nullptr && "Owner must be set.");

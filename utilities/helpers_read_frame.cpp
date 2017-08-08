@@ -137,8 +137,8 @@ xyuv::frame Helpers::LoadXYUVFile(const std::string &infile_name) {
     return frame;
 }
 
-xyuv::frame Helpers::LoadConvertRGBImage(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
-    static std::map<std::string, std::function<xyuv::frame(const xyuv::format_template &, const xyuv::conversion_matrix &, const xyuv::chroma_siting &, const std::string &)>> map{
+xyuv::frame Helpers::LoadConvertRGBImage(const xyuv::format_template_old &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
+    static std::map<std::string, std::function<xyuv::frame(const xyuv::format_template_old &, const xyuv::conversion_matrix &, const xyuv::chroma_siting &, const std::string &)>> map{
 #if defined(USE_LIBPNG) && USE_LIBPNG
             {".png", LoadConvertRGBFrame_libpng },
 #elif defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK

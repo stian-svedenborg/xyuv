@@ -24,7 +24,7 @@
 
 
 #include "format_validator.h"
-#include "xyuv/structures/format_template.h"
+#include "xyuv/structures/format_template_old.h"
 #include "xyuv/structures/format.h"
 #include "../to_string.h"
 #include "../block_reorder.h"
@@ -35,7 +35,7 @@
 namespace xyuv {
 
 // Check whether any of the samples overflow the block or each other
-static bool check_sample_overlap(const xyuv::format_template &format_template) {
+static bool check_sample_overlap(const xyuv::format_template_old &format_template) {
     std::vector<std::vector<bool>> plane_block;
 
     for (auto &plane : format_template.planes) {
@@ -59,7 +59,7 @@ static bool check_sample_overlap(const xyuv::format_template &format_template) {
     return true;
 }
 
-static bool check_block_overflow(const xyuv::format_template &format_template) {
+static bool check_block_overflow(const xyuv::format_template_old &format_template) {
     for (auto &channel_block : format_template.channel_blocks) {
         for (auto &sample : channel_block.samples) {
             // Check block overflow.
@@ -74,7 +74,7 @@ static bool check_block_overflow(const xyuv::format_template &format_template) {
 
 
 
-bool validate_format_template(const xyuv::format_template &format_template) {
+bool validate_format_template(const xyuv::format_template_old &format_template) {
 
     if (!check_block_overflow(format_template)) {
         throw std::logic_error("Block overflow in format template.");
@@ -265,7 +265,7 @@ bool validate_format_template(const xyuv::format_template &format_template) {
         if (!check_illegal_plane_overlap(format)) {
             throw std::logic_error("The format has overlapping planes combined with block reordering. "
                                            "This is not supported as it does not make sense, try to change "
-                                           "the format_template to not use overlapping planes "
+                                           "the format_template_old to not use overlapping planes "
                                            "(not always possible).");
         }
 

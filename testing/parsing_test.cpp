@@ -103,7 +103,7 @@ TEST(MiniCalc, Expressions) {
 
     for (auto expr : expressions) {
         SCOPED_TRACE(expr.first);
-        MiniCalc expression(expr.first);
+        MiniCalc expression(expr.first, nullptr);
         ASSERT_EQ(expr.second, expression.evaluate(nullptr));
     }
 }

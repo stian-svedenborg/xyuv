@@ -26,7 +26,7 @@
 
 #include <xyuv/surface.h>
 #include <xyuv/yuv_image.h>
-#include <xyuv/structures/format_template.h>
+#include <xyuv/structures/format_template_old.h>
 #include <xyuv/frame.h>
 #include <xyuv.h>
 #include "../../xyuv/src/config_parser.h"
@@ -63,7 +63,7 @@ public:
     }
 
 // Enable a more directed test with more predictable values.
-static void test_encode_decode(const ::format_template &format_template, const yuv_image & base_image) {
+static void test_encode_decode(const ::format_template_old &format_template, const yuv_image & base_image) {
 
     ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
@@ -132,7 +132,7 @@ TEST_P(FormatRegression, FromYUVAndBackAgain) {
 
     std::cout << "[ FORMAT   ] " <<  GetParam() << std::endl;
 
-    ::format_template     format_template = Resources::get().config().get_format_template(GetParam());
+    ::format_template_old     format_template = Resources::get().config().get_format_template(GetParam());
     ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
 
@@ -189,7 +189,7 @@ TEST_P(FormatRegression, FromYUVAndBackAgain) {
 
 TEST_P(FormatRegression, ToFileAndBackAgain) {
     SCOPED_TRACE(GetParam());
-    ::format_template     format_template = Resources::get().config().get_format_template(GetParam());
+    ::format_template_old     format_template = Resources::get().config().get_format_template(GetParam());
     ::conversion_matrix conversion_matrix = Resources::get().config().get_conversion_matrix("bt601");
     ::chroma_siting chroma_siting;
 

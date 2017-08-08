@@ -23,7 +23,7 @@
  */
 
 #include "../config_parser.h"
-#include "xyuv/structures/format_template.h"
+#include "xyuv/structures/format_template_old.h"
 #include "xyuv/structures/constants.h"
 #include "../to_string.h"
 #include "parsing_helpers.h"
@@ -49,17 +49,17 @@ class format_template_parser {
 public:
     format_template_parser();
 
-    void parse(const std::string &json, format_template *out);
+    void parse(const std::string &json, format_template_old *out);
 
 private:
-    void parse_document(rapidjson::Document &root, format_template *out);
+    void parse_document(rapidjson::Document &root, format_template_old *out);
 
     // Top-level:
-    void parse_fourcc(rapidjson::Value *licence_root, format_template *out);
+    void parse_fourcc(rapidjson::Value *licence_root, format_template_old *out);
 
-    void parse_subsampling(rapidjson::Value *licence_root, format_template *out);
+    void parse_subsampling(rapidjson::Value *licence_root, format_template_old *out);
 
-    void parse_origin(rapidjson::Value *licence_root, format_template *out);
+    void parse_origin(rapidjson::Value *licence_root, format_template_old *out);
 
     // Parsing of planes.
     void parse_block_order(rapidjson::Value *plane_root, block_order *block_order);
@@ -81,7 +81,7 @@ xyuv::format_template_parser::format_template_parser() :
                               {"lower_left", image_origin::LOWER_LEFT}
                       }) { }
 
-void format_template_parser::parse(const std::string &json, format_template *out) {
+void format_template_parser::parse(const std::string &json, format_template_old *out) {
     rapidjson::Document d;
     d.Parse(json.c_str());
 
@@ -91,14 +91,14 @@ void format_template_parser::parse(const std::string &json, format_template *out
                           " JSON syntax error: " + rapidjson::GetParseError_En(res.Code()));
     }
 
-    format_template tmp;
+    format_template_old tmp;
 
     parse_document(d, &tmp);
 
     *out = tmp;
 }
 
-void format_template_parser::parse_document(rapidjson::Document &root, format_template *out) {
+void format_template_parser::parse_document(rapidjson::Document &root, format_template_old *out) {
     DECLARE_REQUIRED(root, origin, String);
     DECLARE_REQUIRED(root, subsampling_mode, Object);
 
@@ -135,7 +135,7 @@ void format_template_parser::parse_document(rapidjson::Document &root, format_te
     }
 }
 
-void format_template_parser::parse_fourcc(rapidjson::Value *fourcc, format_template *out) {
+void format_template_parser::parse_fourcc(rapidjson::Value *fourcc, format_template_old *out) {
     if (fourcc->GetStringLength() > 4) {
         throw parse_error("Length of field 'fourcc' must be <= 4 characters.");
     }
@@ -143,7 +143,7 @@ void format_template_parser::parse_fourcc(rapidjson::Value *fourcc, format_templ
     out->fourcc = std::string(fourcc->GetString(), fourcc->GetStringLength());
 }
 
-void format_template_parser::parse_subsampling(rapidjson::Value *subsampling_root, format_template *out) {
+void format_template_parser::parse_subsampling(rapidjson::Value *subsampling_root, format_template_old *out) {
     DECLARE_REQUIRED(*subsampling_root, macro_px_w, Uint);
     DECLARE_REQUIRED(*subsampling_root, macro_px_h, Uint);
 
@@ -153,7 +153,7 @@ void format_template_parser::parse_subsampling(rapidjson::Value *subsampling_roo
     out->subsampling.macro_px_h = static_cast<uint8_t>(macro_px_h->GetUint());
 }
 
-void format_template_parser::parse_origin(rapidjson::Value *origin, format_template *out) {
+void format_template_parser::parse_origin(rapidjson::Value *origin, format_template_old *out) {
     auto it = str_to_origin.find(std::string(origin->GetString(), origin->GetStringLength()));
     if (it == str_to_origin.end()) {
         throw parse_error("Origin string not recognized.");
@@ -289,8 +289,8 @@ void format_template_parser::parse_block(rapidjson::Value *channel_root, channel
     }
 }
 
-xyuv::format_template parse_format_template(const std::string &json) {
-    xyuv::format_template format_template;
+xyuv::format_template_old parse_format_template(const std::string &json) {
+    xyuv::format_template_old format_template;
     format_template_parser().parse(json, &format_template);
     return format_template;
 }

@@ -70,7 +70,7 @@ public:
         }
 
         // Load target format templates:
-        xyuv::format_template target_fmt_template = config_manager.get_format_template(options.format_template);
+        xyuv::format_template_old target_fmt_template = config_manager.get_format_template(options.format_template);
         xyuv::chroma_siting target_chroma_siting = config_manager.get_chroma_siting(options.chroma_siting);
         xyuv::conversion_matrix target_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
 

@@ -42,6 +42,10 @@ public:
         return "testing/integration_testing/test_data/";
     }
 
+    const std::string get_px_fmt_dir() const {
+        return "formats/px_fmt/";
+    }
+
     const std::string get_file_basepath(TestImage image) const {
         switch (image) {
             case TestImage::LENA:

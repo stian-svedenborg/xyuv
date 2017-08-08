@@ -37,7 +37,7 @@ namespace xyuv {
 
     using Allocator = rapidjson::Document::AllocatorType;
 
-    static rapidjson::Value set_block_order(Allocator & allocator, const ::block_order & block_order_in) {
+    static rapidjson::Value set_block_order(Allocator & allocator, const xyuv::block_order & block_order_in) {
         rapidjson::Value block_order_out(rapidjson::kObjectType);
 
         block_order_out.AddMember("mega_block_width", block_order_in.mega_block_width, allocator);
@@ -47,12 +47,12 @@ namespace xyuv {
         rapidjson::Value y_mask(rapidjson::kArrayType);
 
         for (auto v : block_order_in.x_mask) {
-            std::string string_val = v >= ::block_order::NOT_USED ? std::string("-") : xyuv::to_string(v);
+            std::string string_val = v >= xyuv::block_order::NOT_USED ? std::string("-") : xyuv::to_string(v);
             x_mask.PushBack( rapidjson::Value(string_val.c_str(), allocator).Move(), allocator);
         }
 
         for (auto v : block_order_in.y_mask) {
-            std::string string_val = v >= ::block_order::NOT_USED ? std::string("-") : xyuv::to_string(v);
+            std::string string_val = v >= xyuv::block_order::NOT_USED ? std::string("-") : xyuv::to_string(v);
             y_mask.PushBack( rapidjson::Value(string_val.c_str(), allocator).Move(), allocator);
         }
 

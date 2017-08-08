@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,33 @@
  * THE SOFTWARE.
  */
 
+#pragma once
 
-#ifndef CROSSYUV_BLOCK_ORDER_H
-#define CROSSYUV_BLOCK_ORDER_H
+#include <memory>
+#include <string>
 
-#include <cstring>
 
 namespace xyuv {
+    class format;
+    class chroma_siting;
+    class conversion_matrix;
+    class format_template_impl;
 
-    struct block_order {
-        enum : uint8_t {
-            NOT_USED = 32,
-        };
+    class format_template {
+    private:
+        std::shared_ptr<format_template_impl> impl;
 
-        block_order() {
-            memset(x_mask, NOT_USED, sizeof(x_mask));
-            memset(y_mask, NOT_USED, sizeof(y_mask));
-        }
+    public:
+        format_template();
+        ~format_template();
 
-        // Width and height of mega_block (in atomic blocks)
-        uint32_t mega_block_width = 1, mega_block_height = 1;
-        uint8_t x_mask[32], y_mask[32];
+        void load_file(const std::string & filename);
+        xyuv::format inflate(uint32_t image_w, uint32_t image_h, const xyuv::chroma_siting & chroma_siting, const xyuv::conversion_matrix & matrix );
+
     };
 
-    bool operator==(const block_order &lhs, const block_order &rhs);
-}
-#endif //CROSSYUV_BLOCK_ORDER_H
+
+} // namespace xyuv
+
+
+

@@ -45,7 +45,7 @@ struct conversion_matrix;
 
 //! A format template holds the generic parameters to describe a specific pixel-format.
 //! i.e. Formulas to describe line stride, pixel-packing etc.
-struct format_template;
+struct format_template_old;
 
 //! A format describes the pixel-format and layout of a single frame. A format holds all the meta-data for a frame,
 //! everything from frame dimensions to pixel-packing, chroma-siting and rgb conversion.
@@ -96,7 +96,7 @@ xyuv::frame create_frame(
 xyuv::format create_format(
         uint32_t width,
         uint32_t height,
-        const xyuv::format_template &format_template,
+        const xyuv::format_template_old &format_template,
         const xyuv::conversion_matrix &conversion_matrix,
         const xyuv::chroma_siting &chroma_siting
 );

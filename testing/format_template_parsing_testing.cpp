@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,28 @@
  * THE SOFTWARE.
  */
 
+#include <gtest/gtest.h>
+#include <xyuv/frame.h>
+#include <xyuv/format_template.h>
+#include <xyuv.h>
+#include <xyuv/yuv_image.h>
+#include "../xyuv/src/config_parser.h"
+#include "TestResources.h"
 
-#ifndef CROSSYUV_BLOCK_ORDER_H
-#define CROSSYUV_BLOCK_ORDER_H
+using namespace xyuv;
 
-#include <cstring>
+//! In this test we want to stress the Toplevel API and ensure the results are sane.
 
-namespace xyuv {
+TEST(FormatTemplate, LoadComplexFormat) {
 
-    struct block_order {
-        enum : uint8_t {
-            NOT_USED = 32,
-        };
+    std::string test_file = Resources::get().get_data_dir() + "formats/px_fmt/RGBA8888_DX_standard_swizzle";
 
-        block_order() {
-            memset(x_mask, NOT_USED, sizeof(x_mask));
-            memset(y_mask, NOT_USED, sizeof(y_mask));
-        }
+    format_template tmpl;
+    tmpl.load_file(test_file);
 
-        // Width and height of mega_block (in atomic blocks)
-        uint32_t mega_block_width = 1, mega_block_height = 1;
-        uint8_t x_mask[32], y_mask[32];
-    };
 
-    bool operator==(const block_order &lhs, const block_order &rhs);
+    tmpl.inflate(2, 2,
+                 Resources::get().config().get_chroma_siting("444"),
+                 Resources::get().config().get_conversion_matrix("identity"));
+
 }
-#endif //CROSSYUV_BLOCK_ORDER_H

@@ -90,7 +90,7 @@ public:
                     throw std::runtime_error("When specifying the format from the command line, all of "
                                                      "-f, -s, -m, -w and -h are required.");
                 }
-                xyuv::format_template source_fmt_template = config_manager.get_format_template(options.format_template);
+                xyuv::format_template_old source_fmt_template = config_manager.get_format_template(options.format_template);
                 xyuv::chroma_siting source_chroma_siting = config_manager.get_chroma_siting(options.chroma_siting);
                 xyuv::conversion_matrix source_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
 

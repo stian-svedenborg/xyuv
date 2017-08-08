@@ -56,7 +56,8 @@ bool operator==(const plane &lhs, const plane &rhs) {
             (lhs.interleave_mode == rhs.interleave_mode) &&
             (lhs.block_stride == rhs.block_stride) &&
             (lhs.line_stride == rhs.line_stride) &&
-            (lhs.size == rhs.size );
+            (lhs.size == rhs.size ) &&
+            (lhs.block_order == rhs.block_order);
 }
 
 bool operator==(const sample &lhs, const sample &rhs) {
@@ -70,7 +71,7 @@ bool operator==(const sample &lhs, const sample &rhs) {
 bool operator==(const channel_block &lhs, const channel_block &rhs) {
     if (lhs.samples.size() != rhs.samples.size()
         || lhs.h != rhs.h
-        || lhs.w != rhs.h
+        || lhs.w != rhs.w
             ) {
         return false;
     }

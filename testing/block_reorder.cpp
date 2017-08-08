@@ -46,11 +46,11 @@ static xyuv::format create_block_reordered_format() {
     plane.block_order.mega_block_width = 2;
     plane.block_order.mega_block_height = 2;
 
-    plane.block_order.x_mask[0] = block_order::NOT_USED;
+    plane.block_order.x_mask[0] = xyuv::block_order::NOT_USED;
     plane.block_order.x_mask[1] = 0;
 
     plane.block_order.y_mask[0] = 0;
-    plane.block_order.y_mask[1] = block_order::NOT_USED;
+    plane.block_order.y_mask[1] = xyuv::block_order::NOT_USED;
 
 
     plane.base_offset = 0;
@@ -83,7 +83,7 @@ static xyuv::format create_block_reordered_format() {
 
 
 TEST(BlockReorder, BlockOffset) {
-    block_order bo;
+    xyuv::block_order bo;
 
     bo.mega_block_height = 0xffffu +1;
     bo.mega_block_width = 0xffffu +1;
@@ -96,8 +96,8 @@ TEST(BlockReorder, BlockOffset) {
     ASSERT_EQ(std::make_pair(0u,0u), xyuv::get_block_order_coords(0xffffffffu, 0xffffffffu, bo));
 
     for (uint8_t i = 0; i < 32; i++) {
-        bo.x_mask[i] = (i & 1) ? block_order::NOT_USED : i / 2u;
-        bo.y_mask[i] = (i & 1) ? i / 2u : block_order::NOT_USED ;
+        bo.x_mask[i] = (i & 1) ? xyuv::block_order::NOT_USED : i / 2u;
+        bo.y_mask[i] = (i & 1) ? i / 2u : xyuv::block_order::NOT_USED ;
     }
 
     ASSERT_EQ(std::make_pair(0xffffu, 0xffffu), xyuv::get_block_order_coords(0xffffffffu, 0xffffffffu, bo));

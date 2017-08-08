@@ -967,27 +967,34 @@ static void yy_reduce(
       case 21: /* expr ::= IDENTIFIER */
 #line 104 "parser.ypp"
 {
-	yygotominor.yy25 = AST::create_node(yymsp[0].minor.yy0->identifier, owner);
-	owner->register_dependency(yymsp[0].minor.yy0->identifier);  
+	// If the identifier is one of the named constants, parse it as a string constant.
+	if (owner->get_constants() != nullptr && owner->get_constants()->find(yymsp[0].minor.yy0->identifier) != owner->get_constants()->end()) {
+		yygotominor.yy25 = AST::create_node(AST::value::string(yymsp[0].minor.yy0->identifier));
+	}
+	else {
+		// Otherwise assume it is a variable
+		yygotominor.yy25 = AST::create_node(yymsp[0].minor.yy0->identifier, owner);
+		owner->register_dependency(static_cast<AST::variable_node*>(yygotominor.yy25));  
+	}
 }
-#line 974 "parser.c"
+#line 981 "parser.c"
         break;
       case 22: /* expr ::= INT */
-#line 110 "parser.ypp"
+#line 117 "parser.ypp"
 { yygotominor.yy25 = AST::create_node(AST::value::integer(yymsp[0].minor.yy0->value)); }
-#line 979 "parser.c"
+#line 986 "parser.c"
         break;
       case 23: /* expr ::= TRUE */
-#line 111 "parser.ypp"
+#line 118 "parser.ypp"
 { yygotominor.yy25 = AST::create_node(AST::value::boolean(true));   yy_destructor(yypParser,24,&yymsp[0].minor);
 }
-#line 985 "parser.c"
+#line 992 "parser.c"
         break;
       case 24: /* expr ::= FALSE */
-#line 112 "parser.ypp"
+#line 119 "parser.ypp"
 { yygotominor.yy25 = AST::create_node(AST::value::boolean(false));   yy_destructor(yypParser,25,&yymsp[0].minor);
 }
-#line 991 "parser.c"
+#line 998 "parser.c"
         break;
       default:
         break;
@@ -1053,7 +1060,7 @@ static void yy_syntax_error(
 
    owner->parse_error("Syntax error!");
 
-#line 1057 "parser.c"
+#line 1064 "parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

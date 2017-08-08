@@ -118,7 +118,7 @@ void XYUVHeader::Run(const ::options & options) {
     }
 
     // Check validity of formats:
-    std::vector<xyuv::format_template> format_templates;
+    std::vector<xyuv::format_template_old> format_templates;
     std::vector<xyuv::chroma_siting> sitings;
     std::vector<xyuv::conversion_matrix> matrices;
 

@@ -37,9 +37,9 @@ namespace xyuv {
 
 // Helper functions
 
-format_template config_manager::load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error)
+format_template_old config_manager::load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error)
 {
-    xyuv::format_template format_template = parse_format_template(read_json(path));
+    xyuv::format_template_old format_template = parse_format_template(read_json(path));
     if (validate_format_template(format_template)) {
         return format_template;
     }
@@ -65,7 +65,7 @@ void config_manager::load_format_templates(const std::string &dir_path) {
 
     for (auto &file : files) {
         try {
-            xyuv::format_template format_template = load_format_template(dir_path + "/" + file);
+            xyuv::format_template_old format_template = load_format_template(dir_path + "/" + file);
             add(file, format_template);
         } catch (parse_error &e) {
             std::cerr << "Parse error in '" << dir_path << file << "': " << e.what() << std::endl;
@@ -117,7 +117,7 @@ void config_manager::load_configurations(std::string format_search_root) {
     load_conversion_matrices(format_search_root + CONVERSION_MATRICES_DIR);
 }
 
-void config_manager::add(const std::string &key, const format_template &fmt_template) {
+void config_manager::add(const std::string &key, const format_template_old &fmt_template) {
     format_templates_.emplace(key, fmt_template);
 }
 
@@ -144,7 +144,7 @@ const std::set<std::string> &config_manager::get_chroma_sitings(const subsamplin
     return it->second;
 }
 
-xyuv::format_template     config_manager::get_format_template(const std::string &key) const throw(std::runtime_error) {
+xyuv::format_template_old     config_manager::get_format_template(const std::string &key) const throw(std::runtime_error) {
     auto it = format_templates_.find(key);
     if (it == format_templates_.end()) {
         throw std::runtime_error("There is no format template named " + key);
@@ -168,7 +168,7 @@ conversion_matrix   config_manager::get_conversion_matrix(const std::string &key
     return it->second;
 }
 
-const std::map<std::string, format_template> &config_manager::get_format_templates() const {
+const std::map<std::string, format_template_old> &config_manager::get_format_templates() const {
     return format_templates_;
 }
 

@@ -716,6 +716,7 @@ private:
     class OperationNode : public node {
     public:
         OperationNode(std::shared_ptr<Operation> op, std::deque<std::shared_ptr<node>> && args) :
+            node(OperationNode::result_is_const(args)),
             args(std::move(args)),
             op(op)
         {}
@@ -731,11 +732,18 @@ private:
             return val;
         }
 
-
-
     private:
         std::deque<std::shared_ptr<node>> args;
         std::shared_ptr<Operation> op;
+
+        static bool result_is_const(const std::deque<std::shared_ptr<node>> & args) {
+            for (const auto & node : args) {
+                if (!node->is_const) {
+                    return false;
+                }
+            }
+            return true;
+        }
     };
 
     node* create_node(const std::string op, std::deque<std::shared_ptr<node>> &&args) {

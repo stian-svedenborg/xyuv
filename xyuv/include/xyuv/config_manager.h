@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include "xyuv/structures/format_template.h"
+#include "xyuv/structures/format_template_old.h"
 #include "xyuv/structures/conversion_matrix.h"
 #include "xyuv/structures/chroma_siting.h"
 
@@ -90,7 +90,7 @@ public:
     //! \details This will manually add a new format_template/chroma_siting/conversion_matrix to the configuration
     //! manager.
     //! \note If there already exists a configuration item with the given \a key, the previous item will be overwritten.
-    void add(const std::string &key, const format_template &fmt_template);
+    void add(const std::string &key, const format_template_old &fmt_template);
 
     //! \copydoc add(const std::string &, const format_template &)
     void add(const std::string &key, const chroma_siting &siting);
@@ -99,7 +99,7 @@ public:
 
     //! \brief Get a format_template with the given key.
     //! \throw If the item is not found, a std::runtime_error is thrown.
-    format_template get_format_template(const std::string &key) const throw(std::runtime_error);
+    format_template_old get_format_template(const std::string &key) const throw(std::runtime_error);
 
     //! \brief Get a chroma_siting with the given key.
     //! \throw If the item is not found, a std::runtime_error is thrown.
@@ -113,7 +113,7 @@ public:
     const std::set<std::string> &get_chroma_sitings(const subsampling &sampling) const;
 
     //! \brief Return all loaded format templates.
-    const std::map<std::string, format_template> &get_format_templates() const;
+    const std::map<std::string, format_template_old> &get_format_templates() const;
 
     //! \brief Return all loaded chroma sitings.
     const std::map<std::string, chroma_siting> &get_chroma_sitings() const;
@@ -122,14 +122,14 @@ public:
     const std::map<std::string, conversion_matrix> &get_conversion_matrices() const;
 
     //! \brief Static helper accessor that will attempt to load a format template matrix descriptor from \a path.
-    static format_template load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error);
+    static format_template_old load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error);
     //! \brief Static helper accessor that will attempt to load a chroma siting descriptor from \a path.
     static chroma_siting load_chroma_siting(const std::string &path) throw(std::runtime_error, std::logic_error);
     //! \brief Static helper accessor that will attempt to load a conversion matrix descriptor from \a path.
     static conversion_matrix load_conversion_matrix(const std::string &path) throw(std::runtime_error, std::logic_error);
 
 private:
-    std::map<std::string, format_template> format_templates_;
+    std::map<std::string, format_template_old> format_templates_;
 
     void load_format_templates(const std::string &dir_path);
 

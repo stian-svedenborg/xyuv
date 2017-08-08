@@ -27,7 +27,7 @@
 #include <xyuv/frame.h>
 #include <xyuv/large_buffer.h>
 
-xyuv::frame Helpers::AddHeader(const xyuv::format_template & fmt_template,
+xyuv::frame Helpers::AddHeader(const xyuv::format_template_old & fmt_template,
                                   const xyuv::chroma_siting & siting,
                                   const xyuv::conversion_matrix & matrix,
                                   uint32_t image_w,

@@ -29,13 +29,13 @@
 namespace xyuv {
     struct frame;
     struct format;
-    struct format_template;
+    struct format_template_old;
     struct chroma_siting;
     struct conversion_matrix;
 }
 
 xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::string & infile_name );
-xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
+xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template_old &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
 
 void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string & out_filename);
 

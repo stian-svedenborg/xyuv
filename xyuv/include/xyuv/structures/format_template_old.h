@@ -43,7 +43,7 @@ namespace xyuv {
   * See documentation on LINK for information on how to integrate your own pixel formats with xyuv.
   * \todo Add link to format documentation
   */
-struct format_template {
+struct format_template_old {
     //! \copydoc format::fourcc
     std::string fourcc;
 

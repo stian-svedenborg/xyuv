@@ -30,16 +30,17 @@
 #include <stdexcept>
 #include <sstream>
 
-MiniCalc::MiniCalc(const std::string & expression)
-: expression(expression)
+MiniCalc::MiniCalc(const std::string & expression, const std::set<std::string> * constants)
+: constants(nullptr)
+, expression(expression)
 {
-    parse_expression(expression);
+    parse_expression(expression, constants);
 }
 
 MiniCalc::~MiniCalc() = default;
 
 const AST::value * MiniCalc::get_variable( const std::string & variable_name ) const {
-    if (!variables) {
+    if (this->variables == nullptr ) {
         return nullptr;
     }
     else {
@@ -88,6 +89,10 @@ AST::value MiniCalc::evaluate(const std::unordered_map<std::string, AST::value> 
     return result;
 }
 
+void MiniCalc::register_dependency(AST::variable_node *node) {
+    this->dependencies[node->get_name()].push_back(node);
+}
+
 void MiniCalc::set_root(std::shared_ptr<AST::node> node) {
     root = node;
 }
@@ -100,8 +105,10 @@ void MiniCalc::runtime_error(const std::string & msg) const {
     runtime_errors.push_back(msg);
 }
 
-int MiniCalc::parse_expression(const std::string & expression)
+int MiniCalc::parse_expression(const std::string & expression, const std::set<std::string> * constants)
 {
+    this->constants = constants;
+
     #define YYCTYPE         char
     int errorstate = 0;
 	const char *YYCURSOR = expression.c_str();
@@ -179,6 +186,8 @@ int MiniCalc::parse_expression(const std::string & expression)
 
 	ParseFree(parser, free);
 
+    this->constants = nullptr;
+
 	return errorstate;
 }
 
@@ -202,7 +211,7 @@ int main(int argc, char **argv)
 
 	if (argc > 1)
 	{
-        MiniCalc expr(argv[1]);
+        MiniCalc expr(argv[1], nullptr);
         cout << expr.evaluate(nullptr) << endl;
 
         return 0;

@@ -32,7 +32,7 @@ xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::stri
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 
-xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
+xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template_old &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
     xyuv::libpng_wrapper wrapper(infile_name);
     xyuv::format format = xyuv::create_format(wrapper.columns(), wrapper.rows(), fmt_template, matrix, siting);
     return xyuv::read_frame_from_rgb_image(wrapper, format);

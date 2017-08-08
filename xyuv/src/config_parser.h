@@ -28,7 +28,7 @@
 namespace xyuv {
 
 struct chroma_siting;
-struct format_template;
+struct format_template_old;
 struct conversion_matrix;
 
 /** \brief Read a configuration file stripping it of all comments.
@@ -42,7 +42,7 @@ extern std::string read_json(const std::string &filename);
 extern chroma_siting parse_chroma_siting(const std::string &json);
 
 /** Parse a pixel format template from a json string. */
-extern format_template parse_format_template(const std::string &json);
+extern format_template_old parse_format_template(const std::string &json);
 
 /** Parse an rgb conversion matrix from a json string. */
 extern conversion_matrix parse_conversion_matrix(const std::string &json);

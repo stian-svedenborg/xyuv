@@ -27,8 +27,9 @@
 
 namespace xyuv {
 
-AST::value minicalc_evaluate(const std::string &expression, const std::unordered_map<std::string, AST::value> *variables) {
-    MiniCalc expr{expression};
+AST::value minicalc_evaluate(const std::string & expression, std::unordered_map<std::string, AST::value> * variables, const std::set<std::string> * constants)
+{
+    MiniCalc expr{expression, constants};
     AST::value result = expr.evaluate(variables);
     return result;
 };

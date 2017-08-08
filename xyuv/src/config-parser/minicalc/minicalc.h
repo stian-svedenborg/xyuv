@@ -23,19 +23,19 @@
  */
 
 #pragma once
+#include "ast.h"
 #include <unordered_map>
 #include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 #include <set>
 
 namespace AST {
     struct node;
     struct value;
+    struct variable_node;
 };
-
-//! Evaluate \a expression given the set of variable values \a variables.
-extern AST::value minicalc_evaluate(const std::string & expression, std::unordered_map<std::string, AST::value> variables);
 
 class MiniCalcParseError : public std::runtime_error {
 public:
@@ -47,7 +47,7 @@ class MiniCalc {
 public:
     //! Parse \a expression and construct parse tree which is later evaluated.
     //! TODO: Describe error handling.
-    MiniCalc(const std::string & expression);
+    MiniCalc(const std::string & expression, const std::set<std::string> * constants);
 
     ~MiniCalc();
 
@@ -74,31 +74,53 @@ public:
     //! Push a run-time error message. (This message stack is cleared each time xyuv::evaluate() is called.
     void runtime_error( const std::string & msg ) const;
 
-    void register_dependency(const std::string var_name) {
-        this->dependencies.insert(var_name);
+    void register_dependency(AST::variable_node *node);
+
+    const std::unordered_map<std::string, std::vector<AST::variable_node*>> & get_dependencies() const {
+        return dependencies;
     }
 
-    const std::set<std::string> & get_dependencies() const {
-        return dependencies;
+    const std::set<std::string> * get_constants() const {
+        return constants;
+    }
+
+    void recalculate_dependencies() {
+        std::unordered_map<std::string, std::vector<AST::variable_node*>> new_map;
+        for (auto & elem: dependencies) {
+            new_map.emplace((*elem.second.begin())->get_name(), std::move(elem.second));
+        }
+        dependencies.swap(new_map);
+    }
+
+    //! Return true if the expression is constant, i.e. has no dependencies on other fields and can be calculated
+    //! immediately.
+    bool is_const() const {
+        return root->is_const;
     }
 
 private:
     //! Parse \a expression and assign the result to root.
-    int parse_expression(const std::string & expression);
+    int parse_expression(const std::string & expression, const std::set<std::string> * constants);
 
     // Private variables.
     //! Symbol table of all variables in the expression.
     mutable const std::unordered_map<std::string, AST::value > *variables = nullptr;
 
     //! Variable names this expression depend on.
-    std::set<std::string> dependencies;
+    std::unordered_map<std::string, std::vector<AST::variable_node*>> dependencies;
 
     //! Vectors temporarily holding parse and runtime_errors.
     mutable std::vector<std::string> parse_errors, runtime_errors;
+
+    //! Set temporarily holding information about constants, this is only valid for access during the execution
+    //! of parse_expression and my be nullptr.
+    const std::set<std::string> * constants;
 
     //! Root of the AST.
     std::shared_ptr<AST::node> root;
 
     //! Copy of the expression for logging/debugging purposes.
     std::string expression;
+
+
 };

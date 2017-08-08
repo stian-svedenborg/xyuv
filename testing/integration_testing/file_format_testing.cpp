@@ -24,18 +24,18 @@
 
 #include "xyuv.h"
 #include "xyuv/frame.h"
-#include "xyuv/structures/format_template.h"
+#include "xyuv/structures/format_template_old.h"
 #include "../../xyuv/src/config_parser.h"
 #include <gtest/gtest.h>
 
 using namespace xyuv;
 
-static format_template load_format(const std::string & filename) {
+static format_template_old load_format(const std::string & filename) {
     std::string json;
     EXPECT_NO_THROW(json = read_json(filename));
     SCOPED_TRACE(filename);
 
-    format_template result;
+    format_template_old result;
     EXPECT_NO_THROW(result = parse_format_template(json));
 
     return result;

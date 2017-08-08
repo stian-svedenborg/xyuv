@@ -24,7 +24,7 @@
 
 #include <xyuv.h>
 #include <xyuv/structures/format.h>
-#include <xyuv/structures/format_template.h>
+#include <xyuv/structures/format_template_old.h>
 #include <xyuv/minicalc.h>
 #include <xyuv/frame.h>
 #include "to_string.h"
@@ -41,37 +41,11 @@
 
 namespace xyuv {
 
-std::unordered_map<std::string, AST::value> CONSTANTS = {
-        // Enums
-
-};
-
-class FormatInflater {
-private:
-    std::unordered_map<std::string, AST::value> resolved_expressions;
-    std::unordered_map<std::string, MiniCalc> registered_expressions;
-
-    std::vector<std::string> get_expression_resolve_order() {
-        std::vector<std::string> result;
-        std::vector<std::string> roots;
-
-        for (const auto & expr : this->registered_expressions) {
-            expr.second.get_dependencies();
-        }
-
-        return result;
-    }
-
-public:
-
-
-
-};
 
 xyuv::format create_format(
         uint32_t width,
         uint32_t height,
-        const xyuv::format_template &format_template,
+        const xyuv::format_template_old &format_template,
         const xyuv::conversion_matrix &conversion_matrix,
         const xyuv::chroma_siting &chroma_siting
 ) {
@@ -96,8 +70,8 @@ xyuv::format create_format(
             // These are the global variables.
             {"image_w", AST::value::integer(width)},
             {"image_h", AST::value::integer(height)},
-            {"macro_px_w", AST::value::integer(format_template.subsampling.macro_px_w)},
-            {"macro_px_h", AST::value::integer(format_template.subsampling.macro_px_h)}
+            {"subsampling_mode.macro_px_w", AST::value::integer(format_template.subsampling.macro_px_w)},
+            {"subsampling_mode.macro_px_h", AST::value::integer(format_template.subsampling.macro_px_h)}
     };
 
     for (std::size_t i = 0; i < format_template.planes.size(); i++) {
@@ -175,5 +149,7 @@ xyuv::frame create_frame(
 
     return frame;
 };
+
+    bool operator==(const xyuv::format &lhs, const xyuv::format &rhs );
 
 } // namespace xyuv

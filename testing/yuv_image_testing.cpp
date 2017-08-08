@@ -24,7 +24,7 @@
 
 #include <gtest/gtest.h>
 #include <xyuv/frame.h>
-#include <xyuv/structures/format_template.h>
+#include <xyuv/structures/format_template_old.h>
 #include <xyuv.h>
 #include <xyuv/yuv_image.h>
 #include "../xyuv/src/config_parser.h"
@@ -35,7 +35,7 @@ using namespace xyuv;
 //! In this test we want to stress the Toplevel API and ensure the results are sane.
 class TopLevelAPITest : public ::testing::Test {
 public:
-    format_template fmt_444, fmt_420;
+    format_template_old fmt_444, fmt_420;
     chroma_siting siting_444, siting_420;
     conversion_matrix rgb_matrix;
 
