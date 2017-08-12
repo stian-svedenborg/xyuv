@@ -31,11 +31,42 @@
 #include "assert.h"
 #include "config-parser/format_validator.h"
 #include "utility.h"
+#include "config-parser/minicalc/ast.h"
+#include "config-parser/minicalc/minicalc.h"
+
 
 #include <algorithm>
 #include <cstring>
+#include <unordered_map>
 
 namespace xyuv {
+
+std::unordered_map<std::string, AST::value> CONSTANTS = {
+        // Enums
+
+};
+
+class FormatInflater {
+private:
+    std::unordered_map<std::string, AST::value> resolved_expressions;
+    std::unordered_map<std::string, MiniCalc> registered_expressions;
+
+    std::vector<std::string> get_expression_resolve_order() {
+        std::vector<std::string> result;
+        std::vector<std::string> roots;
+
+        for (const auto & expr : this->registered_expressions) {
+            expr.second.get_dependencies();
+        }
+
+        return result;
+    }
+
+public:
+
+
+
+};
 
 xyuv::format create_format(
         uint32_t width,
@@ -61,12 +92,12 @@ xyuv::format create_format(
     //      - plane[i].line_stride, plane[i].base_offset, plane[i].size of all previous planes.
     // - The plane_size expression has the line_stride of the same plane available.
 
-    std::unordered_map<std::string, uint64_t> available_variables = {
+    std::unordered_map<std::string, AST::value> available_variables = {
             // These are the global variables.
-            {"image_w", width},
-            {"image_h", height},
-            {"macro_px_w", format_template.subsampling.macro_px_w},
-            {"macro_px_h", format_template.subsampling.macro_px_h}
+            {"image_w", AST::value::integer(width)},
+            {"image_h", AST::value::integer(height)},
+            {"macro_px_w", AST::value::integer(format_template.subsampling.macro_px_w)},
+            {"macro_px_h", AST::value::integer(format_template.subsampling.macro_px_h)}
     };
 
     for (std::size_t i = 0; i < format_template.planes.size(); i++) {
@@ -76,17 +107,17 @@ xyuv::format create_format(
         uint32_t padded_width  = next_multiple(width, format_template.planes[i].block_order.mega_block_width);
         uint32_t padded_height = next_multiple(height, format_template.planes[i].block_order.mega_block_height);
 
-        available_variables["image_w"] = padded_width;
-        available_variables["image_h"] = padded_height;
+        available_variables["image_w"] = AST::value::integer(padded_width);
+        available_variables["image_h"] = AST::value::integer(padded_height);
 
         // Set default.
-        plane.base_offset = minicalc_evaluate(format_template.planes[i].base_offset_expression, &available_variables);
+        plane.base_offset = minicalc_evaluate(format_template.planes[i].base_offset_expression, &available_variables).ival;
         plane.line_stride = static_cast<uint32_t>(minicalc_evaluate(format_template.planes[i].line_stride_expression,
-                                                                    &available_variables));
+                                                                    &available_variables).ival);
 
         // Now do the plane size.
-        available_variables["line_stride"] = plane.line_stride;
-        plane.size = minicalc_evaluate(format_template.planes[i].plane_size_expression, &available_variables);
+        available_variables["line_stride"] = AST::value::integer(plane.line_stride);
+        plane.size = minicalc_evaluate(format_template.planes[i].plane_size_expression, &available_variables).ival;
         available_variables.erase("line_stride");
 
         // Set remaining fields.
@@ -96,9 +127,9 @@ xyuv::format create_format(
 
         // Update variables with the new fields.
         std::string prefix = "plane[" + to_string(i) + "].";
-        available_variables[prefix + "base_offset"] = plane.base_offset;
-        available_variables[prefix + "line_stride"] = plane.line_stride;
-        available_variables[prefix + "plane_size"] = plane.size;
+        available_variables[prefix + "base_offset"] = AST::value::integer(plane.base_offset);
+        available_variables[prefix + "line_stride"] = AST::value::integer(plane.line_stride);
+        available_variables[prefix + "plane_size"] = AST::value::integer(plane.size);
 
         format.planes.push_back(plane);
 

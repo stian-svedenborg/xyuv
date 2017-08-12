@@ -27,13 +27,17 @@
 #include <cstdint>
 #include <unordered_map>
 
+namespace AST {
+    struct value;
+}
+
 namespace xyuv {
 
 //! Evaluate a single \a expression using the minicalc parser.
 //! \TODO: Throw exceptions
-extern uint64_t minicalc_evaluate(
+extern AST::value minicalc_evaluate(
         const std::string &expression,
-        const std::unordered_map <std::string, uint64_t> *variables
+        const std::unordered_map <std::string, AST::value> *variables
 );
 
 } // namespace xyuv

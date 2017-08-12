@@ -2,7 +2,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2016 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2017 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,28 +25,23 @@
 
 #include "minicalc.h"
 #include "ast.h"
-#include "operations.h"
 #include <iostream>
 #include <cassert>
 #include <unordered_map>
 #include <functional>
+#include <memory>
+#include <deque>
 
-static const std::unordered_map<std::string, std::function<int(int, int)>> binary_functions{
-        {"pow", minicalc_pow},
-        {"next_multiple", minicalc_next_multiple},
-        {"gcd", minicalc_gcd},
-        {"lcm", minicalc_lcm}
-};
-
-static const std::unordered_map<std::string, std::function<int(int)>> unary_functions{
-        {"abs", minicalc_abs},
-};
 }
 
+// Operator precendence
+%nonassoc LOGIC_AND LOGIC_OR.
+%nonassoc LOGIC_EQ LOGIC_NE LOGIC_LT LOGIC_GT LOGIC_LE LOGIC_GE.
 %left PLUS MINUS.
 %left DIV MUL MOD.
-%nonassoc UNARY_MINUS.
-%nonassoc POW.
+%right UNARY_MINUS LOGIC_NEG.
+%left POW.
+%nonassoc LPARENS RPARENS.
 
 %extra_argument { MiniCalc *owner }
 
@@ -62,56 +57,57 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
     delete $$;
 }
 
-
-%type expr  {node*}
+%type expr       { AST::node* }
 %destructor expr {
-    delete $$;
+	delete $$;
+}
+%type arg_list   { std::deque<std::shared_ptr<AST::node>>* }
+%destructor arg_list {
+	delete $$;
 }
 %start_symbol start
 
-start ::= result.
-
-result   ::= expr(A). {
-    owner->set_root(A);
+start ::= expr(A). {
+    owner->set_root(std::shared_ptr<AST::node>(A));
 }
 
-expr(A) ::= INT(B). {
-    A = create_node(B->value);
+// Function calls:
+arg_list(A) ::= expr(E).                        { A = new std::deque<std::shared_ptr<AST::node>>(); A->push_front(std::shared_ptr<AST::node>(E)); }
+arg_list(A) ::= expr(E) COMMA arg_list(A_tail). { A = A_tail; A->push_front(std::shared_ptr<AST::node>(E)); }
+
+expr(A) ::= IDENTIFIER(F) LPAREN arg_list(Args) RPAREN.  { A = AST::create_node(F->identifier, std::move(*Args)); }
+
+// Binary Operators
+expr(A) ::= expr(B) PLUS expr(C).    { A = AST::create_node("+", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) DIV expr(C).     { A = AST::create_node("/", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) MUL expr(C).     { A = AST::create_node("*", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) MINUS expr(C).   { A = AST::create_node("-", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) MOD expr(C).     { A = AST::create_node("%", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) POW expr(C).     { A = AST::create_node("**", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_EQ expr(C). { A = AST::create_node("==", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_NE expr(C). { A = AST::create_node("!=", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_LT expr(C). { A = AST::create_node("<", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_GT expr(C). { A = AST::create_node(">", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_LE expr(C). { A = AST::create_node("<=", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_GE expr(C). { A = AST::create_node(">=", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_AND expr(C). { A = AST::create_node("&&", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)}); }
+expr(A) ::= expr(B) LOGIC_OR expr(C).  { A = AST::create_node("||", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B), std::shared_ptr<AST::node>(C)});  }
+
+// Unary Operators
+expr(A) ::= MINUS expr(B). [UNARY_MINUS] { A = AST::create_node("-Unary", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B)}); }
+expr(A) ::= LOGIC_NEG expr(B).         { A = AST::create_node("!", std::deque<std::shared_ptr<AST::node>>{std::shared_ptr<AST::node>(B)}); }
+
+// Parenthesis:
+expr(A) ::= LPAREN expr(B) RPAREN.  { A = B; }
+
+// Variables
+expr(A) ::= IDENTIFIER(F).  {
+	A = AST::create_node(F->identifier, owner);
+	owner->register_dependency(F->identifier);  
 }
 
-expr(A) ::= expr(B) PLUS expr(C).    { A = create_node(B, C, minicalc_add); }
-expr(A) ::= expr(B) DIV expr(C).     { A = create_node(B, C, minicalc_div); }
-expr(A) ::= expr(B) MUL expr(C).     { A = create_node(B, C, minicalc_mul); }
-expr(A) ::= expr(B) MINUS expr(C).   { A = create_node(B, C, minicalc_sub); }
-expr(A) ::= expr(B) MOD expr(C).     { A = create_node(B, C, minicalc_mod); }
-expr(A) ::= expr(B) POW expr(C).     { A = create_node(B, C, minicalc_pow); }
-expr(A) ::= MINUS expr(B). [UNARY_MINUS]
-{
-    A = create_node(B, minicalc_negate);
-}
-expr(A) ::= IDENTIFIER(I).           { A = create_node(I->identifier, *owner); }
-expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) COMMA expr(A1) RPAREN.
-    {
-        auto it = binary_functions.find(F->identifier);
-        if (it != binary_functions.end()) {
-            A = create_node(A0, A1, it->second);
-        }
-        else {
-            owner->parse_error("Undeclared function '" + F->identifier + "'");
-            A = nullptr;
-        }
-    }
+// Literals
+expr(A) ::= INT(I). { A = AST::create_node(AST::value::integer(I->value)); }
+expr(A) ::= TRUE. { A = AST::create_node(AST::value::boolean(true)); }
+expr(A) ::= FALSE. { A = AST::create_node(AST::value::boolean(false)); }
 
-expr(A) ::= IDENTIFIER(F) LPAREN expr(A0) RPAREN.
-{
-    auto it = unary_functions.find(F->identifier);
-        if (it != unary_functions.end()) {
-            A = create_node(A0, it->second);
-    }
-    else {
-        owner->parse_error("Undeclared function '" + F->identifier + "'");
-        A = nullptr;
-    }
-}
-
-expr(A) ::= LPAREN expr(B) RPAREN.   { A = B; }
