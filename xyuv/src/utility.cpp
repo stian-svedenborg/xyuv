@@ -69,7 +69,11 @@ std::vector<std::string> list_files_in_folder(const std::string &dir_path) {
 #else
 
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <cstring>
+#include <stdexcept>
 
 namespace xyuv {
 
@@ -81,13 +85,29 @@ namespace xyuv {
             struct dirent *current = NULL;
             struct dirent storage;
 
-
             readdir_r(dirp, &storage, &current);
 
-
             while (current != NULL) {
-                if (current->d_type != DT_DIR) {
-                    ret_val.push_back(std::string(current->d_name));
+                std::string d_name = current->d_name;
+
+                // Dtype is not supported on all systems. So in the case it is not (or in the case of a symlink)
+                // fall back to stat.
+                if (current->d_type == DT_UNKNOWN || current->d_type == DT_LNK) {
+                    struct stat entry;
+                    std::string full_path = (dir_path + "/" + d_name);
+                    // Stat will follow symlinks.
+                    int err = stat(full_path.c_str(), &entry);
+                    if (err) {
+                        throw std::runtime_error("Could not stat: '" + full_path + "'");
+                    }
+
+                    if (S_ISREG(entry.st_mode)) {
+                        ret_val.push_back(d_name);
+                    }
+                }
+                // If it's supported, we rely on d_type (which is faster).
+                else if (current->d_type == DT_REG) {
+                    ret_val.push_back(d_name);
                 }
                 readdir_r(dirp, &storage, &current);
             }
