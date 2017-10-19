@@ -61,18 +61,33 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
 ** Each symbol here is a terminal symbol in the grammar.
 */
 #if INTERFACE
-#define TOK_PLUS                            1
-#define TOK_MINUS                           2
-#define TOK_DIV                             3
-#define TOK_MUL                             4
-#define TOK_MOD                             5
-#define TOK_UNARY_MINUS                     6
-#define TOK_POW                             7
-#define TOK_INT                             8
-#define TOK_IDENTIFIER                      9
-#define TOK_LPAREN                         10
-#define TOK_COMMA                          11
-#define TOK_RPAREN                         12
+#define TOK_LOGIC_AND                       1
+#define TOK_LOGIC_OR                        2
+#define TOK_LOGIC_EQ                        3
+#define TOK_LOGIC_NE                        4
+#define TOK_LOGIC_LT                        5
+#define TOK_LOGIC_GT                        6
+#define TOK_LOGIC_LE                        7
+#define TOK_LOGIC_GE                        8
+#define TOK_PLUS                            9
+#define TOK_MINUS                          10
+#define TOK_DIV                            11
+#define TOK_MUL                            12
+#define TOK_MOD                            13
+#define TOK_UNARY_MINUS                    14
+#define TOK_LOGIC_NEG                      15
+#define TOK_POW                            16
+#define TOK_LPARENS                        17
+#define TOK_RPARENS                        18
+#define TOK_INT                            19
+#define TOK_IDENTIFIER                     20
+#define TOK_LPAREN                         21
+#define TOK_COMMA                          22
+#define TOK_RPAREN                         23
+#define TOK_TRUE                           24
+#define TOK_FALSE                          25
+#define TOK_IF                             26
+#define TOK_BOOL                           27
 #endif
 /* Make sure the INTERFACE macro is defined.
 */
@@ -114,7 +129,7 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
 **                       defined, then do no error processing.
 */
 #define YYCODETYPE unsigned char
-#define YYNOCODE 18
+#define YYNOCODE 34
 #define YYACTIONTYPE unsigned char
 #if INTERFACE
 #define ParseTOKENTYPE MiniCalc::Token*
@@ -122,7 +137,7 @@ static const std::unordered_map<std::string, std::function<int(int)>> unary_func
 typedef union {
   int yyinit;
   ParseTOKENTYPE yy0;
-  node* yy29;
+  node* yy35;
 } YYMINORTYPE;
 #ifndef YYSTACKDEPTH
 #define YYSTACKDEPTH 100
@@ -133,8 +148,8 @@ typedef union {
 #define ParseARG_FETCH  MiniCalc *owner  = yypParser->owner 
 #define ParseARG_STORE yypParser->owner  = owner 
 #endif
-#define YYNSTATE 28
-#define YYNRULE 14
+#define YYNSTATE 68
+#define YYNRULE 29
 #define YY_NO_ACTION      (YYNSTATE+YYNRULE+2)
 #define YY_ACCEPT_ACTION  (YYNSTATE+YYNRULE+1)
 #define YY_ERROR_ACTION   (YYNSTATE+YYNRULE)
@@ -203,44 +218,70 @@ static const YYMINORTYPE yyzerominor = { 0 };
 **                     shifting non-terminals after a reduce.
 **  yy_default[]       Default action for each state.
 */
-#define YY_ACTTAB_COUNT (54)
+#define YY_ACTTAB_COUNT (147)
 static const YYACTIONTYPE yy_action[] = {
- /*     0 */    10,    7,    9,    8,    6,   28,    5,   14,   43,   23,
- /*    10 */     2,   24,   10,    7,    9,    8,    6,    5,    5,   42,
- /*    20 */     9,    8,    6,   26,    5,   10,    7,    9,    8,    6,
- /*    30 */     3,    5,   16,   22,   44,   21,   25,   15,   10,    7,
- /*    40 */     9,    8,    6,    4,    5,   20,   19,   18,   11,   27,
- /*    50 */    17,    1,   13,   12,
+ /*     0 */    15,   14,   13,   12,   11,   10,   25,   22,   24,   23,
+ /*    10 */    21,   97,   97,   20,   25,   22,   24,   23,   21,   68,
+ /*    20 */    65,   20,   27,   43,   15,   14,   13,   12,   11,   10,
+ /*    30 */    25,   22,   24,   23,   21,   19,   40,   20,   98,   56,
+ /*    40 */     2,   27,   44,    6,   55,   50,    4,   26,   45,   64,
+ /*    50 */    63,   49,   48,   20,   25,   22,   24,   23,   21,   27,
+ /*    60 */    46,   20,   25,   22,   24,   23,   21,   17,   58,   20,
+ /*    70 */    18,   25,   22,   24,   23,   21,   66,    5,   20,   25,
+ /*    80 */    22,   24,   23,   21,    9,   65,   20,   41,   25,   22,
+ /*    90 */    24,   23,   21,   60,   54,   20,   25,   22,   24,   23,
+ /*   100 */    21,    7,   19,   20,   24,   23,   21,    3,    1,   20,
+ /*   110 */    59,   55,   50,   16,    3,    1,    3,    1,   49,   27,
+ /*   120 */    61,   99,   99,   27,   47,   53,   42,   52,   67,   62,
+ /*   130 */    51,   28,   33,   32,   39,    8,   38,   37,   57,   36,
+ /*   140 */    35,   34,   99,   31,   99,   30,   29,
 };
 static const YYCODETYPE yy_lookahead[] = {
- /*     0 */     1,    2,    3,    4,    5,    0,    7,   14,   15,   16,
- /*    10 */    11,   12,    1,    2,    3,    4,    5,    7,    7,    7,
- /*    20 */     3,    4,    5,   12,    7,    1,    2,    3,    4,    5,
- /*    30 */    10,    7,   14,   14,   17,   14,   12,   14,    1,    2,
- /*    40 */     3,    4,    5,    2,    7,   14,   14,   14,   14,    8,
- /*    50 */     9,   10,   14,   14,
+ /*     0 */     3,    4,    5,    6,    7,    8,    9,   10,   11,   12,
+ /*    10 */    13,    1,    2,   16,    9,   10,   11,   12,   13,    0,
+ /*    20 */    23,   16,   29,   30,    3,    4,    5,    6,    7,    8,
+ /*    30 */     9,   10,   11,   12,   13,   10,   29,   16,   31,   32,
+ /*    40 */    15,   29,   30,   21,   19,   20,   21,   29,   30,   24,
+ /*    50 */    25,   26,   27,   16,    9,   10,   11,   12,   13,   29,
+ /*    60 */    30,   16,    9,   10,   11,   12,   13,   22,   23,   16,
+ /*    70 */    21,    9,   10,   11,   12,   13,   23,   21,   16,    9,
+ /*    80 */    10,   11,   12,   13,   21,   23,   16,   29,    9,   10,
+ /*    90 */    11,   12,   13,   23,   29,   16,    9,   10,   11,   12,
+ /*   100 */    13,   22,   10,   16,   11,   12,   13,    1,    2,   16,
+ /*   110 */    23,   19,   20,   21,    1,    2,    1,    2,   26,   29,
+ /*   120 */    30,   33,   33,   29,   30,   29,   29,   29,   29,   23,
+ /*   130 */    29,   29,   29,   29,   29,   22,   29,   29,   23,   29,
+ /*   140 */    29,   29,   33,   29,   33,   29,   29,
 };
-#define YY_SHIFT_USE_DFLT (-2)
-#define YY_SHIFT_COUNT (23)
-#define YY_SHIFT_MIN   (-1)
-#define YY_SHIFT_MAX   (41)
+#define YY_SHIFT_USE_DFLT (-4)
+#define YY_SHIFT_COUNT (56)
+#define YY_SHIFT_MIN   (-3)
+#define YY_SHIFT_MAX   (115)
 static const signed char yy_shift_ofst[] = {
- /*     0 */    41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
- /*    10 */    41,   -1,   24,   11,   37,   17,   17,   20,   10,   12,
- /*    20 */    10,   10,   10,    5,
+ /*     0 */    92,   25,   25,   25,   25,   25,   25,   92,   92,   92,
+ /*    10 */    92,   92,   92,   92,   92,   92,   92,   92,   92,   92,
+ /*    20 */    92,   92,   92,   92,   92,   92,   -3,   21,   45,   87,
+ /*    30 */    79,   70,   62,   53,    5,    5,    5,    5,    5,    5,
+ /*    40 */     5,   93,   93,  115,  113,  106,   10,   10,   63,   56,
+ /*    50 */    49,   37,   37,   37,   37,   22,   19,
 };
 #define YY_REDUCE_USE_DFLT (-8)
-#define YY_REDUCE_COUNT (10)
+#define YY_REDUCE_COUNT (25)
 #define YY_REDUCE_MIN   (-7)
-#define YY_REDUCE_MAX   (39)
+#define YY_REDUCE_MAX   (117)
 static const signed char yy_reduce_ofst[] = {
- /*     0 */    -7,   39,   38,   34,   33,   32,   31,   23,   21,   19,
- /*    10 */    18,
+ /*     0 */     7,   94,   90,   30,   18,   12,   -7,  117,  116,  114,
+ /*    10 */   112,  111,  110,  108,  107,  105,  104,  103,  102,  101,
+ /*    20 */    99,   98,   97,   96,   65,   58,
 };
 static const YYACTIONTYPE yy_default[] = {
- /*     0 */    42,   42,   42,   42,   42,   42,   42,   42,   42,   42,
- /*    10 */    42,   42,   42,   42,   29,   34,   31,   38,   37,   36,
- /*    20 */    35,   33,   32,   42,   40,   41,   39,   30,
+ /*     0 */    97,   97,   97,   97,   97,   97,   97,   97,   97,   97,
+ /*    10 */    97,   97,   97,   97,   97,   97,   97,   97,   97,   97,
+ /*    20 */    97,   97,   97,   97,   97,   97,   97,   97,   97,   97,
+ /*    30 */    97,   97,   97,   97,   90,   89,   88,   87,   86,   85,
+ /*    40 */    69,   71,   74,   97,   97,   97,   92,   93,   97,   97,
+ /*    50 */    78,   77,   75,   73,   72,   70,   97,   95,   80,   94,
+ /*    60 */    96,   91,   84,   83,   82,   81,   79,   76,
 };
 
 /* The next table maps tokens into fallback tokens.  If a construct
@@ -333,10 +374,14 @@ void ParseTrace(FILE *TraceFILE, char *zTracePrompt){
 /* For tracing shifts, the names of all terminals and nonterminals
 ** are required.  The following table supplies these names */
 static const char *const yyTokenName[] = { 
-  "$",             "PLUS",          "MINUS",         "DIV",         
-  "MUL",           "MOD",           "UNARY_MINUS",   "POW",         
-  "INT",           "IDENTIFIER",    "LPAREN",        "COMMA",       
-  "RPAREN",        "error",         "expr",          "start",       
+  "$",             "LOGIC_AND",     "LOGIC_OR",      "LOGIC_EQ",    
+  "LOGIC_NE",      "LOGIC_LT",      "LOGIC_GT",      "LOGIC_LE",    
+  "LOGIC_GE",      "PLUS",          "MINUS",         "DIV",         
+  "MUL",           "MOD",           "UNARY_MINUS",   "LOGIC_NEG",   
+  "POW",           "LPARENS",       "RPARENS",       "INT",         
+  "IDENTIFIER",    "LPAREN",        "COMMA",         "RPAREN",      
+  "TRUE",          "FALSE",         "IF",            "BOOL",        
+  "error",         "expr",          "bool_expr",     "start",       
   "result",      
 };
 #endif /* NDEBUG */
@@ -359,6 +404,21 @@ static const char *const yyRuleName[] = {
  /*  11 */ "expr ::= IDENTIFIER LPAREN expr COMMA expr RPAREN",
  /*  12 */ "expr ::= IDENTIFIER LPAREN expr RPAREN",
  /*  13 */ "expr ::= LPAREN expr RPAREN",
+ /*  14 */ "bool_expr ::= TRUE",
+ /*  15 */ "bool_expr ::= FALSE",
+ /*  16 */ "bool_expr ::= LPAREN bool_expr RPAREN",
+ /*  17 */ "bool_expr ::= expr LOGIC_EQ expr",
+ /*  18 */ "bool_expr ::= expr LOGIC_NE expr",
+ /*  19 */ "bool_expr ::= expr LOGIC_LT expr",
+ /*  20 */ "bool_expr ::= expr LOGIC_GT expr",
+ /*  21 */ "bool_expr ::= expr LOGIC_LE expr",
+ /*  22 */ "bool_expr ::= expr LOGIC_GE expr",
+ /*  23 */ "bool_expr ::= LOGIC_NEG bool_expr",
+ /*  24 */ "bool_expr ::= bool_expr LOGIC_AND bool_expr",
+ /*  25 */ "bool_expr ::= bool_expr LOGIC_OR bool_expr",
+ /*  26 */ "expr ::= IF LPAREN bool_expr COMMA expr COMMA expr RPAREN",
+ /*  27 */ "expr ::= INT LPAREN bool_expr RPAREN",
+ /*  28 */ "bool_expr ::= BOOL LPAREN expr RPAREN",
 };
 #endif /* NDEBUG */
 
@@ -438,34 +498,50 @@ static void yy_destructor(
     ** inside the C code.
     */
       /* TERMINAL Destructor */
-    case 1: /* PLUS */
-    case 2: /* MINUS */
-    case 3: /* DIV */
-    case 4: /* MUL */
-    case 5: /* MOD */
-    case 6: /* UNARY_MINUS */
-    case 7: /* POW */
-    case 8: /* INT */
-    case 9: /* IDENTIFIER */
-    case 10: /* LPAREN */
-    case 11: /* COMMA */
-    case 12: /* RPAREN */
+    case 1: /* LOGIC_AND */
+    case 2: /* LOGIC_OR */
+    case 3: /* LOGIC_EQ */
+    case 4: /* LOGIC_NE */
+    case 5: /* LOGIC_LT */
+    case 6: /* LOGIC_GT */
+    case 7: /* LOGIC_LE */
+    case 8: /* LOGIC_GE */
+    case 9: /* PLUS */
+    case 10: /* MINUS */
+    case 11: /* DIV */
+    case 12: /* MUL */
+    case 13: /* MOD */
+    case 14: /* UNARY_MINUS */
+    case 15: /* LOGIC_NEG */
+    case 16: /* POW */
+    case 17: /* LPARENS */
+    case 18: /* RPARENS */
+    case 19: /* INT */
+    case 20: /* IDENTIFIER */
+    case 21: /* LPAREN */
+    case 22: /* COMMA */
+    case 23: /* RPAREN */
+    case 24: /* TRUE */
+    case 25: /* FALSE */
+    case 26: /* IF */
+    case 27: /* BOOL */
 {
-#line 60 "parser.ypp"
+#line 64 "parser.ypp"
 
     (void) owner;
     delete (yypminor->yy0);
 
-#line 460 "parser.c"
+#line 535 "parser.c"
 }
       break;
-    case 14: /* expr */
+    case 29: /* expr */
+    case 30: /* bool_expr */
 {
-#line 67 "parser.ypp"
+#line 73 "parser.ypp"
 
-    delete (yypminor->yy29);
+    delete (yypminor->yy35);
 
-#line 469 "parser.c"
+#line 545 "parser.c"
 }
       break;
     default:  break;   /* If no destructor action specified: do nothing */
@@ -703,20 +779,35 @@ static const struct {
   YYCODETYPE lhs;         /* Symbol on the left-hand side of the rule */
   unsigned char nrhs;     /* Number of right-hand side symbols in the rule */
 } yyRuleInfo[] = {
-  { 15, 1 },
-  { 16, 1 },
-  { 14, 1 },
-  { 14, 3 },
-  { 14, 3 },
-  { 14, 3 },
-  { 14, 3 },
-  { 14, 3 },
-  { 14, 3 },
-  { 14, 2 },
-  { 14, 1 },
-  { 14, 6 },
-  { 14, 4 },
-  { 14, 3 },
+  { 31, 1 },
+  { 32, 1 },
+  { 29, 1 },
+  { 29, 3 },
+  { 29, 3 },
+  { 29, 3 },
+  { 29, 3 },
+  { 29, 3 },
+  { 29, 3 },
+  { 29, 2 },
+  { 29, 1 },
+  { 29, 6 },
+  { 29, 4 },
+  { 29, 3 },
+  { 30, 1 },
+  { 30, 1 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 3 },
+  { 30, 2 },
+  { 30, 3 },
+  { 30, 3 },
+  { 29, 8 },
+  { 29, 4 },
+  { 30, 4 },
 };
 
 static void yy_accept(yyParser*);  /* Forward Declaration */
@@ -772,107 +863,206 @@ static void yy_reduce(
   **     break;
   */
       case 1: /* result ::= expr */
-#line 74 "parser.ypp"
+#line 83 "parser.ypp"
 {
-    owner->set_root(yymsp[0].minor.yy29);
+    owner->set_root(yymsp[0].minor.yy35);
 }
-#line 780 "parser.c"
+#line 871 "parser.c"
         break;
       case 2: /* expr ::= INT */
-#line 78 "parser.ypp"
+#line 87 "parser.ypp"
 {
-    yygotominor.yy29 = create_node(yymsp[0].minor.yy0->value);
+    yygotominor.yy35 = create_node(yymsp[0].minor.yy0->value);
 }
-#line 787 "parser.c"
+#line 878 "parser.c"
         break;
       case 3: /* expr ::= expr PLUS expr */
-#line 82 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_add);   yy_destructor(yypParser,1,&yymsp[-1].minor);
+#line 91 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_add);   yy_destructor(yypParser,9,&yymsp[-1].minor);
 }
-#line 793 "parser.c"
+#line 884 "parser.c"
         break;
       case 4: /* expr ::= expr DIV expr */
-#line 83 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_div);   yy_destructor(yypParser,3,&yymsp[-1].minor);
+#line 92 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_div);   yy_destructor(yypParser,11,&yymsp[-1].minor);
 }
-#line 799 "parser.c"
+#line 890 "parser.c"
         break;
       case 5: /* expr ::= expr MUL expr */
-#line 84 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_mul);   yy_destructor(yypParser,4,&yymsp[-1].minor);
+#line 93 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_mul);   yy_destructor(yypParser,12,&yymsp[-1].minor);
 }
-#line 805 "parser.c"
+#line 896 "parser.c"
         break;
       case 6: /* expr ::= expr MINUS expr */
-#line 85 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_sub);   yy_destructor(yypParser,2,&yymsp[-1].minor);
+#line 94 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_sub);   yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
-#line 811 "parser.c"
+#line 902 "parser.c"
         break;
       case 7: /* expr ::= expr MOD expr */
-#line 86 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_mod);   yy_destructor(yypParser,5,&yymsp[-1].minor);
+#line 95 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_mod);   yy_destructor(yypParser,13,&yymsp[-1].minor);
 }
-#line 817 "parser.c"
+#line 908 "parser.c"
         break;
       case 8: /* expr ::= expr POW expr */
-#line 87 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[-2].minor.yy29, yymsp[0].minor.yy29, minicalc_pow);   yy_destructor(yypParser,7,&yymsp[-1].minor);
+#line 96 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_pow);   yy_destructor(yypParser,16,&yymsp[-1].minor);
 }
-#line 823 "parser.c"
+#line 914 "parser.c"
         break;
       case 9: /* expr ::= MINUS expr */
-#line 89 "parser.ypp"
+#line 98 "parser.ypp"
 {
-    yygotominor.yy29 = create_node(yymsp[0].minor.yy29, minicalc_negate);
-  yy_destructor(yypParser,2,&yymsp[-1].minor);
+    yygotominor.yy35 = create_node(yymsp[0].minor.yy35, minicalc_negate);
+  yy_destructor(yypParser,10,&yymsp[-1].minor);
 }
-#line 831 "parser.c"
+#line 922 "parser.c"
         break;
       case 10: /* expr ::= IDENTIFIER */
-#line 92 "parser.ypp"
-{ yygotominor.yy29 = create_node(yymsp[0].minor.yy0->identifier, *owner); }
-#line 836 "parser.c"
+#line 101 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[0].minor.yy0->identifier, *owner); }
+#line 927 "parser.c"
         break;
       case 11: /* expr ::= IDENTIFIER LPAREN expr COMMA expr RPAREN */
-#line 94 "parser.ypp"
+#line 103 "parser.ypp"
 {
-        auto it = binary_functions.find(yymsp[-5].minor.yy0->identifier);
-        if (it != binary_functions.end()) {
-            yygotominor.yy29 = create_node(yymsp[-3].minor.yy29, yymsp[-1].minor.yy29, it->second);
-        }
-        else {
-            owner->parse_error("Undeclared function '" + yymsp[-5].minor.yy0->identifier + "'");
-            yygotominor.yy29 = nullptr;
-        }
-      yy_destructor(yypParser,10,&yymsp[-4].minor);
-  yy_destructor(yypParser,11,&yymsp[-2].minor);
-  yy_destructor(yypParser,12,&yymsp[0].minor);
+    auto it = binary_functions.find(yymsp[-5].minor.yy0->identifier);
+    if (it != binary_functions.end()) {
+        yygotominor.yy35 = create_node(yymsp[-3].minor.yy35, yymsp[-1].minor.yy35, it->second);
+    }
+    else {
+        owner->parse_error("Undeclared function '" + yymsp[-5].minor.yy0->identifier + "'");
+        yygotominor.yy35 = nullptr;
+    }
+  yy_destructor(yypParser,21,&yymsp[-4].minor);
+  yy_destructor(yypParser,22,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
 }
-#line 853 "parser.c"
+#line 944 "parser.c"
         break;
       case 12: /* expr ::= IDENTIFIER LPAREN expr RPAREN */
-#line 106 "parser.ypp"
+#line 115 "parser.ypp"
 {
     auto it = unary_functions.find(yymsp[-3].minor.yy0->identifier);
-        if (it != unary_functions.end()) {
-            yygotominor.yy29 = create_node(yymsp[-1].minor.yy29, it->second);
+    if (it != unary_functions.end()) {
+        yygotominor.yy35 = create_node(yymsp[-1].minor.yy35, it->second);
     }
     else {
         owner->parse_error("Undeclared function '" + yymsp[-3].minor.yy0->identifier + "'");
-        yygotominor.yy29 = nullptr;
+        yygotominor.yy35 = nullptr;
     }
-  yy_destructor(yypParser,10,&yymsp[-2].minor);
-  yy_destructor(yypParser,12,&yymsp[0].minor);
+  yy_destructor(yypParser,21,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
 }
-#line 869 "parser.c"
+#line 960 "parser.c"
         break;
       case 13: /* expr ::= LPAREN expr RPAREN */
-#line 117 "parser.ypp"
-{ yygotominor.yy29 = yymsp[-1].minor.yy29;   yy_destructor(yypParser,10,&yymsp[-2].minor);
-  yy_destructor(yypParser,12,&yymsp[0].minor);
+      case 16: /* bool_expr ::= LPAREN bool_expr RPAREN */ yytestcase(yyruleno==16);
+#line 126 "parser.ypp"
+{ yygotominor.yy35 = yymsp[-1].minor.yy35;   yy_destructor(yypParser,21,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
 }
-#line 876 "parser.c"
+#line 968 "parser.c"
+        break;
+      case 14: /* bool_expr ::= TRUE */
+#line 128 "parser.ypp"
+{ yygotominor.yy35 = create_node(1);   yy_destructor(yypParser,24,&yymsp[0].minor);
+}
+#line 974 "parser.c"
+        break;
+      case 15: /* bool_expr ::= FALSE */
+#line 129 "parser.ypp"
+{ yygotominor.yy35 = create_node(0);   yy_destructor(yypParser,25,&yymsp[0].minor);
+}
+#line 980 "parser.c"
+        break;
+      case 17: /* bool_expr ::= expr LOGIC_EQ expr */
+#line 133 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_eq);  yy_destructor(yypParser,3,&yymsp[-1].minor);
+}
+#line 986 "parser.c"
+        break;
+      case 18: /* bool_expr ::= expr LOGIC_NE expr */
+#line 134 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_ne);  yy_destructor(yypParser,4,&yymsp[-1].minor);
+}
+#line 992 "parser.c"
+        break;
+      case 19: /* bool_expr ::= expr LOGIC_LT expr */
+#line 135 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_lt);  yy_destructor(yypParser,5,&yymsp[-1].minor);
+}
+#line 998 "parser.c"
+        break;
+      case 20: /* bool_expr ::= expr LOGIC_GT expr */
+#line 136 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_gt);  yy_destructor(yypParser,6,&yymsp[-1].minor);
+}
+#line 1004 "parser.c"
+        break;
+      case 21: /* bool_expr ::= expr LOGIC_LE expr */
+#line 137 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_le);  yy_destructor(yypParser,7,&yymsp[-1].minor);
+}
+#line 1010 "parser.c"
+        break;
+      case 22: /* bool_expr ::= expr LOGIC_GE expr */
+#line 138 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_ge);  yy_destructor(yypParser,8,&yymsp[-1].minor);
+}
+#line 1016 "parser.c"
+        break;
+      case 23: /* bool_expr ::= LOGIC_NEG bool_expr */
+#line 139 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[0].minor.yy35, minicalc_logic_neg);  yy_destructor(yypParser,15,&yymsp[-1].minor);
+}
+#line 1022 "parser.c"
+        break;
+      case 24: /* bool_expr ::= bool_expr LOGIC_AND bool_expr */
+#line 141 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_and);  yy_destructor(yypParser,1,&yymsp[-1].minor);
+}
+#line 1028 "parser.c"
+        break;
+      case 25: /* bool_expr ::= bool_expr LOGIC_OR bool_expr */
+#line 142 "parser.ypp"
+{ yygotominor.yy35 = create_node(yymsp[-2].minor.yy35, yymsp[0].minor.yy35, minicalc_logic_or);  yy_destructor(yypParser,2,&yymsp[-1].minor);
+}
+#line 1034 "parser.c"
+        break;
+      case 26: /* expr ::= IF LPAREN bool_expr COMMA expr COMMA expr RPAREN */
+#line 145 "parser.ypp"
+{
+    yygotominor.yy35 = create_if_node(yymsp[-5].minor.yy35, yymsp[-3].minor.yy35, yymsp[-1].minor.yy35);
+  yy_destructor(yypParser,26,&yymsp[-7].minor);
+  yy_destructor(yypParser,21,&yymsp[-6].minor);
+  yy_destructor(yypParser,22,&yymsp[-4].minor);
+  yy_destructor(yypParser,22,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
+}
+#line 1046 "parser.c"
+        break;
+      case 27: /* expr ::= INT LPAREN bool_expr RPAREN */
+#line 150 "parser.ypp"
+{
+    yygotominor.yy35 = yymsp[-1].minor.yy35;
+  yy_destructor(yypParser,19,&yymsp[-3].minor);
+  yy_destructor(yypParser,21,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
+}
+#line 1056 "parser.c"
+        break;
+      case 28: /* bool_expr ::= BOOL LPAREN expr RPAREN */
+#line 155 "parser.ypp"
+{
+    yygotominor.yy35 = yymsp[-1].minor.yy35;
+  yy_destructor(yypParser,27,&yymsp[-3].minor);
+  yy_destructor(yypParser,21,&yymsp[-2].minor);
+  yy_destructor(yypParser,23,&yymsp[0].minor);
+}
+#line 1066 "parser.c"
         break;
       default:
       /* (0) start ::= result */ yytestcase(yyruleno==0);
@@ -935,11 +1125,11 @@ static void yy_syntax_error(
 ){
   ParseARG_FETCH;
 #define TOKEN (yyminor.yy0)
-#line 53 "parser.ypp"
+#line 57 "parser.ypp"
 
    owner->parse_error("Syntax error!");
 
-#line 943 "parser.c"
+#line 1133 "parser.c"
   ParseARG_STORE; /* Suppress warning about unused %extra_argument variable */
 }
 

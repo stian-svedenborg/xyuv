@@ -68,6 +68,31 @@ private:
     std::function<int(int, int)> operation;
 };
 
+//! \brief Class representing a binary operation in the ast.
+class conditional_node : public node {
+public:
+    conditional_node(node *bool_expr, node *true_expr, node *false_expr) :
+            true_expr(true_expr),
+            false_expr(false_expr),
+            bool_expr(bool_expr)
+    {}
+
+    int evaluate() const {
+        if (bool_expr->evaluate() == 0) {
+            return false_expr->evaluate();
+        } else {
+            return true_expr->evaluate();
+        }
+    }
+    virtual ~conditional_node() {
+        delete true_expr;
+        delete false_expr;
+        delete bool_expr;
+    }
+private:
+    node *true_expr, *false_expr, *bool_expr;
+};
+
 //! \brief Class representing a constant value in the ast.
 class value_node : public node {
 public:
@@ -118,5 +143,8 @@ node* create_node(const std::string & name, const MiniCalc & owner) {
     return new variable_node(name, owner);
 }
 
+node* create_if_node(node* bool_expr, node* true_expr, node* false_expr) {
+    return new conditional_node(bool_expr, true_expr, false_expr);
+}
 
 

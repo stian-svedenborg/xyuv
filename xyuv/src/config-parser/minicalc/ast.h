@@ -51,3 +51,7 @@ node* create_node(int value);
 //! \param owner Reference to xyuv::MiniCalc object in which to lookup the value of variable during evaluation.
 node* create_node(const std::string & variable, const MiniCalc & owner);
 
+//! \brief Allocate a new node representing a single if-condition.
+//! \param bool_expr Expression, if bool_expr == 0, return false_expr->evaluate() else return true_expr->evaluate()
+node* create_if_node(node* bool_expr, node* true_expr, node* false_expr);
+
