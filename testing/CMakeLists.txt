@@ -37,7 +37,7 @@ add_executable(unit_tests
         TestResources.h
         continuation_blocks.cpp
         interleave_test.cpp
-        bit_packing.cpp block_reorder.cpp)
+        bit_packing.cpp block_reorder.cpp configuration_manager.cpp)
 
 add_executable(integration_testing
         ${INTEGRATION_TESTING_SOURCES}

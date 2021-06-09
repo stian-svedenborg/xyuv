@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2016-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +38,11 @@ xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template &fmt_template
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 
-void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string & out_filename) {
+void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string & out_stem, const std::string & suffix, bool split_planes) {
+    if (split_planes) {
+        throw std::runtime_error("Suffix '" + suffix + "' does not support split planes");
+    }
     xyuv::libpng_wrapper wrapper;
     xyuv::write_frame_to_rgb_image(&wrapper, frame);
-    wrapper.save_png_to_file(out_filename);
+    wrapper.save_png_to_file(out_stem + suffix);
 }

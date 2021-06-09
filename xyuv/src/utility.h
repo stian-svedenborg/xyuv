@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
  */
 
 #pragma once
+
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -34,39 +35,41 @@ namespace xyuv {
 #define _XYUV_STRINGIFY(x) # x
 #define XYUV_STRINGIFY(x) _XYUV_STRINGIFY(x)
 
-std::vector<std::string> list_files_in_folder(const std::string &dir_path);
+    std::vector<std::string> list_files_in_folder(const std::string &dir_path);
 
-static inline pixel_quantum clamp( pixel_quantum min_, pixel_quantum max_, pixel_quantum val)
-{
-    using std::min;
-    using std::max;
-    return min(max_, max(min_, val));
-}
+    static inline pixel_quantum clamp(pixel_quantum min_, pixel_quantum max_, pixel_quantum val) {
+        using std::min;
+        using std::max;
+        return min(max_, max(min_, val));
+    }
 
-uint32_t gcd(uint32_t u, uint32_t v);
-uint32_t lcm(uint32_t a, uint32_t b);
+    uint32_t gcd(uint32_t u, uint32_t v);
 
-uint32_t next_multiple(uint32_t base, uint32_t multiplier);
+    uint32_t lcm(uint32_t a, uint32_t b);
+
+    uint32_t next_multiple(uint32_t base, uint32_t multiplier);
 
 
 //! \brief Fill a memory region with little endian 0xDEADBEEF.
-void poison_buffer(void *buffer, uint64_t buffersize);
+    void poison_buffer(void *buffer, uint64_t buffersize);
 
-
-//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
-//! Offset is in bits from least significant bit of buffer to least significant bit of value
-inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
-    uint8_t &byte = buffer[offset / 8];
-    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
-    byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
-}
+//! Return the basename, i.e. name after final slash of a path.
+    std::string basename(const std::string &path);
 
 //! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
 //! Offset is in bits from least significant bit of buffer to least significant bit of value
-inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
-    uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
-    return (buffer[offset / 8] & mask) != 0;
-}
+    inline void set_bit(uint8_t *buffer, uint64_t offset, bool val) {
+        uint8_t &byte = buffer[offset / 8];
+        uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
+        byte = static_cast<uint8_t>((val ? mask : 0) | (byte & ~mask));
+    }
+
+//! \brief Buffer is seen as a continuous stream of bits from lsb of LSB to msb of MSB.
+//! Offset is in bits from least significant bit of buffer to least significant bit of value
+    inline bool get_bit(const uint8_t *buffer, uint64_t offset) {
+        uint8_t mask = static_cast<uint8_t>(0x1 << (offset % 8));
+        return (buffer[offset / 8] & mask) != 0;
+    }
 
 
 } // namespace xyuv

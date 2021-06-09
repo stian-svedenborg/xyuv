@@ -1,0 +1,23 @@
+####################################
+#   Identity                       #
+####################################
+# Simply pass through the values, doing no conversion.
+# This can be used to visualize YUV data in RGB images
+# or to use xyuv to encode raw rgb images.
+{
+
+    "to_yuv" : [
+        [1.0, 0.0, 0.0 ],
+        [0.0, 1.0, 0.0 ],
+        [0.0, 0.0, 1.0 ]
+    ],
+
+    "y_range" : [0.0, 1.0],
+    "u_range" : [0.0, 1.0],
+    "v_range" : [0.0, 1.0],
+
+    "y_packed_range" : [ 0.0, 1.0],
+    "u_packed_range" : [ 0.0, 1.0],
+    "v_packed_range" : [ 0.0, 1.0]
+
+}

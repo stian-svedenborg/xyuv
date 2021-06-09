@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2016-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ namespace xyuv {
 
 xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name );
 xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
-void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename);
+void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string &out_stem, const std::string& suffix, bool split_planes);
 void Display_imagemagick(const xyuv::frame & frame);
 
 #endif //CROSSYUV_MAGICK_FORMAT_RW_H

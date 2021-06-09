@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -109,7 +109,7 @@ public:
         }
 
         // Finally write the frame back.
-        Helpers::WriteFrame(frame, options.output_file);
+        Helpers::WriteFrame(frame, options.output_file, false);
     }
 
     DecoderOptions ParseArgs(int argc, char * argv[]) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Stian Valentin Svedenborg
+ * Copyright (c) 2016-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,13 +42,16 @@ xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_tem
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 
-void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string & out_filename) {
+void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string &out_stem, const std::string& suffix, bool split_planes) {
+    if (split_planes) {
+        throw std::runtime_error("Suffix '" + suffix + "' does not support split planes");
+    }
     Magick::Image image(Magick::Geometry(frame.format.image_w,frame.format.image_h,0,0), Magick::ColorRGB(0.0,0.0,0.0));
 
     xyuv::magick_wrapper wrapper(image);
     xyuv::write_frame_to_rgb_image(&wrapper, frame);
 
-    image.write(out_filename);
+    image.write(out_stem + suffix);
 }
 
 void Display_imagemagick(const xyuv::frame & frame) {

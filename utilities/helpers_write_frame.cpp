@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,13 +41,29 @@
 
 
 
-void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size);
+void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size, uint64_t memory_map_offset = 0);
 
 std::string Helpers::GetSuffix(const std::string & path) {
     return path.substr(path.rfind('.', std::string::npos), std::string::npos);
 }
 
-static void write_frame_using_xyuv(const xyuv::frame & frame, const std::string & out_filename) {
+std::pair<std::string, std::string> Helpers::SplitSuffix(const std::string &path) {
+    std::size_t dot_pos = path.rfind('.');
+    std::size_t slash_pos = path.rfind('/');
+    if (dot_pos < slash_pos) {
+        return std::make_pair(path, std::string(""));
+    }
+    else {
+        return std::make_pair(path.substr(0, dot_pos), path.substr(dot_pos));
+    }
+
+}
+
+static void write_frame_using_xyuv(const xyuv::frame & frame, const std::string & out_stem, const std::string& suffix, bool split_planes) {
+    if (split_planes) {
+        throw std::logic_error("Suffix .xyuv does not support split-planes.");
+    }
+    auto out_filename = out_stem + suffix;
     std::ofstream fout(out_filename, std::ios::binary);
     if (!fout) {
         throw std::runtime_error("Could not open output file: '" + out_filename + "' for writing");
@@ -55,20 +71,40 @@ static void write_frame_using_xyuv(const xyuv::frame & frame, const std::string 
     xyuv::write_frame(fout, frame);
 }
 
-static void write_frame_raw(const xyuv::frame & frame, const std::string & out_filename) {
+static void WriteRawFile(const std::string & out_filename, const std::uint8_t* buffer, const std::uint64_t buffersize) {
     std::ofstream fout(out_filename, std::ios::binary);
     if (!fout) {
         throw std::runtime_error("Could not open output file: '" + out_filename + "' for writing");
     }
-    xyuv::write_large_buffer(fout, reinterpret_cast<const char*>(frame.data.get()), frame.format.size);
+    xyuv::write_large_buffer(fout, reinterpret_cast<const char *>(buffer), buffersize);
 }
 
-static void write_frame_hex(const xyuv::frame & frame, const std::string & out_filename) {
-    WriteHexFile(out_filename, frame.data.get(), frame.format.size);
+static void write_frame_raw(const xyuv::frame & frame, const std::string & out_stem, const std::string & suffix, bool split_planes) {
+    if (split_planes) {
+        for (int i = 0; i < frame.format.planes.size(); i++) {
+            auto outfilename = out_stem + "-p" + std::to_string(i) + suffix;
+            WriteRawFile(outfilename, frame.data.get() + frame.format.planes[i].base_offset, frame.format.planes[i].size);
+        }
+    }
+    else {
+        WriteRawFile(out_stem + suffix, frame.data.get(), frame.format.size);
+    }
 }
 
-void Helpers::WriteFrame(const xyuv::frame & frame, const std::string & out_filename) {
-    static std::map<std::string, std::function<void(const xyuv::frame &, const std::string &)>> map {
+static void write_frame_hex(const xyuv::frame & frame, const std::string & out_stem, const std::string & suffix, bool split_planes) {
+    if (split_planes) {
+        for (int i = 0; i < frame.format.planes.size(); i++) {
+            auto outfilename = out_stem + "-p" + std::to_string(i) + suffix;
+            WriteHexFile(outfilename, frame.data.get() + frame.format.planes[i].base_offset, frame.format.planes[i].size, frame.format.planes[i].base_offset);
+        }
+    }
+    else {
+        WriteHexFile(out_stem + suffix, frame.data.get(), frame.format.size);
+    }
+}
+
+void Helpers::WriteFrame(const xyuv::frame &frame, const std::string &out_filename, bool split_planes) {
+    static std::map<std::string, std::function<void(const xyuv::frame &, const std::string &, const std::string &, bool)>> map {
             {".xyuv", write_frame_using_xyuv },
             {".hex", write_frame_hex },
             {".bin", write_frame_raw },
@@ -87,22 +123,19 @@ void Helpers::WriteFrame(const xyuv::frame & frame, const std::string & out_file
 #endif
     };
 
-    std::string suffix = Helpers::GetSuffix(out_filename);
-
-    // Make it lowercase.
-    for (char & c : suffix ) {
-        c = static_cast<char>(std::tolower(c));
-    }
+    auto file_parts = Helpers::SplitSuffix(out_filename);
+    const auto & out_stem = file_parts.first;
+    const auto & suffix = file_parts.second;
 
     // If the suffix is in out map, use it
-    auto it = map.find(suffix);
+    auto it = map.find(Helpers::ToLower(suffix));
     if (it != map.end()) {
-        (it->second)(frame, out_filename);
+        (it->second)(frame, out_stem, suffix, split_planes);
     }
     else {
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
         std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' trying to pass it to ImageMagick." << std::endl;
-        WriteConvertFrame_imagemagick(frame, out_filename);
+        WriteConvertFrame_imagemagick(frame, out_stem, suffix, split_planes);
 #else
         throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
 #endif

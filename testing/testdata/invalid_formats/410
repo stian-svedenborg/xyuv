@@ -1,0 +1,18 @@
+############################################
+#             Chroma siting 411            #
+#                                          #
+############################################
+{
+    "block_width" : true,
+    "block_height" : 4,
+
+    "u_sample_point" : {
+        "sample_x" : 0.5,
+        "sample_y" : 0.5
+    },
+    "v_sample_point" : {
+        "sample_x" : 0.5,
+        "sample_y" : 0.5
+    }
+}
+
