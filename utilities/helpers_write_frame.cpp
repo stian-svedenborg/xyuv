@@ -29,6 +29,7 @@
 #include "helpers.h"
 #include <xyuv/format_json.h>
 #include <map>
+#include <functional>
 
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
 #include "external/magick_format_rw.h"

@@ -37,7 +37,7 @@ namespace xyuv {
 
 // Helper functions
 
-format_template config_manager::load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error)
+format_template config_manager::load_format_template(const std::string &path)
 {
     xyuv::format_template format_template = parse_format_template(read_json(path));
     if (validate_format_template(format_template)) {
@@ -48,12 +48,12 @@ format_template config_manager::load_format_template(const std::string &path) th
     }
 }
 
-chroma_siting config_manager::load_chroma_siting(const std::string &path) throw(std::runtime_error, std::logic_error)
+chroma_siting config_manager::load_chroma_siting(const std::string &path)
 {
     return parse_chroma_siting(read_json(path));
 }
 
-conversion_matrix config_manager::load_conversion_matrix(const std::string &path) throw(std::runtime_error, std::logic_error)
+conversion_matrix config_manager::load_conversion_matrix(const std::string &path)
 {
     return parse_conversion_matrix(read_json(path));
 }
@@ -144,7 +144,7 @@ const std::set<std::string> &config_manager::get_chroma_sitings(const subsamplin
     return it->second;
 }
 
-xyuv::format_template     config_manager::get_format_template(const std::string &key) const throw(std::runtime_error) {
+xyuv::format_template     config_manager::get_format_template(const std::string &key) const{
     auto it = format_templates_.find(key);
     if (it == format_templates_.end()) {
         throw std::runtime_error("There is no format template named " + key);
@@ -152,7 +152,7 @@ xyuv::format_template     config_manager::get_format_template(const std::string 
     return it->second;
 }
 
-chroma_siting        config_manager::get_chroma_siting(const std::string &key) const throw(std::runtime_error) {
+chroma_siting        config_manager::get_chroma_siting(const std::string &key) const {
     auto it = chroma_sitings_.find(key);
     if (it == chroma_sitings_.end()) {
         throw std::runtime_error("There is no chroma siting named " + key);
@@ -160,7 +160,7 @@ chroma_siting        config_manager::get_chroma_siting(const std::string &key) c
     return it->second;
 }
 
-conversion_matrix   config_manager::get_conversion_matrix(const std::string &key) const throw(std::runtime_error) {
+conversion_matrix   config_manager::get_conversion_matrix(const std::string &key) const {
     auto it = conversion_matrices_.find(key);
     if (it == conversion_matrices_.end()) {
         throw std::runtime_error("There is no conversion matrix named " + key);

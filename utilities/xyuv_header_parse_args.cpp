@@ -81,7 +81,7 @@ void XYUVHeader::PrintHelp() {
                                       "\nNB! this tool currently does not support reading multi-frame .xyuv images."
     );
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
-    Helpers::print_help_section("-d",
+    Helpers::PrintHelpSection("-d",
                        "--display",
                        "Display the loaded image, (press ESC to close)."
                                "\nNB! This option may only be used for single input invocations."
