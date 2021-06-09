@@ -19,6 +19,23 @@ of the license may be found in the file LICENSE included
 in this bundle.
 
 ===================================================
+||             LibPNG and ImageMagick            ||
+===================================================
+CrossYUV supports loading and encoding standard image formats
+such as png, jpeg etc. when compiled with libPNG or
+ImageMagick support.
+
+These should be automatically included by CMAKE at
+compile time if they are installed.
+For troubleshooting please refer to CMAKE's find_package documentation.
+
+To install libPNG on Ubuntu:
+$ sudo apt install libpng++-dev
+
+To install imagemagick on Ubuntu:
+$ sudo apt install libmagick++-6.q16-dev
+
+===================================================
 ||                Installation                   ||
 ===================================================
 Start by cloning the repository (recursively to bring
@@ -29,10 +46,10 @@ $ mkdir xyuv_build
 $ cd xyuv_build
 $ cmake ../xyuv
 $ make
-# make install
+$ sudo make install
 
 You may also need to run ldconfig to update the shared library cache.
-# ldconfig
+$ sudo ldconfig
 
 The default installation directory can be overridden
 by passing -DCMAKE_INSTALL_PREFIX:PATH=/path/to/somewhere

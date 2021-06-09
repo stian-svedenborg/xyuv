@@ -27,7 +27,7 @@
 #include <xyuv.h>
 #include <stdexcept>
 #include <png.h>
-#include <cstdlib>
+#include <cstring>
 #include <cstdio>
 #include <xyuv/structures/color.h>
 #include "xyuv/color_conversion.h"

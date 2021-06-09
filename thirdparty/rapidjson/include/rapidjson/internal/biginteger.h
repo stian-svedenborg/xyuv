@@ -54,8 +54,10 @@ public:
     
     BigInteger& operator=(const BigInteger &rhs)
     {
-        count_ = rhs.count_;
-        std::memcpy(digits_, rhs.digits_, count_ * sizeof(Type));
+        if (this != &rhs) {
+            count_ = rhs.count_;
+            std::memcpy(digits_, rhs.digits_, count_ * sizeof(Type));
+        }
         return *this;
     }
     
@@ -238,7 +240,7 @@ private:
         uint64_t r = 0;
         for (const char* p = begin; p != end; ++p) {
             RAPIDJSON_ASSERT(*p >= '0' && *p <= '9');
-            r = r * 10u + (unsigned)(*p - '0');
+            r = r * 10u + static_cast<unsigned>(*p - '0');
         }
         return r;
     }

@@ -82,10 +82,7 @@ namespace xyuv {
 
         std::vector<std::string> ret_val;
         if (dirp) {
-            struct dirent *current = NULL;
-            struct dirent storage;
-
-            readdir_r(dirp, &storage, &current);
+            struct dirent *current = readdir(dirp);
 
             while (current != NULL) {
                 std::string d_name = current->d_name;
@@ -109,7 +106,7 @@ namespace xyuv {
                 else if (current->d_type == DT_REG) {
                     ret_val.push_back(d_name);
                 }
-                readdir_r(dirp, &storage, &current);
+                current = readdir(dirp);
             }
 
             closedir(dirp);

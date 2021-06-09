@@ -99,15 +99,15 @@ public:
 
     //! \brief Get a format_template with the given key.
     //! \throw If the item is not found, a std::runtime_error is thrown.
-    format_template get_format_template(const std::string &key) const throw(std::runtime_error);
+    format_template get_format_template(const std::string &key) const;
 
     //! \brief Get a chroma_siting with the given key.
     //! \throw If the item is not found, a std::runtime_error is thrown.
-    chroma_siting get_chroma_siting(const std::string &key) const throw(std::runtime_error);
+    chroma_siting get_chroma_siting(const std::string &key) const;
 
     //! \brief Get a conversion_matrix with the given key.
     //! \throw If the item is not found, a std::runtime_error is thrown.
-    conversion_matrix get_conversion_matrix(const std::string &key) const throw(std::runtime_error);
+    conversion_matrix get_conversion_matrix(const std::string &key) const;
 
     //! \brief Return all chroma sitings corresponding to a given subsampling.
     const std::set<std::string> &get_chroma_sitings(const subsampling &sampling) const;
@@ -122,11 +122,11 @@ public:
     const std::map<std::string, conversion_matrix> &get_conversion_matrices() const;
 
     //! \brief Static helper accessor that will attempt to load a format template matrix descriptor from \a path.
-    static format_template load_format_template(const std::string &path) throw(std::runtime_error, std::logic_error);
+    static format_template load_format_template(const std::string &path);
     //! \brief Static helper accessor that will attempt to load a chroma siting descriptor from \a path.
-    static chroma_siting load_chroma_siting(const std::string &path) throw(std::runtime_error, std::logic_error);
+    static chroma_siting load_chroma_siting(const std::string &path);
     //! \brief Static helper accessor that will attempt to load a conversion matrix descriptor from \a path.
-    static conversion_matrix load_conversion_matrix(const std::string &path) throw(std::runtime_error, std::logic_error);
+    static conversion_matrix load_conversion_matrix(const std::string &path);
 
 private:
     std::map<std::string, format_template> format_templates_;

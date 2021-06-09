@@ -24,6 +24,7 @@
 
 
 #include <fstream>
+#include <functional>
 #include <xyuv/frame.h>
 #include <xyuv/large_buffer.h>
 #include <iostream>
