@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -111,4 +111,12 @@ TEST(Utility, PoisonBuffer) {
 	ASSERT_EQ(buf1[10], 0x0);
 	ASSERT_EQ(buf1[11], 0x0);
 
+}
+
+TEST(Utility, Basename) {
+	ASSERT_EQ(xyuv::basename("formats/px_fmt/"), "");
+	ASSERT_EQ(xyuv::basename("formats/px_fmt"), "px_fmt");
+	ASSERT_EQ(xyuv::basename(""), "");
+	ASSERT_EQ(xyuv::basename("/"), "");
+	ASSERT_EQ(xyuv::basename("formats"), "formats");
 }

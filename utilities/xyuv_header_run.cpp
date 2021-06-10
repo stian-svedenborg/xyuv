@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +54,11 @@ void XYUVHeader::Run(const ::options & options) {
     // Load all additional formats supplied on the command line.
     for (const auto & path : options.additional_config_directories) {
         config_manager_.load_configurations(path);
+    }
+
+    // Load all additional formats supplied on the command line.
+    for (const auto & path : options.additional_format_files) {
+        config_manager_.load_format(path);
     }
 
     // If a list of all formats has been requested, print it and quit.
@@ -252,7 +257,7 @@ void XYUVHeader::Run(const ::options & options) {
                     if (options.write_meta) {
                         Helpers::WriteMetadata(frame, output_names[i]);
                     }
-                    Helpers::WriteFrame(frame, output_names[i]);
+                    Helpers::WriteFrame(frame, output_names[i], false);
                 } catch (std::exception & e) {
                     std::cout << "[Warning] Error occured while writing file '" <<
                                  output_names[i] << "'\n   " <<

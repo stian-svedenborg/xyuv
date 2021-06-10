@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,15 +38,15 @@
 #include "../xyuv/src/paths.h"
 
 struct DecoderOptions {
-    std::string input_file;
+    std::vector<std::string> input_files;
     std::string output_file;
 
     std::string format_template;
     std::vector<std::string> additional_format_template_locations;
     std::string chroma_siting;
     std::string conversion_matrix;
-    uint32_t width;
-    uint32_t height;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
     bool flip_y = false;
     bool list_all_formats = false;
@@ -76,14 +76,17 @@ public:
         // - Otherwise use the format the user specified.
         xyuv::frame frame;
 
-        auto suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_file));
+        auto suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_files[0]));
         if (suffix == ".xyuv") {
             if (options.format_template != "" || options.conversion_matrix != "" || options.chroma_siting != "" || options.width || options.height) {
-                throw std::runtime_error("Using the arguments  -f, -s, -m, -w and -h are forbidden when loading .xyuv files. "
+                throw std::runtime_error("Using the arguments  -f, -s, -m, -w and -h are disallowed when loading .xyuv files. "
                                                  "This is because the format information is already encoded in the "
                                                  "file.");
             }
-            frame = Helpers::LoadXYUVFile(options.input_file);
+            if (options.input_files.size() != 1) {
+                throw std::runtime_error("You cannot specify multiple input files when using .xyuv.");
+            }
+            frame = Helpers::LoadXYUVFile(options.input_files[0]);
         } else {
             if (options.format_template != "" || options.conversion_matrix != "" || options.chroma_siting != "" || options.width || options.height) {
                 if ( !(options.format_template != "" && options.conversion_matrix != "" && options.chroma_siting != "" && options.width && options.height)) {
@@ -96,7 +99,7 @@ public:
 
                 xyuv::format format = xyuv::create_format(options.width, options.height, source_fmt_template, source_conversion_matrix, source_chroma_siting);
 
-                frame = Helpers::LoadConvertFrame(format, options.input_file);
+                frame = Helpers::LoadConvertFrame(format, options.input_files);
             }
             else {
                 // TODO: Add support for loading json full formats.
@@ -109,7 +112,7 @@ public:
         }
 
         // Finally write the frame back.
-        Helpers::WriteFrame(frame, options.output_file);
+        Helpers::WriteFrame(frame, options.output_file, false);
     }
 
     DecoderOptions ParseArgs(int argc, char * argv[]) {
@@ -178,24 +181,15 @@ public:
 
         int remaining_args = argc - optind;
         if (remaining_args <= 0) {
-            throw std::runtime_error("Missing required positional arguments: 'input_file' and 'output_file'.");
+            throw std::runtime_error("Missing required positional arguments: 'input_files' and 'output_file'.");
         } else if (remaining_args == 1) {
             throw std::runtime_error("Missing required positional arguments: 'output_file'.");
         }
         // The number of remaining arguments are at least 2:
-        options.input_file = argv[optind++];
-        options.output_file = argv[optind++];
-
-        // Are there additional arguments?
-        if (optind < argc) {
-            std::ostringstream error_string("Unexpected positional arguments: [");
-            while (optind < argc) {
-                error_string << " " << argv[optind++] << ", ";
-            }
-
-            error_string << "]";
-            throw std::runtime_error(error_string.str());
+        for (int i = 1; i < remaining_args; i++) {
+            options.input_files.push_back(std::string(argv[optind++]));
         }
+        options.output_file = argv[optind++];
 
         return options;
     }
@@ -204,8 +198,8 @@ public:
         std::cout << "xyuv-decode, version " XYUV_STRINGIFY(XYUV_VERSION) "\n";
         std::cout << Helpers::FormatString(0, Helpers::GetAdaptedConsoleWidth(),
                                            "Decode a single .hex, .bin, .yuv or .xyuv file to a standard image.\n"
-                                                   "USAGE: xyuv-decode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-y] [-l] input_file output_file\n"
-                                                   "USAGE: xyuv-decode [-y] [-l] input_file.xyuv output_file\n")
+                                                   "USAGE: xyuv-decode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-y] [-l] input_files output_file\n"
+                                                   "USAGE: xyuv-decode [-y] [-l] input_files.xyuv output_file\n")
                   << std::endl;
 
 
@@ -246,8 +240,8 @@ public:
                                   "input_path",
                                   "Path to encoded image, the supported file suffixes are:"
                                           "\n- xyuv           The raw data is written to an xyuv image."
-                                          "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump_metadata)"
-                                          "\n- hex            The raw data converted to hex, with no header. (See also --dump_metadata)"
+                                          "\n- bin, raw, yuv  The raw data directly, with no header. "
+                                          "\n- hex            The raw data converted to hex, with no header."
         );
 
         Helpers::PrintHelpSection("",
@@ -259,13 +253,6 @@ public:
                                   "a .png image or "
                                 #endif
                                   "an .xyuv image."
-        );
-
-
-
-        Helpers::PrintHelpSection("-D",
-                                  "--dump-metadata",
-                                  "When outputting to .raw, .bin, .yuv or .hex additionally output the metadata to a json file."
         );
 
         Helpers::PrintHelpSection("-l",

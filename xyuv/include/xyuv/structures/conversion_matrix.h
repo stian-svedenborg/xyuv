@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,9 @@ struct conversion_matrix {
     //!     integer-bits is good to go. If the number of integer bits change you are in deeper trouble and must create
     //!     a separate conversion matrix object.
     std::pair<float, float> y_packed_range, u_packed_range, v_packed_range;
+
+    //! \brief The identity color conversion transform, resulting in no change.
+    static const conversion_matrix identity;
 
 };
 

@@ -136,8 +136,7 @@ std::vector<uint8_t> LoadHexFile(const std::string & filename) {
     return data;
 }
 
-
-void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size) {
+void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t size, uint64_t memory_map_offset) {
     constexpr uint32_t words_per_line = 4;
     const uint64_t uint32_rounds = size/sizeof(uint32_t);
 
@@ -155,7 +154,7 @@ void WriteHexFile(const std::string & filename, const uint8_t * data, uint64_t s
         XYUV_ASSERT(fout && "IO ERROR occured.");
 
         // Write address:
-        uint64_t addr = i * sizeof(uint32_t)*words_per_line;
+        uint64_t addr = memory_map_offset + i * sizeof(uint32_t)*words_per_line;
         fout << std::setw(16) << std::setfill('0') << std::noshowbase << std::hex << addr << ":";
 
         for (uint32_t i = 0; i < words_per_line; i++) {

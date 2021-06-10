@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ struct EncoderOptions {
 
     bool dump_metadata = false;
     bool list_all_formats = false;
+    bool split_planes = false;
 };
 
 class XYUVEncode {
@@ -72,13 +73,16 @@ public:
         // Load target format templates:
         xyuv::format_template target_fmt_template = config_manager.get_format_template(options.format_template);
         xyuv::chroma_siting target_chroma_siting = config_manager.get_chroma_siting(options.chroma_siting);
-        xyuv::conversion_matrix target_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
+        xyuv::conversion_matrix target_conversion_matrix = xyuv::conversion_matrix::identity;
+        if (options.conversion_matrix != "") {
+            target_conversion_matrix = config_manager.get_conversion_matrix(options.conversion_matrix);
+        }
 
         // Two modes are supported: Loading an xyuv-file and loading a rgb-image file.
-        auto suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_file));
+        auto input_suffix = Helpers::ToLower(Helpers::GetSuffix(options.input_file));
 
         xyuv::frame frame;
-        if (suffix == ".xyuv") {
+        if (input_suffix == ".xyuv") {
             frame = Helpers::LoadXYUVFile(options.input_file);
             auto fmt = xyuv::create_format(frame.format.image_w, frame.format.image_h, target_fmt_template, target_conversion_matrix, target_chroma_siting);
             frame = xyuv::convert_frame(frame, fmt);
@@ -88,10 +92,11 @@ public:
         }
 
         // Finally write the frame back.
-        Helpers::WriteFrame(frame, options.output_file);
+        Helpers::WriteFrame(frame, options.output_file, options.split_planes);
 
         if (options.dump_metadata) {
-            Helpers::WriteMetadata(frame, options.output_file);
+            auto parts = Helpers::SplitSuffix(options.output_file);
+            Helpers::WriteMetadata(frame, parts.first + "-meta");
         }
 
     }
@@ -99,7 +104,8 @@ public:
     EncoderOptions ParseArgs(int argc, char * argv[]) {
         struct option long_opts[] = {
                 {"additional-format-dir", required_argument, 0, 'F'},
-                {"dump-metadata",         no_argument,       0, 'D'},
+                {"dump-metadata",         no_argument,       0, 'd'},
+                {"split-planes",          no_argument,       0, 'z'},
                 {"format-template",       required_argument, 0, 'f'},
                 {"chroma-siting",         required_argument, 0, 's'},
                 {"conversion-matrix",     required_argument, 0, 'm'},
@@ -109,7 +115,7 @@ public:
         };
         int index = 0;
         int c = -1;
-        const char *const shortopts = "?lDF:o:f:m:s:";
+        const char *const shortopts = "?ldF:o:f:m:s:";
 
         EncoderOptions options = {};
         while ((c = getopt_long(argc, argv, shortopts, long_opts, &index)) != -1) {
@@ -126,8 +132,11 @@ public:
                 case 'm':
                     options.conversion_matrix = optarg;
                     break;
-                case 'D':
+                case 'd':
                     options.dump_metadata = true;
+                    break;
+                case 'z':
+                    options.split_planes = true;
                     break;
                 case 'l':
                     options.list_all_formats = true;
@@ -158,6 +167,7 @@ public:
         } else if (remaining_args == 1) {
             throw std::runtime_error("Missing required positional arguments: 'output_file'.");
         }
+
         // The number of remaining arguments are at least 2:
         options.input_file = argv[optind++];
         options.output_file = argv[optind++];
@@ -180,32 +190,35 @@ public:
         std::cout << "xyuv-encode, version " XYUV_STRINGIFY(XYUV_VERSION) "\n";
         std::cout << Helpers::FormatString(0, Helpers::GetAdaptedConsoleWidth(),
                                            "Encode a single image to a .hex, .bin, .yuv or .xyuv file.\n"
-                                                   "USAGE: xyuv-encode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-D] [-l] input_file output_file\n")
+                                                   "USAGE: xyuv-encode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-d] [-l] [--split-planes] input_file output_file\n")
                   << std::endl;
 
 
         Helpers::PrintHelpSection("-f FMT_KEY",
                                   "--format-template FMT_KEY",
-                                  "Set the load-format for an input file, this argument is required."
-                                          "\nA list of valid keys is listed by the --list option."
-                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to open a file with that name,"
-                                          "if the file does not verify it will look for a corresponding key in the store."
+                                  "Set the pixel packing format for the output, this argument is required."
+                                          "\nA list of valid format keys are listed by the --list option."
+                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to "
+                                          "\nopen a file with that name, if the file does not verify it will look for a corresponding "
+                                          "\nkey in the store."
         );
 
         Helpers::PrintHelpSection("-s CS_KEY",
                                   "--chroma-siting CS_KEY",
-                                  "Set the chroma siting key for an input file, this argument is required."
+                                  "Set the chroma siting key for the output, this argument is required."
                                           "\nA list of valid keys is listed by the --list option."
-                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to open a file with that name,"
-                                          "if the file does not verify it will look for a corresponding key in the store."
+                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to "
+                                          "\nopen a file with that name, if the file does not verify it will look for a corresponding "
+                                          "\nkey in the store."
         );
 
         Helpers::PrintHelpSection("-m CM_KEY",
                                   "--conversion-matrix CM_KEY",
-                                  "Set the conversion matrix key for an input file, this argument is required."
+                                  "Set the color conversion matrix, if this argument is omitted the default will be \"identity\", i.e. no color transform."
                                           "\nA list of valid keys is listed by the --list option."
-                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to open a file with that name,"
-                                          "if the file does not verify it will look for a corresponding key in the store."
+                                          "\nSpecial: You may supply a file-name directly to this flag, the tool will first try to "
+                                          "\nopen a file with that name, if the file does not verify it will look for a corresponding "
+                                          "\nkey in the store."
         );
 
 
@@ -232,13 +245,19 @@ public:
                                   "output_path",
                                   "Path to encoded image, the supported file suffixes are:"
                                           "\n- xyuv           The raw data is written to an xyuv image."
-                                          "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump_metadata)"
-                                          "\n- hex            The raw data converted to hex, with no header. (See also --dump_metadata)"
+                                          "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump-metadata)"
+                                          "\n- hex            The raw data converted to hex, with no header. (See also --dump-metadata)"
         );
 
-        Helpers::PrintHelpSection("-D",
+        Helpers::PrintHelpSection("-d",
                                   "--dump-metadata",
-                                  "When outputting to .raw, .bin, .yuv or .hex additionally output the metadata to a json file."
+                                  "When outputting to .raw, .bin, .yuv or .hex additionally output the metadata to a json file. This file will be named <basename>-meta.json"
+        );
+
+        Helpers::PrintHelpSection("",
+                                  "--split-planes",
+                                  "When outputting to .raw, .bin, .yuv or .hex, split each plane to a separate file. "
+                                          "\nThese files will be named <basename>-p<X>.<suffix>. "
         );
 
         Helpers::PrintHelpSection("-l",

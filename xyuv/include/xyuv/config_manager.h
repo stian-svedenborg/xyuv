@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,10 @@ public:
     //! and conversion matrices under \a format_search_root/<CONVERSION_MATRICES_DIR>. See the source for the default
     //! values for each of these definitions.
     void load_configurations(std::string format_search_root);
+
+    //! \brief Load a single format specification from a path.
+    //! \details This will first try to load the format as a pixel format, then as a chroma siting and finally as a conversion matrix.
+    void load_format(std::string path);
 
     //! \brief Add a configuration with the given key.
     //! \details This will manually add a new format_template/chroma_siting/conversion_matrix to the configuration

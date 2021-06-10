@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -179,6 +179,14 @@ namespace xyuv {
         if (remaining) {
             memcpy(static_cast<uint8_t *>(buffer) + i, &poison_value, remaining);
         }
+    }
+
+    std::string basename(const std::string &path) {
+        std::size_t last_slash = path.rfind('/');
+        if (last_slash != std::string::npos) {
+            return path.substr(last_slash + 1);
+        }
+        return path;
     }
 } // namespace xyuv
 #endif

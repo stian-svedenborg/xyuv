@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2021 Stian Valentin Svedenborg
+ * Copyright (c) 2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,12 @@
  * THE SOFTWARE.
  */
 
-#ifndef CROSSYUV_MAGICK_FORMAT_RW_H
-#define CROSSYUV_MAGICK_FORMAT_RW_H
+#include <xyuv/structures/conversion_matrix.h>
 
-#include <string>
-#include <vector>
-namespace xyuv {
-    struct frame;
-    struct format;
-    struct format_template;
-    struct chroma_siting;
-    struct conversion_matrix;
-}
+const xyuv::conversion_matrix xyuv::conversion_matrix::identity = {
+        {1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f},
+        {1.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 1.f},
+        {0.f, 1.f}, {0.f, 1.f}, {0.f, 1.f},
+        {0.f, 1.f}, {0.f, 1.f}, {0.f, 1.f},
+};
 
-xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::vector<std::string> & infiles);
-xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
-void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string &out_stem, const std::string& suffix, bool split_planes);
-void Display_imagemagick(const xyuv::frame & frame);
-
-#endif //CROSSYUV_MAGICK_FORMAT_RW_H

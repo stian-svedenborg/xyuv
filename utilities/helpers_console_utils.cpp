@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Stian Valentin Svedenborg
+ * Copyright (c) 2015-2021 Stian Valentin Svedenborg
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -95,4 +95,6 @@ void Helpers::PrintHelpSection(const std::string &short_arg, const std::string &
     std::cout << FormatString(INDENT_WIDTH, console_width, helpstring) << '\n' << std::endl;
 
 }
+
+
 
