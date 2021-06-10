@@ -26,6 +26,7 @@
 #define CROSSYUV_MAGICK_FORMAT_RW_H
 
 #include <string>
+#include <vector>
 namespace xyuv {
     struct frame;
     struct format;
@@ -34,7 +35,7 @@ namespace xyuv {
     struct conversion_matrix;
 }
 
-xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name );
+xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::vector<std::string> & infiles);
 xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
 void WriteConvertFrame_imagemagick(const xyuv::frame &frame, const std::string &out_stem, const std::string& suffix, bool split_planes);
 void Display_imagemagick(const xyuv::frame & frame);

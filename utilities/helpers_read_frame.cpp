@@ -39,9 +39,15 @@
 #endif
 
 std::string get_suffix(const std::string & path);
+static xyuv::frame LoadConvertFrame_hex(const xyuv::format & format, const std::vector<std::string> & infiles );
 
 
-static xyuv::frame LoadConvertFrame_xyuv(const xyuv::format & format, const std::string & infile_name ) {
+static xyuv::frame LoadConvertFrame_xyuv(const xyuv::format & format, const std::vector<std::string> & infiles ) {
+    if (infiles.size() != 1) {
+        throw std::runtime_error(".xyuv does not support loading planes from multiple files.");
+    }
+    auto infile_name = infiles[0];
+
     std::ifstream fin(infile_name, std::ios::binary);
 
     if (!fin) {
@@ -53,43 +59,77 @@ static xyuv::frame LoadConvertFrame_xyuv(const xyuv::format & format, const std:
     return frame;
 }
 
-static xyuv::frame LoadConvertFrame_raw(const xyuv::format & format, const std::string & infile_name ) {
-    std::ifstream fin(infile_name, std::ios::binary);
-
-    if (!fin) {
-        throw std::runtime_error("Could not open input file: '" + infile_name + "'");
+static xyuv::frame LoadConvertFrame_raw(const xyuv::format & format, const std::vector<std::string> & infiles) {
+    if (infiles.size() > 1 && infiles.size() != format.planes.size()) {
+        throw std::runtime_error("When providing multiple input files, the number of files must exactly match "
+                                         "number of planes in the format. "
+                                         "Expected: " + std::to_string(format.planes.size()) +
+                                         " got " + std::to_string(infiles.size()));
     }
 
     auto frame = xyuv::create_frame(format, nullptr, 0);
 
-    uint64_t bytes_read = xyuv::read_large_buffer(fin, reinterpret_cast<char*>(frame.data.get()), format.size);
+    for (int i = 0; i < infiles.size(); i++) {
+        auto infile_name = infiles[i];
 
-    if (bytes_read != format.size) {
-        throw std::runtime_error("Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " + std::to_string(format.size));
+        std::ifstream fin(infile_name, std::ios::binary);
+
+        if (!fin) {
+            throw std::runtime_error("Could not open input file: '" + infile_name + "'");
+        }
+
+        uint64_t expected_size = infiles.size() > 1 ? format.planes[i].size : format.size;
+        uint64_t offset = format.planes[i].base_offset;
+
+        uint64_t bytes_read = xyuv::read_large_buffer(fin, reinterpret_cast<char *>(frame.data.get()) + offset, expected_size);
+
+        if (bytes_read != expected_size) {
+            throw std::runtime_error(
+                    "Error loading frame data, only " + std::to_string(bytes_read) + " bytes read, expected " +
+                    std::to_string(expected_size));
+        }
     }
-
     return frame;
 }
 
 std::vector<uint8_t> LoadHexFile(const std::string & filename);
 
-static xyuv::frame LoadConvertFrame_hex(const xyuv::format & format, const std::string & infile_name ) {
+
+static xyuv::frame LoadConvertFrame_hex(const xyuv::format & format, const std::vector<std::string> & infiles ) {
+
+    if (infiles.size() > 1 && infiles.size() != format.planes.size()) {
+        throw std::runtime_error("When providing multiple input files, the number of files must exactly match "
+                                         "number of planes in the format. "
+                                         "Expected: " + std::to_string(format.planes.size()) +
+                                 " got " + std::to_string(infiles.size()));
+    }
 
     auto frame = xyuv::create_frame(format, nullptr, 0);
 
-    std::vector<uint8_t> buffer = LoadHexFile(infile_name);
+    for (int i = 0; i < infiles.size(); i++) {
+        auto infile_name = infiles[i];
 
-    if (buffer.size() < format.size) {
-        throw std::runtime_error("Error loading frame data, only " + std::to_string(buffer.size()) + " bytes read, expected " + std::to_string(format.size));
+        std::vector<uint8_t> buffer = LoadHexFile(infile_name);
+
+        uint64_t expected_size = infiles.size() > 1 ? format.planes[i].size : format.size;
+        uint64_t offset = format.planes[i].base_offset;
+
+        if (buffer.size() < expected_size) {
+            throw std::runtime_error("Error loading frame data, only " + std::to_string(buffer.size()) + " bytes read, expected " + std::to_string(expected_size));
+        }
+
+        memcpy(frame.data.get() + offset, buffer.data(), expected_size );
+
     }
-
-    memcpy(frame.data.get(), buffer.data(), format.size );
-
     return frame;
 }
 
 xyuv::frame Helpers::LoadConvertFrame( const xyuv::format & format, const std::string & infile_name ) {
-    static std::map<std::string, std::function<xyuv::frame(const xyuv::format &, const std::string &)>> map{
+    return LoadConvertFrame(format, std::vector<std::string>{infile_name});
+}
+
+xyuv::frame Helpers::LoadConvertFrame( const xyuv::format & format, const std::vector<std::string> & infiles ) {
+    static std::map<std::string, std::function<xyuv::frame(const xyuv::format &, const std::vector<std::string> &)>> map{
             {".xyuv", LoadConvertFrame_xyuv},
             {".bin", LoadConvertFrame_raw},
             {".raw", LoadConvertFrame_raw},
@@ -109,17 +149,17 @@ xyuv::frame Helpers::LoadConvertFrame( const xyuv::format & format, const std::s
             {".dump", LoadConvertFrame_hex},
     };
 
-    std::string suffix = Helpers::ToLower(Helpers::GetSuffix(infile_name));
+    std::string suffix = Helpers::ToLower(Helpers::GetSuffix(infiles[0]));
 
     // If the suffix is in out map, use it
     auto it = map.find(suffix);
     if (it != map.end()) {
-        return (it->second)(format, infile_name);
+        return (it->second)(format, infiles);
     }
     else {
 #if defined(USE_IMAGEMAGICK) && USE_IMAGEMAGICK
-        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "' for input file '" + infile_name + "' trying to pass it to ImageMagick." << std::endl;
-        return LoadConvertFrame_imagemagick(format, infile_name);
+        std::cout << "[Warning]: Unrecognized file suffix '" + suffix + "trying to pass it to ImageMagick." << std::endl;
+        return LoadConvertFrame_imagemagick(format, infiles);
 #else
         throw std::runtime_error("[Error]: Unrecognized file suffix '" + suffix + "' aborting.");
 #endif

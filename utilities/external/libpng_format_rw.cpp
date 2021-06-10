@@ -27,7 +27,12 @@
 #include <xyuv.h>
 #include <xyuv/frame.h>
 
-xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::string & infile_name ) {
+xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::vector<std::string> & infiles ) {
+    if (infiles.size() != 1) {
+        throw std::runtime_error("Normal image files does not support loading planes from multiple files.");
+    }
+    auto infile_name = infiles[0];
+
     xyuv::libpng_wrapper wrapper(infile_name);
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }

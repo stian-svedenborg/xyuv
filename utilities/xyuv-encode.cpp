@@ -95,7 +95,8 @@ public:
         Helpers::WriteFrame(frame, options.output_file, options.split_planes);
 
         if (options.dump_metadata) {
-            Helpers::WriteMetadata(frame, options.output_file);
+            auto parts = Helpers::SplitSuffix(options.output_file);
+            Helpers::WriteMetadata(frame, parts.first + "-meta");
         }
 
     }
@@ -103,7 +104,7 @@ public:
     EncoderOptions ParseArgs(int argc, char * argv[]) {
         struct option long_opts[] = {
                 {"additional-format-dir", required_argument, 0, 'F'},
-                {"dump-metadata",         no_argument,       0, 'D'},
+                {"dump-metadata",         no_argument,       0, 'd'},
                 {"split-planes",          no_argument,       0, 'z'},
                 {"format-template",       required_argument, 0, 'f'},
                 {"chroma-siting",         required_argument, 0, 's'},
@@ -114,7 +115,7 @@ public:
         };
         int index = 0;
         int c = -1;
-        const char *const shortopts = "?lDF:o:f:m:s:";
+        const char *const shortopts = "?ldF:o:f:m:s:";
 
         EncoderOptions options = {};
         while ((c = getopt_long(argc, argv, shortopts, long_opts, &index)) != -1) {
@@ -131,7 +132,7 @@ public:
                 case 'm':
                     options.conversion_matrix = optarg;
                     break;
-                case 'D':
+                case 'd':
                     options.dump_metadata = true;
                     break;
                 case 'z':
@@ -189,7 +190,7 @@ public:
         std::cout << "xyuv-encode, version " XYUV_STRINGIFY(XYUV_VERSION) "\n";
         std::cout << Helpers::FormatString(0, Helpers::GetAdaptedConsoleWidth(),
                                            "Encode a single image to a .hex, .bin, .yuv or .xyuv file.\n"
-                                                   "USAGE: xyuv-encode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-D] [-l] input_file output_file\n")
+                                                   "USAGE: xyuv-encode -f FMT_KEY -s CS_KEY -m CM_KEY [-F PATH]... [-d] [-l] [--split-planes] input_file output_file\n")
                   << std::endl;
 
 
@@ -244,11 +245,11 @@ public:
                                   "output_path",
                                   "Path to encoded image, the supported file suffixes are:"
                                           "\n- xyuv           The raw data is written to an xyuv image."
-                                          "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump_metadata)"
-                                          "\n- hex            The raw data converted to hex, with no header. (See also --dump_metadata)"
+                                          "\n- bin, raw, yuv  The raw data directly, with no header. (See also --dump-metadata)"
+                                          "\n- hex            The raw data converted to hex, with no header. (See also --dump-metadata)"
         );
 
-        Helpers::PrintHelpSection("-n",
+        Helpers::PrintHelpSection("-d",
                                   "--dump-metadata",
                                   "When outputting to .raw, .bin, .yuv or .hex additionally output the metadata to a json file. This file will be named <basename>-meta.json"
         );

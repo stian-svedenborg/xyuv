@@ -29,7 +29,12 @@
 #include <Magick++/Image.h>
 #include <xyuv/external/magick_wrapper.h>
 
-xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::string & infile_name ) {
+xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std::vector<std::string> & infiles) {
+    if (infiles.size() != 1) {
+        throw std::runtime_error("Normal image files does not support loading planes from multiple files.");
+    }
+    auto infile_name = infiles[0];
+
     Magick::Image image(infile_name);
     xyuv::magick_wrapper wrapper(image);
     return xyuv::read_frame_from_rgb_image(wrapper, format);
@@ -38,7 +43,7 @@ xyuv::frame LoadConvertFrame_imagemagick(const xyuv::format & format, const std:
 xyuv::frame LoadConvertRGBFrame_imagemagick(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name) {
     Magick::Image image(infile_name);
     xyuv::magick_wrapper wrapper(image);
-    xyuv::format format = xyuv::create_format(image.columns(), image.rows(), fmt_template, matrix, siting);
+    xyuv::format format = xyuv::create_format(static_cast<std::uint32_t>(image.columns()), static_cast<std::uint32_t>(image.rows()), fmt_template, matrix, siting);
     return xyuv::read_frame_from_rgb_image(wrapper, format);
 }
 

@@ -34,7 +34,7 @@ namespace xyuv {
     struct conversion_matrix;
 }
 
-xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::string & infile_name );
+xyuv::frame LoadConvertFrame_libpng(const xyuv::format & format, const std::vector<std::string>& infile_name );
 xyuv::frame LoadConvertRGBFrame_libpng(const xyuv::format_template &fmt_template, const xyuv::conversion_matrix &matrix, const xyuv::chroma_siting &siting, const std::string & infile_name);
 
 void WriteConvertFrame_libpng(const xyuv::frame &frame, const std::string &out_stem, const std::string& suffix, bool split_planes);

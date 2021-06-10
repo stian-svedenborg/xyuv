@@ -49,6 +49,7 @@ public:
     static void WriteMetadata(const xyuv::frame &frame, const std::string &raw_out_filename);
 
     static xyuv::frame LoadConvertFrame(const xyuv::format &, const std::string &infile_name);
+    static xyuv::frame LoadConvertFrame( const xyuv::format & format, const std::vector<std::string> & infiles );
 
     static int GetAdaptedConsoleWidth();
 
